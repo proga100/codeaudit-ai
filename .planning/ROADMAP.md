@@ -23,10 +23,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 1: Foundation
 **Goal**: Users can securely authenticate, connect their GitHub account, and store encrypted LLM API keys ready for use
 **Depends on**: Nothing (first phase)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-06, AUTH-07, AUTH-08
+**Requirements**: AUTH-02, AUTH-03, AUTH-04, AUTH-06, AUTH-07, AUTH-08
 **Success Criteria** (what must be TRUE):
-  1. User can sign up with email/password and sign in on subsequent visits with session persisting across browser refresh
-  2. User can sign in via GitHub SSO as an alternative to email/password
+  1. User can sign up and sign in via GitHub SSO with session persisting across browser refresh
+  2. (Removed — AUTH-01 dropped per D-01: GitHub SSO only, no email/password)
   3. User can connect their GitHub account via OAuth to authorize repo access (GitHub App with Contents: read per-repo scope)
   4. User can add, update, and delete stored API keys for Anthropic, OpenAI, and Gemini (stored AES-256-GCM encrypted)
   5. User can sign out from any page and session is terminated

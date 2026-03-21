@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication & Access
 
-- [ ] **AUTH-01**: User can sign up with email and password
+- [x] **AUTH-01**: ~~User can sign up with email and password~~ — Dropped per D-01: GitHub SSO is the only auth method
 - [x] **AUTH-02**: User can sign in and maintain a session across browser refresh
 - [x] **AUTH-03**: User can sign in with GitHub SSO as an alternative to email/password
 - [x] **AUTH-04**: User can connect their GitHub account via OAuth to grant repo access
