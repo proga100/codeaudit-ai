@@ -16,9 +16,9 @@ Anyone can get a thorough, structured codebase health audit on their GitHub repo
 
 ### Active
 
-- [ ] GitHub OAuth integration — users connect their GitHub account to access private repos
+- [x] GitHub OAuth integration — users connect their GitHub account to access private repos — Validated in Phase 1
 - [ ] Repository selection — users browse and select repos from their GitHub account
-- [ ] LLM API key management — users provide their own API keys (Anthropic, OpenAI, Gemini)
+- [x] LLM API key management — users provide their own API keys (Anthropic, OpenAI, Gemini) — Validated in Phase 1
 - [ ] Audit type selection — users choose audit focus: full audit, security-only, team & collaboration, code quality, or custom combination
 - [ ] Audit depth selection — users choose between quick scan (~30 min) and deep audit (hours)
 - [ ] Secure repo cloning — backend clones selected repo with read-only safety guarantees
@@ -31,7 +31,7 @@ Anyone can get a thorough, structured codebase health audit on their GitHub repo
 - [ ] Downloadable reports — users can download full HTML and markdown reports
 - [ ] Audit history — store completed audits so users can re-run and compare over time
 - [ ] Audit comparison (Phase 12) — when previous audit exists, generate comparison showing improvements/degradations
-- [ ] User authentication — sign up / sign in for the webapp itself
+- [x] User authentication — sign up / sign in via GitHub SSO — Validated in Phase 1
 - [ ] Budget monitoring — track and display token usage per audit using the user's API key
 
 ### Out of Scope
