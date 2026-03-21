@@ -6,6 +6,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-03-22 — GitHub App + API Key Management (Phase 1, Plan 01-03)
+
+### Added
+
+- **AES-256-GCM encryption utility** (`packages/db/src/encryption.ts`) with `encryptApiKey()`, `decryptApiKey()`, `maskApiKey()` — unique IV per key, auth-tag tamper detection
+- **API key validation service** (`lib/api-key-validator.ts`) — lightweight test calls to Anthropic, OpenAI, and Gemini APIs; returns typed result (`valid | invalid_key | rate_limited | quota_exceeded | network_error`)
+- **API key CRUD server actions** (`actions/api-keys.ts`) — create, list, update label, delete; all scoped to authenticated userId (IDOR safe); encrypted keys never returned to client
+- **`maskedKey` column** added to `api_keys` schema — stores last-4 chars display string at creation, avoiding decryption for list views
+- **API Keys settings page** at `/settings/api-keys` with three equal sections (Anthropic, OpenAI, Gemini); add/edit label/delete with confirmation
+- **GitHub App installation flow** — `lib/github-app.ts` with install URL, token expiry checks, and refresh function
+- **GitHub App webhook handler** at `/api/github/webhook` — processes `installation.created`, `installation.deleted`, `installation_repositories.added/removed`; HMAC-SHA256 signature verification with timing-safe comparison
+- **GitHub App installation callback** at `/api/github/callback` — stores installation record after GitHub App install, redirects to onboarding or settings
+- **Proactive GitHub token refresh** (`lib/github-token-refresh.ts`) — refreshes access_token 15 minutes before expiry; in-memory lock prevents concurrent refreshes; null return signals expired refresh token (re-auth needed)
+- **GitHub connection settings page** at `/settings/github` — shows connection status, account login, installation ID, manage repos link (opens GitHub), disconnect with confirmation
+- **Settings index page** updated with navigation cards to API Keys and GitHub sections
+- **Onboarding Step 2 (API key)** wired to real API key form — shows existing keys, allows adding inline, Continue button unlocks after first key
+- **Onboarding Step 3 (Repo)** wired to GitHub App install — Install GitHub App button, confirmation state after callback, skip remains available
+- **Encryption unit tests** — round-trip, unique IVs, tamper detection, wrong-key failure, key validation edge cases
+
 ## 2026-03-22 — Auth Flows (Phase 1, Plan 01-02)
 
 ### Added
