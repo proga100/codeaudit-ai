@@ -1,0 +1,26 @@
+{
+  "name": "@codeaudit/audit-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core audit orchestrator — translates 13-phase CLI audit into structured LLM API calls",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch"
+  },
+  "dependencies": {
+    "@codeaudit/db": "workspace:*",
+    "@codeaudit/llm-adapter": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
