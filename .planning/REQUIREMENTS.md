@@ -48,12 +48,12 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 ### New Audit (NAUD)
 
-- [ ] **NAUD-01**: Single-page form with folder input (mono, validation icons, recent folder chips)
-- [ ] **NAUD-02**: Audit type selection as 2x2 SelectCard grid (Full, Security, Team, Code Quality)
-- [ ] **NAUD-03**: Audit depth selection as 2 side-by-side SelectCards (Quick Scan, Deep Audit)
-- [ ] **NAUD-04**: Provider & Key dropdown + Model dropdown (Auto recommended + specific models)
-- [ ] **NAUD-05**: Live cost estimate card updates as user configures
-- [ ] **NAUD-06**: Start button opens confirmation modal with summary grid and folder lock warning
+- [x] **NAUD-01**: Single-page form with folder input (mono, validation icons, recent folder chips)
+- [x] **NAUD-02**: Audit type selection as 2x2 SelectCard grid (Full, Security, Team, Code Quality)
+- [x] **NAUD-03**: Audit depth selection as 2 side-by-side SelectCards (Quick Scan, Deep Audit)
+- [x] **NAUD-04**: Provider & Key dropdown + Model dropdown (Auto recommended + specific models)
+- [x] **NAUD-05**: Live cost estimate card updates as user configures
+- [x] **NAUD-06**: Start button opens confirmation modal with summary grid and folder lock warning
 
 ### Audit Progress (PROG)
 
@@ -147,12 +147,12 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 | DASH-01 | Phase 6 | Complete |
 | DASH-02 | Phase 6 | Complete |
 | DASH-03 | Phase 6 | Complete |
-| NAUD-01 | Phase 7 | Pending |
-| NAUD-02 | Phase 7 | Pending |
-| NAUD-03 | Phase 7 | Pending |
-| NAUD-04 | Phase 7 | Pending |
-| NAUD-05 | Phase 7 | Pending |
-| NAUD-06 | Phase 7 | Pending |
+| NAUD-01 | Phase 7 | Complete |
+| NAUD-02 | Phase 7 | Complete |
+| NAUD-03 | Phase 7 | Complete |
+| NAUD-04 | Phase 7 | Complete |
+| NAUD-05 | Phase 7 | Complete |
+| NAUD-06 | Phase 7 | Complete |
 | PROG-01 | Phase 7 | Complete |
 | PROG-02 | Phase 7 | Complete |
 | PROG-03 | Phase 7 | Complete |
