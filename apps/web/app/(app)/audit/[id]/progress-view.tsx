@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { cancelAudit } from "@/actions/audit-control";
+import { formatCost, formatTokens } from "@/lib/format";
 
 // Types matching SSE event shapes from stream/route.ts
 type PhaseEvent = {
@@ -29,15 +30,6 @@ const PHASE_NAMES: Record<number, string> = {
   4: "Code Complexity", 5: "Git Archaeology", 6: "Security Audit", 7: "Deep Reads",
   8: "CI/CD", 9: "Documentation", 10: "Final Report", 11: "HTML Reports",
 };
-
-function formatCost(microdollars: number): string {
-  return `$${(microdollars / 1_000_000).toFixed(4)}`;
-}
-
-function formatTokens(tokens: number): string {
-  if (tokens >= 1000) return `${(tokens / 1000).toFixed(1)}k`;
-  return String(tokens);
-}
 
 export function ProgressView({
   auditId,
@@ -203,8 +195,14 @@ export function ProgressView({
 
       {/* Completion state */}
       {isTerminal && statusLabel === "completed" && (
-        <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-sm text-green-600 dark:text-green-400">
-          Audit complete. View the full results dashboard when it becomes available.
+        <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 flex items-center justify-between">
+          <span className="text-sm text-green-600 dark:text-green-400">Audit complete</span>
+          <a
+            href={`/audit/${auditId}/results`}
+            className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition-colors"
+          >
+            View Results
+          </a>
         </div>
       )}
     </div>
