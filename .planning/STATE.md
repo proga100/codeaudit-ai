@@ -2,34 +2,37 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-22T00:30:09.176Z"
+status: ready_to_plan
+stopped_at: Roadmap created after local-first pivot
+last_updated: "2026-03-22"
 progress:
-  total_phases: 5
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 10
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-21)
+See: .planning/PROJECT.md (updated 2026-03-22 after local-first pivot)
 
-**Core value:** Anyone can get a thorough, structured codebase health audit on their GitHub repos without CLI setup — just connect GitHub, pick a repo, and run.
-**Current focus:** Phase 01 — foundation
+**Core value:** Anyone can run a thorough codebase audit on any local folder without CLI setup — just open the app, pick a folder, and run.
+**Current focus:** Phase 1 — App Shell & Configuration
 
 ## Current Position
 
-Phase: 2
+Phase: 1 of 4 (App Shell & Configuration)
 Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-22 — Roadmap created after pivot from GitHub cloud webapp to local-first tool
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
-
 - Total plans completed: 0
 - Average duration: -
 - Total execution time: 0 hours
@@ -41,14 +44,10 @@ Plan: Not started
 | - | - | - | - |
 
 **Recent Trend:**
-
 - Last 5 plans: -
 - Trend: -
 
 *Updated after each plan completion*
-| Phase 01-foundation P01 | 8 | 7 tasks | 32 files |
-| Phase 01-foundation P02 | 6 | 7 tasks | 20 files |
-| Phase 01-foundation P03 | 10 | 8 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -57,19 +56,11 @@ Plan: Not started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Research recommends GitHub App (Contents: read per-repo) over OAuth App with `repo` scope — implement from the start to avoid OAuth overprivilege (Pitfall 6 in research)
-- BYOK API keys must use AES-256-GCM application-layer encryption with master key in secrets manager — not just transparent DB encryption
-- Structured findings JSON schema must be decided in Phase 1 even though comparison UI ships in Phase 5
-- Object storage decision (local disk vs. S3) should be locked during Phase 1 schema design
-- [Phase 01-foundation]: AuditFindings JSONB schema locked in Phase 1 schema.ts for stable Phase 5 comparison diff target
-- [Phase 01-foundation]: Costs stored as microdollar integers (not floats) to avoid floating-point precision issues in token accounting
-- [Phase 01-foundation]: apps/web excluded from root tsconfig project references — Next.js uses bundler moduleResolution incompatible with composite mode
-- [Phase 01-foundation]: Database session strategy confirmed — GitHub access_token stays in accounts table server-side only, never in JWT or client cookie
-- [Phase 01-foundation]: Server actions for auth sign-in/sign-out to avoid client-side token exposure
-- [Phase 01-foundation]: Onboarding steps 2-3 are intentional placeholder UI — wired to real functionality in Plan 01-03
-- [Phase 01-foundation]: maskedKey column added to api_keys schema — store last-4 chars of plaintext at creation, no decryption needed for list views
-- [Phase 01-foundation]: API key validation allows rate_limited/quota_exceeded through to storage — key is valid even with usage limits
-- [Phase 01-foundation]: Webhook installation.created: callback route owns DB record creation; webhook handler only logs
+- [Pivot 2026-03-22]: Architecture changed from cloud webapp (GitHub OAuth) to local-first (localhost server, local folder selection). GitHub OAuth and GitHub App code from old Phase 1 is discarded.
+- [Pivot 2026-03-22]: Reusable from old Phase 1 — Next.js scaffold, Drizzle ORM, dark mode UI, AES-256-GCM API key encryption, maskedKey pattern, microdollar integer cost storage, AuditFindings JSONB schema shape
+- [Pivot 2026-03-22]: Safety model is filesystem-level: chmod -R a-w (read-only lock) + git remote set-url --push origin no_push (git push block) — enforced programmatically before audit starts
+- [Pivot 2026-03-22]: All audit output goes to ~/audit-{repo-name}/ — never inside the target folder
+- [Pivot 2026-03-22]: BYOK with Anthropic, OpenAI, Gemini from day one — provider-tuned prompts required for audit phases
 
 ### Pending Todos
 
@@ -77,11 +68,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 (Audit Engine) has a research flag: prompt engineering across 3 providers for 13 analytical phases is high-risk. Plan Phase 3 with a golden test repo evaluation sprint before declaring engine complete.
-- GitHub App vs. OAuth App decision resolved: GitHub App with `Contents: read` per-repo scope (D-04 in CONTEXT.md). Plans 01-02 and 01-03 implement this.
+- Phase 2 (Audit Engine): Prompt engineering across 3 providers for 13 analytical phases is high-risk. Plan Phase 2 with a golden test repo evaluation approach before declaring engine complete.
+- Phase 2: Prompt injection via repo file contents must be handled — wrap repo content in explicit DATA BLOCK framing in all LLM prompts.
 
 ## Session Continuity
 
-Last session: 2026-03-22T00:30:09.168Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-audit-setup/02-CONTEXT.md
+Last session: 2026-03-22
+Stopped at: Roadmap created — ready to plan Phase 1
+Resume file: None

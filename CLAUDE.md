@@ -1,18 +1,19 @@
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
-**CodeAudit Web**
+**CodeAudit**
 
-A webapp that turns a manual CLI-based codebase audit process into a self-service tool. Users connect their GitHub account, select a repo (public or private), choose an audit type and depth, provide their own LLM API key (Anthropic, OpenAI, or Gemini), and get a comprehensive codebase health report — viewable in-app with option to download full reports. Built initially for internal use, designed to open up as a public product.
+A local web application that wraps the manual codebase audit process into a browser-based UI. Users run it on their machine (localhost), point it at a local folder, choose an audit type and depth, provide their own LLM API key (Anthropic, OpenAI, or Gemini), and get a comprehensive codebase health report — viewable in-app with option to download full reports. No code ever leaves the user's machine. Built initially for internal use, designed to distribute as a downloadable tool.
 
-**Core Value:** Anyone can get a thorough, structured codebase health audit on their GitHub repos without needing to set up Claude Code CLI, manage read-only filesystem locks, or paste multi-page prompts — just connect GitHub, pick a repo, and run.
+**Core Value:** Anyone can run a thorough, structured codebase health audit on any local codebase without needing to set up Claude Code CLI, manage read-only filesystem locks, or paste multi-page prompts — just open the app, pick a folder, and run.
 
 ### Constraints
 
-- **Security**: Cloned repos must be sandboxed — read-only filesystem, no push, no network access to production URLs. This is non-negotiable safety from the existing process.
-- **Multi-LLM**: Must support at least Anthropic, OpenAI, and Gemini APIs from day one. The audit prompts need to work across providers.
-- **Cost transparency**: Users pay for their own tokens — the app must show real-time token usage and cost estimates before and during audits.
-- **Existing guides**: The 13-phase audit logic in `codebase_review_guide.md` is the source of truth. The webapp implements this, not a reimagined version.
+- **Local execution**: All code stays on the user's machine. No data sent anywhere except LLM API calls with the user's own key.
+- **Safety**: Target folder must be locked read-only before audit starts, git push must be blocked — exactly replicating the manual process.
+- **Multi-LLM**: Must support at least Anthropic, OpenAI, and Gemini APIs from day one.
+- **Cost transparency**: Users pay for their own tokens — the app must show real-time token usage and cost estimates.
+- **Existing guides**: The 13-phase audit logic in `codebase_review_guide.md` is the source of truth. The app implements this, not a reimagined version.
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:research/STACK.md -->
