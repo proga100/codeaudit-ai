@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: App Shell & Configuration** - Users can open the app, manage API keys, select a local folder, and configure an audit ready to run
 - [x] **Phase 2: Audit Engine** - Users can run a full LLM-powered audit against a local folder and watch it execute in real time (completed 2026-03-22)
-- [ ] **Phase 3: Results & Cost** - Users can view findings dashboards, download reports, and see full cost breakdowns
+- [x] **Phase 3: Results & Cost** - Users can view findings dashboards, download reports, and see full cost breakdowns (completed 2026-03-22)
 - [ ] **Phase 4: History & Comparison** - Users can browse past audits and generate comparison reports across runs
 
 ## Phase Details
@@ -68,7 +68,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Shared format utilities, SeverityBadge/SeverityChart/FindingCard/CostSummary components, results page (server + client with filter/sort), progress-view "View Results" transition
-- [ ] 03-02-PLAN.md — Zip download API route (archiver streaming), PDF generation route (Puppeteer), HTML report serve route, executive/technical in-app viewer pages (iframe)
+- [x] 03-02-PLAN.md — Zip download API route (archiver streaming), PDF generation route (Puppeteer), HTML report serve route, executive/technical in-app viewer pages (iframe)
 
 ### Phase 4: History & Comparison
 **Goal**: Users can browse all past audits for any folder and generate a delta comparison report when two or more audits exist for the same folder
@@ -94,5 +94,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. App Shell & Configuration | 1/3 | In Progress|  |
 | 2. Audit Engine | 3/3 | Complete   | 2026-03-22 |
-| 3. Results & Cost | 1/2 | In Progress|  |
+| 3. Results & Cost | 2/2 | Complete   | 2026-03-22 |
 | 4. History & Comparison | 0/2 | Not started | - |

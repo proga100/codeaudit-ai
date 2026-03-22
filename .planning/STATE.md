@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-results-cost-01-PLAN.md
-last_updated: "2026-03-22T09:36:28.180Z"
+stopped_at: Completed 03-results-cost-02-PLAN.md
+last_updated: "2026-03-22T09:41:23.955Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -53,6 +53,7 @@ Plan: 2 of 2
 | Phase 02-audit-setup P02 | 5 | 2 tasks | 15 files |
 | Phase 02-audit-setup P03 | 3 | 2 tasks | 6 files |
 | Phase 03-results-cost P01 | 15 | 3 tasks | 10 files |
+| Phase 03-results-cost P02 | 8 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Recent decisions affecting current work:
 - [Phase 03-results-cost]: Recharts installed directly (not via Shadcn chart CLI) since recharts is the underlying library — avoids adding chart.tsx wrapper overhead
 - [Phase 03-results-cost]: ResultsView accepts typed AuditRow/PhaseRow inline types instead of importing Drizzle select type — avoids server-module leak into client bundle
 - [Phase 03-results-cost]: View Results uses <a href> not router.push — intentional full navigation to trigger fresh server component load
+- [Phase 03-results-cost]: Puppeteer pdf() returns Uint8Array in v24+ — wrapped with Buffer.from() for BodyInit compatibility
+- [Phase 03-results-cost]: iframe sandbox uses allow-same-origin allow-scripts — safe at localhost, needed for Phase 11 inline chart JS
+- [Phase 03-results-cost]: Readable.toWeb cast uses import('node:stream').Readable type to satisfy TypeScript (not NodeJS.ReadableStream)
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:36:28.178Z
-Stopped at: Completed 03-results-cost-01-PLAN.md
+Last session: 2026-03-22T09:41:23.953Z
+Stopped at: Completed 03-results-cost-02-PLAN.md
 Resume file: None

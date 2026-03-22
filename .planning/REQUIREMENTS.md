@@ -50,11 +50,11 @@
 
 ### Results Dashboard
 
-- [ ] **DASH-01**: User can view audit findings in an in-app dashboard with scores, severity breakdown, and findings list
-- [ ] **DASH-02**: User can filter and sort findings by severity (Critical, High, Medium, Low, Info)
-- [ ] **DASH-03**: User can view the executive/management report and the technical report as separate views
-- [ ] **DASH-04**: User can download full audit reports (HTML dashboards + markdown reports) as a zip file
-- [ ] **DASH-05**: Findings include file paths, line numbers, evidence, and remediation suggestions
+- [x] **DASH-01**: User can view audit findings in an in-app dashboard with scores, severity breakdown, and findings list
+- [x] **DASH-02**: User can filter and sort findings by severity (Critical, High, Medium, Low, Info)
+- [x] **DASH-03**: User can view the executive/management report and the technical report as separate views
+- [x] **DASH-04**: User can download full audit reports (HTML dashboards + markdown reports) as a zip file
+- [x] **DASH-05**: Findings include file paths, line numbers, evidence, and remediation suggestions
 
 ### Audit History & Comparison
 
@@ -65,9 +65,9 @@
 
 ### Budget & Cost
 
-- [ ] **COST-01**: User sees total tokens used and total cost after an audit completes
-- [ ] **COST-02**: User sees a budget warning if the audit is consuming significantly more tokens than estimated
-- [ ] **COST-03**: User can cancel a running audit at any time and sees the cost incurred
+- [x] **COST-01**: User sees total tokens used and total cost after an audit completes
+- [x] **COST-02**: User sees a budget warning if the audit is consuming significantly more tokens than estimated
+- [x] **COST-03**: User can cancel a running audit at any time and sees the cost incurred
 
 ## v2 Requirements
 
@@ -126,14 +126,14 @@
 | PROG-03 | Phase 2 | Complete |
 | PROG-04 | Phase 2 | Complete |
 | PROG-05 | Phase 2 | Complete |
-| DASH-01 | Phase 3 | Pending |
-| DASH-02 | Phase 3 | Pending |
-| DASH-03 | Phase 3 | Pending |
-| DASH-04 | Phase 3 | Pending |
-| DASH-05 | Phase 3 | Pending |
-| COST-01 | Phase 3 | Pending |
-| COST-02 | Phase 3 | Pending |
-| COST-03 | Phase 3 | Pending |
+| DASH-01 | Phase 3 | Complete |
+| DASH-02 | Phase 3 | Complete |
+| DASH-03 | Phase 3 | Complete |
+| DASH-04 | Phase 3 | Complete |
+| DASH-05 | Phase 3 | Complete |
+| COST-01 | Phase 3 | Complete |
+| COST-02 | Phase 3 | Complete |
+| COST-03 | Phase 3 | Complete |
 | HIST-01 | Phase 4 | Pending |
 | HIST-02 | Phase 4 | Pending |
 | HIST-03 | Phase 4 | Pending |
