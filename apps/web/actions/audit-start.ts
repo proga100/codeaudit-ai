@@ -48,6 +48,6 @@ export async function startAudit(input: StartAuditInput): Promise<void> {
     throw new Error("Failed to create audit record");
   }
 
-  // Redirect to queued audit stub page (audit engine is Phase 2)
-  redirect(`/audit/${audit.id}/queued`);
+  // Redirect to audit progress page
+  redirect(`/audit/${audit.id}`);
 }
