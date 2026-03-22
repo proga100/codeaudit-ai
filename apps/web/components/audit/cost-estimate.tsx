@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { estimateCostRange, formatCostRange, type FolderStats, type AuditType, type AuditDepth, type Provider } from "@/lib/cost-estimator";
+import { estimateCostRange, formatCostRange, type FolderStats, type AuditType, type AuditDepth, type Provider } from "@/lib/cost-estimator-shared";
 import { DollarSign } from "lucide-react";
 
 interface CostEstimateProps {

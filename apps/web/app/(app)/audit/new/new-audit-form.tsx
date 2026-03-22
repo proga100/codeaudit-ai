@@ -12,8 +12,8 @@ import { startAudit } from "@/actions/audit-start";
 import { getFolderStats } from "@/actions/folder-stats";
 import type { FolderValidationResult } from "@/actions/folders";
 import type { ApiKeyRecord } from "@/actions/api-keys";
-import type { FolderStats, Provider } from "@/lib/cost-estimator";
-import { estimateCostRange } from "@/lib/cost-estimator";
+import type { FolderStats, Provider } from "@/lib/cost-estimator-shared";
+import { estimateCostRange } from "@/lib/cost-estimator-shared";
 
 interface NewAuditFormProps {
   initialKeys: ApiKeyRecord[];

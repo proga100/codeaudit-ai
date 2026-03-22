@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import type { AuditType, AuditDepth } from "@/lib/cost-estimator";
+import type { AuditType, AuditDepth } from "@/lib/cost-estimator-shared";
 
 const AUDIT_TYPE_LABELS: Record<AuditType, string> = {
   full: "Full Audit",
