@@ -1,197 +1,173 @@
 ---
 phase: 01-foundation
-verified: 2026-03-22T00:00:00Z
+verified: 2026-03-22T04:30:00Z
 status: gaps_found
-score: 6/7 requirements verified (AUTH-01 intentionally dropped per D-01)
+score: 12/14 must-haves verified
+re_verification: false
 gaps:
-  - truth: "User can sign up with email/password and sign in on subsequent visits (ROADMAP Success Criterion #1)"
+  - truth: "User can add, label, update, and delete encrypted API keys for Anthropic, OpenAI, and Gemini — each key is validated against the provider via a test API call before being saved"
     status: failed
-    reason: "AUTH-01 was listed in ROADMAP Phase 1 requirements and Success Criteria but was intentionally dropped per decision D-01 (GitHub SSO only). No email/password auth exists anywhere in the codebase. The REQUIREMENTS.md Traceability table still maps AUTH-01 to Phase 1 as Pending. This is a documented decision but creates a gap between the stated ROADMAP success criterion and what was built."
+    reason: "Argument order bug in api-keys-client.tsx: createApiKey is called as createApiKey(provider, label, rawKey) but addApiKey signature is (provider, rawKey, label). The user's label string is passed as the raw key argument, and the actual API key is passed as the label. Validation will reject valid keys (label string fails provider pattern check) or succeed with garbage stored."
     artifacts:
-      - path: ".planning/ROADMAP.md"
-        issue: "ROADMAP Phase 1 Success Criteria #1 requires email/password sign-up; this criterion is unachievable given D-01"
-      - path: ".planning/REQUIREMENTS.md"
-        issue: "Traceability table maps AUTH-01 to Phase 1 as Pending but no plan claims it and no implementation exists"
+      - path: "apps/web/app/(app)/settings/api-keys/api-keys-client.tsx"
+        issue: "Line 102: createApiKey(provider, label, rawKey) — label and rawKey arguments are swapped relative to addApiKey(provider, rawKey, label) signature"
     missing:
-      - "Either: update ROADMAP.md Phase 1 Success Criteria to remove the email/password criterion (it was superseded by D-01)"
-      - "Or: update REQUIREMENTS.md Traceability to note AUTH-01 was dropped per D-01 and move it to Out of Scope or v2"
+      - "Fix argument order to: createApiKey(provider, rawKey, label)"
+  - truth: "User can store multiple keys per provider with labels"
+    status: failed
+    reason: "Depends on the same argument-order bug: when the label is passed as rawKey, the stored maskedKey and encryptedKey will contain the label string, not the actual API key. Persisted data is corrupted for keys added via the Settings page."
+    artifacts:
+      - path: "apps/web/app/(app)/settings/api-keys/api-keys-client.tsx"
+        issue: "Line 102: same swapped-args bug corrupts stored encrypted key and masked display"
+    missing:
+      - "Fix argument order to: createApiKey(provider, rawKey, label)"
 human_verification:
-  - test: "Sign in via GitHub OAuth and verify session persists across browser refresh"
-    expected: "After OAuth callback, user is redirected to /dashboard (or /onboarding on first visit), and hard-refreshing the page keeps the user signed in"
-    why_human: "Requires actual GitHub OAuth App credentials and live OAuth redirect flow — cannot verify programmatically"
-  - test: "First-time user onboarding flow: sign in fresh, step through all 4 steps including installing GitHub App and adding an API key"
-    expected: "Steps 1-4 all render with real functionality, Skip works at each step, Step 4 marks onboarding complete and redirects to /dashboard"
-    why_human: "Requires live GitHub App installation redirect and real LLM provider API key for validation"
-  - test: "API key validation rejection: enter an invalid key (e.g. 'fake-key') for each provider"
-    expected: "Each provider returns a distinct user-friendly error message (not a 500 or generic error)"
-    why_human: "Requires live network calls to each LLM provider API"
-  - test: "IDOR test: authenticate as User A, note a key ID from User A, then authenticate as User B and attempt to delete User A's key ID"
-    expected: "DELETE returns 'API key not found' — User B cannot delete User A's keys"
-    why_human: "Requires two separate authenticated sessions; cannot be tested via code inspection alone"
-  - test: "Webhook signature rejection: POST to /api/github/webhook with a tampered or missing X-Hub-Signature-256 header"
-    expected: "Returns HTTP 401 with 'Invalid signature'"
-    why_human: "Requires live HTTP call — signature verification logic present in code but needs end-to-end confirmation"
+  - test: "Open app at localhost:3000 and add an Anthropic API key via the Settings > API Keys page"
+    expected: "Key is validated, saved with masked display, and persists after page reload"
+    why_human: "The argument-order bug is programmatically identified but the full user flow through the validation API call needs to be observed to confirm severity"
+  - test: "Select a local folder, choose audit type and depth, observe cost estimate updating"
+    expected: "Cost estimate range changes immediately when type, depth, or provider selection changes without requiring a page submit"
+    why_human: "Live reactive update behavior cannot be verified from static file analysis"
+  - test: "Click Start Audit, confirm the dialog, verify folder is locked and audit is queued"
+    expected: "Folder is chmod'd read-only, git push is blocked, audit record appears in DB with status queued, redirect to /audit/{id}/queued"
+    why_human: "Actual filesystem operations (chmod, git remote set-url) require running the app on a real folder"
 ---
 
-# Phase 1: Foundation Verification Report
+# Phase 1: App Shell & Configuration Verification Report
 
-**Phase Goal:** Users can securely authenticate via GitHub SSO, connect their GitHub account to authorize repo access, and store/manage encrypted LLM API keys for Anthropic, OpenAI, and Gemini.
-**Verified:** 2026-03-22
-**Status:** gaps_found — 1 documentation gap (AUTH-01 ROADMAP/REQUIREMENTS.md mismatch), all code goals achieved
+**Phase Goal:** Users can open the app at localhost, manage encrypted API keys for all three LLM providers, select a local folder to audit with safety enforcement, and configure an audit through to the cost-estimate confirmation gate
+**Verified:** 2026-03-22T04:30:00Z
+**Status:** gaps_found
 **Re-verification:** No — initial verification
 
 ---
 
 ## Goal Achievement
 
-### Observable Truths (derived from ROADMAP Phase 1 Success Criteria)
+### Observable Truths (from Phase 1 Success Criteria)
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | User can sign up with email/password (ROADMAP SC #1) | ✗ FAILED | No email/password auth exists. Only GitHub SSO. Decision D-01 intentionally dropped this, but ROADMAP SC #1 and REQUIREMENTS.md AUTH-01 still reference it. |
-| 2 | User can sign in via GitHub SSO and maintain session across browser refresh (ROADMAP SC #2 + AUTH-02, AUTH-03) | ✓ VERIFIED | `auth.ts`: NextAuth with GitHub provider + database session strategy. `middleware.ts`: guards /dashboard and /onboarding, redirects unauthenticated. `lib/auth.ts`: `getRequiredSession()` wraps `auth()` with redirect. |
-| 3 | User can connect GitHub account via OAuth to authorize repo access — GitHub App with Contents:read per-repo scope (ROADMAP SC #3 + AUTH-04) | ✓ VERIFIED | `lib/github-app.ts`: `getGitHubAppInstallUrl()`. `app/api/github/callback/route.ts`: stores installationId in `github_installations` table. `app/api/github/webhook/route.ts`: HMAC-SHA256 signature verification on all events. |
-| 4 | User can add, update, and delete stored API keys for Anthropic, OpenAI, and Gemini, stored AES-256-GCM encrypted (ROADMAP SC #4 + AUTH-06, AUTH-07) | ✓ VERIFIED | `packages/db/src/encryption.ts`: AES-256-GCM with unique IVs + auth tag. `actions/api-keys.ts`: CRUD actions all userId-scoped (IDOR safe). `settings/api-keys/page.tsx` + `api-keys-client.tsx`: full add/edit/delete UI with 3 providers. |
-| 5 | User can sign out from any page and session is terminated (ROADMAP SC #5 + AUTH-08) | ✓ VERIFIED | `app/actions/auth.ts`: `signOutAction()` calls `signOut({ redirectTo: "/sign-in" })`. `components/sign-out-button.tsx`: present in sidebar on all authenticated pages. `components/nav/sidebar.tsx`: SignOutButton in user section. |
-| 6 | LLM API keys are validated via test API call before storage | ✓ VERIFIED | `lib/api-key-validator.ts`: live calls to Anthropic (`/v1/messages`), OpenAI (`/v1/models`), Gemini (`/v1beta/models`). Returns typed discriminated union. `actions/api-keys.ts`: `createApiKey` calls `validateApiKey` and blocks on `invalid_key` / `network_error` status. |
-| 7 | Onboarding flow routes users through 4 steps on first sign-in; steps 2 and 3 are wired to real functionality | ✓ VERIFIED | `onboarding/api-key/page.tsx`: calls `listApiKeys()`, renders `OnboardingApiKeyClient`. `onboarding/repo/page.tsx`: queries `githubInstallations` table, renders GitHub App install URL. `app/actions/onboarding.ts`: `completeOnboardingAction()` sets `hasCompletedOnboarding = true`. |
+| 1 | User runs one start command and opens the app in their browser at localhost with no errors | VERIFIED | `packages/cli/index.ts` exists with ENCRYPTION_KEY bootstrap, health-poll loop, and browser open via `open` package. `/api/health` route returns `{ status: "ok" }`. |
+| 2 | User can add, label, update, and delete encrypted API keys — each key validated via test API call before saved | FAILED | `addApiKey` signature is `(provider, rawKey, label)` but `api-keys-client.tsx:102` calls `createApiKey(provider, label, rawKey)` — label and rawKey are swapped, corrupting validation and storage for keys added from Settings page. |
+| 3 | User can select a local folder; app locks it read-only and blocks git push before audit begins | VERIFIED | `folder-safety.ts` implements CRITICAL ORDER (git push block before chmod). `startAudit` action calls `createAuditOutputDir` then `lockFolder`. |
+| 4 | User can choose audit type, depth, and which stored API key to use | VERIFIED | `AuditTypeCards`, `DepthToggle`, `ModelSelector` all exist, are substantive, and are wired into `new-audit-form.tsx`. |
+| 5 | User sees a pre-audit cost estimate and can confirm to proceed or go back | VERIFIED | `CostEstimate` calls `estimateCostRange` from `cost-estimator.ts` via `useMemo` on every config change. `ConfirmAuditDialog` shows cost range with Go Back / Start Audit buttons. |
 
-**Score: 6/7 truths verified** (Truth #1 fails due to documentation gap — code goal fully achieved via GitHub SSO)
+**Score:** 4/5 truths verified (12/14 plan-level must-haves)
 
 ---
 
-## Required Artifacts
+### Required Artifacts
 
-| Artifact | Expected | Status | Details |
+| Artifact | Provided | Status | Details |
 |----------|----------|--------|---------|
-| `apps/web/auth.ts` | Auth.js v5 config with GitHub provider, DrizzleAdapter, database sessions | ✓ VERIFIED | NextAuth configured, GitHub provider, DrizzleAdapter with all 4 Auth.js tables, session callback includes userId and githubInstalled flag |
-| `apps/web/middleware.ts` | Route protection redirecting unauthenticated users | ✓ VERIFIED | Wraps `auth()`, protects /dashboard/* and /onboarding/*, redirects to /sign-in with callbackUrl |
-| `apps/web/lib/auth.ts` | getRequiredSession(), getOptionalSession(), getRequiredUser() utilities | ✓ VERIFIED | All 3 functions implemented, getRequiredUser() fetches full DB record |
-| `apps/web/app/api/auth/[...nextauth]/route.ts` | Auth.js GET/POST handler | ✓ VERIFIED | Exports handlers from auth.ts |
-| `apps/web/app/(auth)/sign-in/page.tsx` | Sign-in page with GitHub SSO button and OAuth error handling | ✓ VERIFIED | GitHub button, error message mapping for 4 OAuth error codes, auto-redirect if already signed in |
-| `apps/web/app/actions/auth.ts` | signOutAction() server action | ✓ VERIFIED | Calls signOut({ redirectTo: "/sign-in" }) |
-| `apps/web/components/nav/sidebar.tsx` | Sidebar with user info and sign-out button | ✓ VERIFIED | Logo, nav links with active state, GitHub avatar/name, SignOutButton |
-| `apps/web/app/(dashboard)/layout.tsx` | Session-backed dashboard layout | ✓ VERIFIED | Calls getRequiredSession(), passes session.user to Sidebar |
-| `packages/db/src/encryption.ts` | AES-256-GCM encrypt/decrypt/mask with node:crypto | ✓ VERIFIED | encryptApiKey(), decryptApiKey(), maskApiKey() all implemented with unique IVs and auth tag |
-| `packages/db/src/encryption.test.ts` | Unit tests for encryption | ✓ VERIFIED | 11 tests covering round-trip, unique IVs, tamper detection, wrong-key failure, ENCRYPTION_KEY validation |
-| `apps/web/lib/api-key-validator.ts` | Per-provider validation service | ✓ VERIFIED | Anthropic (POST /v1/messages), OpenAI (GET /v1/models), Gemini (GET /v1beta/models), typed result union |
-| `apps/web/actions/api-keys.ts` | createApiKey, listApiKeys, updateApiKeyLabel, deleteApiKey server actions | ✓ VERIFIED | All 4 actions, requireUserId() guard, IDOR prevention via AND(id, userId) on all mutations, never returns encryptedKey |
-| `apps/web/app/(dashboard)/settings/api-keys/page.tsx` | API keys settings page | ✓ VERIFIED | Server component, calls listApiKeys(), passes to ApiKeysClient |
-| `apps/web/app/(dashboard)/settings/api-keys/api-keys-client.tsx` | Client UI with add/edit/delete | ✓ VERIFIED | 3 provider sections, AddKeyForm, EditLabelForm, DeleteConfirmDialog, all wired to server actions |
-| `apps/web/app/api/github/webhook/route.ts` | Webhook handler with HMAC-SHA256 signature verification | ✓ VERIFIED | timingSafeEqual comparison, handles installation.created/deleted and installation_repositories.added/removed |
-| `apps/web/app/api/github/callback/route.ts` | Installation callback handler | ✓ VERIFIED | Requires auth, upserts githubInstallations record, redirects back to state URL |
-| `apps/web/app/(dashboard)/settings/github/page.tsx` | GitHub connection status page | ✓ VERIFIED | Queries githubInstallations, passes to GitHubSettingsClient with install/manage URLs |
-| `apps/web/app/(dashboard)/settings/github/github-settings-client.tsx` | Connect/disconnect UI | ✓ VERIFIED | Connected/disconnected states, "Manage repositories" external link, disconnect with confirmation dialog |
-| `apps/web/lib/github-token-refresh.ts` | Proactive token refresh with in-memory lock | ✓ VERIFIED | 15-min threshold via isTokenExpiringSoon(), Set-based per-user lock, DB update on refresh |
-| `packages/db/src/schema.ts` | All tables including api_keys (maskedKey), github_installations, users (hasCompletedOnboarding) | ✓ VERIFIED | 8 tables present, api_keys has encryptedKey+iv+maskedKey, users has hasCompletedOnboarding |
-| `packages/db/src/index.ts` | Exports encryption utilities | ✓ VERIFIED | Exports encryptApiKey, decryptApiKey, maskApiKey, EncryptedKey |
+| `packages/db/src/schema.ts` | SQLite schema — apiKeys, audits, appSettings tables | VERIFIED | Uses `sqliteTable` exclusively, no pgTable, no userId FKs. All 4 tables present. |
+| `packages/db/src/client.ts` | SQLite Drizzle client via better-sqlite3 | VERIFIED | Uses better-sqlite3, WAL mode enabled, getDb() singleton, ~/.codeaudit/codeaudit.db path. |
+| `apps/web/middleware.ts` | No-auth pass-through middleware | VERIFIED | Contains only `NextResponse.next()`, no auth imports. |
+| `apps/web/actions/api-keys.ts` | Server Actions for key CRUD — addApiKey, listApiKeys, deleteApiKey, updateApiKey | VERIFIED | All four actions present, no session/auth guards, AES-256-GCM encryption via encryptApiKey. |
+| `packages/cli/index.ts` | npx codeaudit launcher | VERIFIED | ENCRYPTION_KEY auto-generation, spawn + health-check poll, browser open via `open` package. |
+| `apps/web/lib/folder-safety.ts` | lockFolder, unlockFolder, isGitRepo, createAuditOutputDir | VERIFIED | Correct critical order enforced, promisify(execFile) used, no execSync. |
+| `apps/web/actions/folders.ts` | validateFolder Server Action | VERIFIED | Checks path exists, is directory, detects git repo. |
+| `apps/web/components/audit/folder-picker.tsx` | FolderPicker UI — multi-folder, per-path validation | VERIFIED | Accepts `value: string[]`, Add Folder button, non-git warning, calls validateFolder. |
+| `apps/web/components/audit/audit-type-cards.tsx` | 4 audit type selection cards | VERIFIED | 4 cards: full, security, team-collaboration, code-quality with visual selection state. |
+| `apps/web/components/audit/depth-toggle.tsx` | Quick Scan / Deep Audit toggle | VERIFIED | Two-option toggle with time and description context for each. |
+| `apps/web/components/audit/model-selector.tsx` | Provider/key dropdown + model selector | VERIFIED | Calls `/api/models?keyId=` on key change, shows grouped provider/key selector + model dropdown. |
+| `apps/web/components/audit/cost-estimate.tsx` | Live cost range display | VERIFIED | Calls `estimateCostRange` via `useMemo` on every prop change. |
+| `apps/web/components/audit/confirm-dialog.tsx` | Start audit confirmation dialog | VERIFIED | Shows folder paths, type, depth, model, cost range. Async `onConfirm` with loading state. |
+| `apps/web/lib/cost-estimator.ts` | estimateCostRange() and collectFolderStats() | VERIFIED | Provider-aware pricing table, phase count multipliers, depth multipliers, ±40% range. |
+| `apps/web/app/api/models/route.ts` | GET /api/models?keyId= | VERIFIED | Fetches from Anthropic/OpenAI/Gemini APIs using decrypted key, returns model list. |
+| `apps/web/actions/audit-start.ts` | startAudit Server Action | VERIFIED | Calls createAuditOutputDir → lockFolder → DB insert → redirect. |
 
 ---
 
-## Key Link Verification
+### Key Link Verification
 
 | From | To | Via | Status | Details |
 |------|----|-----|--------|---------|
-| `sign-in/page.tsx` | Auth.js signIn() | `import { signIn } from "@/auth"` + form action | ✓ WIRED | Server action calls `signIn("github", { redirectTo })` |
-| `signOutAction` | Auth.js signOut() | `import { signOut } from "@/auth"` | ✓ WIRED | `signOut({ redirectTo: "/sign-in" })` |
-| `dashboard/layout.tsx` | getRequiredSession() | `import { getRequiredSession } from "@/lib/auth"` | ✓ WIRED | Session gates dashboard rendering, passes user to Sidebar |
-| `actions/api-keys.ts` | encryptApiKey() | `import { encryptApiKey, maskApiKey } from "@codeaudit/db"` | ✓ WIRED | createApiKey: validates → encrypts → stores maskedKey — plaintext never returned |
-| `actions/api-keys.ts` | validateApiKey() | `import { validateApiKey } from "@/lib/api-key-validator"` | ✓ WIRED | Called in createApiKey before encryption; blocks on invalid_key and network_error |
-| `api-keys-client.tsx` | createApiKey / deleteApiKey / updateApiKeyLabel | `import { createApiKey, deleteApiKey, updateApiKeyLabel } from "@/actions/api-keys"` | ✓ WIRED | All 3 mutation actions wired to form handlers; return value checked for success/error |
-| `webhook/route.ts` | signature verification | `createHmac + timingSafeEqual` | ✓ WIRED | Returns 401 on bad signature before any payload processing |
-| `callback/route.ts` | githubInstallations DB upsert | `import { getDb, githubInstallations } from "@codeaudit/db"` | ✓ WIRED | Inserts record scoped to session.user.id |
-| `onboarding/api-key/page.tsx` | real API key form | `import { OnboardingApiKeyClient }` + `listApiKeys()` | ✓ WIRED | No longer a placeholder — loads existing keys, renders add form |
-| `onboarding/repo/page.tsx` | GitHub App install URL | `import { getGitHubAppInstallUrl }` + githubInstallations query | ✓ WIRED | No longer a placeholder — checks DB for installation, renders Install button or confirmation |
+| `packages/cli/index.ts` | Next.js server | spawn + health-check poll then `open()` | WIRED | Health poll loop (30 iterations, 1s delay), `GET /api/health`, browser open on first 200. |
+| `apps/web/actions/api-keys.ts` | `packages/db/src/encryption.ts` | `encryptApiKey` + `validateApiKey` | WIRED | Both called in `addApiKey`. `encryptApiKey` used before DB insert. Validation checked before encrypt. |
+| `apps/web/app/(app)/layout.tsx` | `apps/web/components/nav/sidebar.tsx` | `<Sidebar />` with no user prop | WIRED | `<Sidebar />` rendered with no props — correct no-auth pattern. |
+| `apps/web/lib/folder-safety.ts` | execFile(chmod) + git remote set-url | promisify(execFile) | WIRED | Critical order: git `set-url --push origin no_push` runs before `chmod -R a-w`. |
+| `apps/web/actions/folders.ts` | `apps/web/lib/folder-safety.ts` | `isGitRepo()` check | WIRED | `isGitRepo` imported and called in `validateFolder`. |
+| `apps/web/components/audit/folder-picker.tsx` | `apps/web/actions/folders.ts` | `validateFolder` server action call | WIRED | Called via `useTransition` on input change when path length > 3. |
+| `apps/web/components/audit/model-selector.tsx` | `apps/web/app/api/models/route.ts` | `fetch /api/models?keyId=` | WIRED | `useEffect` on `selectedKeyId` change fetches `/api/models?keyId=${selectedKeyId}`. |
+| `apps/web/components/audit/cost-estimate.tsx` | `apps/web/lib/cost-estimator.ts` | `estimateCostRange()` | WIRED | Called via `useMemo` on every config prop change, result displayed in rendered output. |
+| `apps/web/app/(app)/audit/new/page.tsx` | `apps/web/components/audit/confirm-dialog.tsx` | `ConfirmAuditDialog` | WIRED | Rendered in `new-audit-form.tsx` which `new/page.tsx` delegates to. |
+| `apps/web/components/audit/confirm-dialog.tsx` | `apps/web/actions/audit-start.ts` | `onConfirm` calls `startAudit` | WIRED | `handleConfirm` in `new-audit-form.tsx` calls `startAudit`, passed as `onConfirm` prop. |
+| `apps/web/actions/audit-start.ts` | `apps/web/lib/folder-safety.ts` | `lockFolder()` + `createAuditOutputDir()` | WIRED | Both called explicitly in sequence before DB insert. |
 
 ---
 
-## Requirements Coverage
+### Requirements Coverage
 
-| Requirement | Source Plan | Description | Status | Evidence |
-|-------------|------------|-------------|--------|----------|
-| AUTH-01 | ROADMAP lists for Phase 1 (no plan claims it) | User can sign up with email/password | ✗ INTENTIONALLY DROPPED | Decision D-01 explicitly drops AUTH-01 in favor of GitHub SSO only. Plan 01-02 notes this. No implementation exists. ROADMAP and REQUIREMENTS.md still reference it — documentation gap. |
-| AUTH-02 | Plan 01-02 (`requirements-completed`) | User can sign in and maintain session across browser refresh | ✓ SATISFIED | Database session strategy; sessions table in DB; `auth()` call in middleware validates session on every protected request |
-| AUTH-03 | Plan 01-02 (`requirements-completed`, partial) | User can sign in with GitHub SSO | ✓ SATISFIED | GitHub provider configured in auth.ts; sign-in page triggers `signIn("github")`; full OAuth flow implemented |
-| AUTH-04 | Plan 01-03 (`requirements-completed`) | User can connect their GitHub account via OAuth to grant repo access | ✓ SATISFIED | GitHub App install flow (`/api/github/callback`), installationId stored in `github_installations`, webhook handler processes events |
-| AUTH-06 | Plan 01-03 (`requirements-completed`) | User can store encrypted LLM API keys for Anthropic, OpenAI, and Gemini | ✓ SATISFIED | AES-256-GCM encryption in `packages/db/src/encryption.ts`; createApiKey validates then encrypts; maskedKey stored for display |
-| AUTH-07 | Plan 01-03 (`requirements-completed`) | User can update or delete their stored API keys | ✓ SATISFIED | updateApiKeyLabel and deleteApiKey server actions; both userId-scoped (IDOR safe); delete has confirmation UI |
-| AUTH-08 | Plan 01-02 (`requirements-completed`) | User can sign out from any page | ✓ SATISFIED | SignOutButton in sidebar present on all authenticated pages; signOutAction() clears session and redirects |
+| Requirement | Plan | Description | Status | Evidence |
+|-------------|------|-------------|--------|----------|
+| SETUP-01 | 01-01 | User can open app at localhost after one start command | SATISFIED | CLI launcher wired, health endpoint exists, browser auto-opens |
+| SETUP-02 | 01-01 | User can add, update, delete encrypted API keys for Anthropic, OpenAI, Gemini | BLOCKED | Argument-order bug in `api-keys-client.tsx:102` — `createApiKey(provider, label, rawKey)` should be `createApiKey(provider, rawKey, label)` |
+| SETUP-03 | 01-01 | User can store multiple keys per provider with labels | BLOCKED | Same bug — label passed as raw key corrupts storage |
+| SETUP-04 | 01-01 | API keys validated on entry via test API call | BLOCKED | Same bug — label string is what gets validated against the provider, not the actual key |
+| FOLD-01 | 01-02 | User can select a local folder via folder picker or path input | SATISFIED | `FolderPicker` with text input and Browse button |
+| FOLD-02 | 01-02 | App locks folder read-only (chmod -R a-w) before audit starts | SATISFIED | `lockFolder` enforces chmod after git push block |
+| FOLD-03 | 01-02 | App blocks git push (git remote set-url --push origin no_push) | SATISFIED | Critical order enforced: git block runs before chmod |
+| FOLD-04 | 01-02 | App creates separate audit output directory (~/audit-{repo-name}/) | SATISFIED | `createAuditOutputDir` creates timestamped dir in $HOME |
+| FOLD-05 | 01-02 | App unlocks folder after audit completes or is cancelled | SATISFIED | `unlockFolder` exported and callable — NEEDS HUMAN verification that Phase 2 calls it |
+| CONF-01 | 01-03 | User can select audit type: full, security-only, team & collaboration, code quality | SATISFIED | `AuditTypeCards` with all 4 options |
+| CONF-02 | 01-03 | User can select audit depth: quick scan or deep audit | SATISFIED | `DepthToggle` with Quick Scan / Deep Audit options |
+| CONF-03 | 01-03 | User can select which LLM provider and key to use | SATISFIED | `ModelSelector` with grouped provider/key dropdown |
+| CONF-04 | 01-03 | User sees pre-audit cost estimate based on folder size, type, depth, provider | SATISFIED | `CostEstimate` updates reactively via `useMemo` |
+| CONF-05 | 01-03 | User can start an audit after reviewing cost estimate | SATISFIED | `ConfirmAuditDialog` with Start Audit confirm gate |
 
-**Orphaned requirements from REQUIREMENTS.md mapped to Phase 1:**
-- AUTH-01: Mapped to Phase 1 in Traceability, status "Pending" — but intentionally dropped per D-01. Not orphaned per se, but the traceability table is misleading. Should be updated.
+**Note on FOLD-05:** `unlockFolder` is implemented and exported but is intentionally not called in the Phase 1 `startAudit` action (Phase 2 is responsible for calling it after audit completion/cancellation/failure). This is by design per the plan — FOLD-05 is satisfied at the service level; Phase 2 execution is required to observe the runtime behavior.
+
+**Note on SETUP-02/03/04:** The bug only affects the Settings page (`api-keys-client.tsx`). The first-run setup wizard (`setup-wizard.tsx:28`) correctly calls `createApiKey(provider, apiKey, label)` with the right argument order. Users who add their first key through the setup wizard will have a valid key stored. The bug surfaces only when adding additional keys through Settings.
 
 ---
 
-## Anti-Patterns Found
-
-Scanned all key files from SUMMARY.md frontmatter.
+### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |------|------|---------|----------|--------|
-| `app/(dashboard)/onboarding/api-key/page.tsx` | — | Previous placeholder replaced with real form | ✓ CLEAN | Intentional placeholder from 01-02 was wired in 01-03 |
-| `app/(dashboard)/onboarding/repo/page.tsx` | — | Previous placeholder replaced with real install flow | ✓ CLEAN | Intentional placeholder from 01-02 was wired in 01-03 |
-| `lib/github-token-refresh.ts` | 27 | `const refreshLocks = new Set<string>()` — in-memory lock | ℹ️ INFO | Single-process only; documented in code and SUMMARY. Sufficient for Phase 1; distributed deployments need Redis SETNX. |
-| `app/api/github/callback/route.ts` | 46 | `accountLogin = session.user.name ?? session.user.email ?? "unknown"` | ⚠️ WARNING | Uses OAuth display name as GitHub account login. The actual `account_login` from the GitHub App installation is not fetched. This is a stub — GitHub App private key auth needed to call `/app/installations/{id}` for the real accountLogin. Non-blocking for Phase 1 but will affect display in settings/github page. |
-| `packages/db/src/encryption.ts` | — | No stub patterns found | ✓ CLEAN | — |
-| `actions/api-keys.ts` | — | No stubs; all 4 CRUD actions fully implemented | ✓ CLEAN | — |
+| `apps/web/app/(app)/settings/api-keys/api-keys-client.tsx` | 102 | `createApiKey(provider, label, rawKey)` — swapped label/rawKey args | BLOCKER | SETUP-02, SETUP-03, SETUP-04 fail for all keys added via Settings page |
+| `apps/web/app/(app)/audit/[id]/queued/page.tsx` | body text | "The audit engine is coming in Phase 2" visible to users | INFO | Intentional Phase 2 stub — documented in 01-03-SUMMARY.md Known Stubs |
 
 ---
 
-## Human Verification Required
+### Human Verification Required
 
-### 1. GitHub OAuth Sign-in Flow
+#### 1. Settings Page API Key Add
 
-**Test:** With GitHub OAuth credentials in `.env.local`, navigate to `/sign-in` and click "Sign in with GitHub"
-**Expected:** GitHub OAuth consent screen appears; after authorization user is redirected to `/onboarding` (first time) or `/dashboard` (returning user); session persists across hard refresh
-**Why human:** Requires live GitHub OAuth App registration and real browser redirect flow
+**Test:** Open Settings > API Keys, add an Anthropic key with a custom label via the Add key form
+**Expected:** Key validates successfully, is stored with the correct masked display, and persists on page reload
+**Why human:** The swapped-argument bug is confirmed in code; human test will confirm whether TypeScript's type-checker silently accepted the wrong order (both label and rawKey are `string` type, so no compile error) and what the actual runtime failure looks like
 
-### 2. Session Persistence Across Refresh
+#### 2. Folder Lock Enforcement
 
-**Test:** Sign in, then hard-refresh the page (Ctrl+Shift+R)
-**Expected:** User remains on /dashboard without redirect to /sign-in
-**Why human:** Database session strategy must be verified end-to-end with real Postgres
+**Test:** Select a real local git repository, configure an audit, click Start Audit and confirm the dialog
+**Expected:** The folder's files become read-only (try `touch {folder}/test.txt` — should fail), git push is blocked (`git push` from the folder should error), and the queued page shows the audit details
+**Why human:** Filesystem permission changes and git remote mutations require running the app against a real local folder
 
-### 3. Full Onboarding Flow Including GitHub App Installation
+#### 3. Cost Estimate Reactivity
 
-**Test:** Sign in as a new user; go through onboarding steps 1-4; at Step 3, click "Install GitHub App" and install it on a test repo
-**Expected:** After GitHub App callback, `/onboarding/repo` shows "GitHub App installed" confirmation; Step 4 "Go to dashboard" marks onboarding complete
-**Why human:** Requires registered GitHub App and live installation callback from GitHub
-
-### 4. API Key Validation — Valid and Invalid Keys
-
-**Test:** On `/settings/api-keys`, add a real key for one provider and a fake key for another
-**Expected:** Real key is accepted and shows masked value; fake key ("invalid-key-123") shows user-friendly error (not a generic 500)
-**Why human:** Requires live LLM provider API calls; validation is server-side only
-
-### 5. IDOR Prevention Test
-
-**Test:** Authenticate as User A, retrieve a key ID from the API keys page. Switch to User B's session. Attempt `deleteApiKey("<User A's key ID>")` via browser DevTools or direct server action call
-**Expected:** Returns `{ success: false, error: "API key not found" }` — User B cannot delete User A's keys
-**Why human:** Requires two separate authenticated sessions
-
-### 6. Webhook Signature Rejection
-
-**Test:** POST to `/api/github/webhook` with a valid JSON body but no `X-Hub-Signature-256` header, or with a tampered signature
-**Expected:** Returns `HTTP 401 {"error":"Invalid signature"}`
-**Why human:** Requires external HTTP tool to craft raw webhook requests
+**Test:** Select a folder, then change audit type, depth, and provider in sequence
+**Expected:** The cost estimate range updates immediately after each selection change without clicking Submit
+**Why human:** Reactive `useMemo` behavior and client-side state updates cannot be verified from static analysis
 
 ---
 
-## Gaps Summary
+### Gaps Summary
 
-There is 1 gap blocking a complete "all truths verified" status, but it is **a documentation gap, not a code gap**:
+**One blocker gap** affecting three requirements (SETUP-02, SETUP-03, SETUP-04):
 
-**ROADMAP.md Phase 1 Success Criterion #1** states "User can sign up with email/password and sign in on subsequent visits with session persisting across browser refresh." This criterion cannot be satisfied — it was superseded by Decision D-01 (GitHub SSO only) before implementation started. The codebase correctly implements GitHub SSO as the only auth method.
+In `apps/web/app/(app)/settings/api-keys/api-keys-client.tsx` at line 102, the `AddKeyForm` component calls `createApiKey(provider, label, rawKey)` but the `addApiKey` function signature is `(provider, rawKey, label)`. Since both `label` and `rawKey` are `string` types, TypeScript does not catch this. At runtime, the user's label string (e.g. "Personal") is passed to the provider validator and will either fail validation (short label won't match key patterns) or succeed with garbage data stored as the encrypted key.
 
-Two items need updating to close this gap:
-1. **ROADMAP.md Phase 1 Success Criteria** — remove or replace Criterion #1 with the actual implemented behavior (GitHub SSO sign-in, session persistence)
-2. **REQUIREMENTS.md Traceability** — update AUTH-01 row to note "Dropped per D-01 decision — GitHub SSO is the only auth method"
+**Scope of impact:** The setup wizard (`setup-wizard.tsx`) calls `createApiKey(provider, apiKey, label)` correctly, so the first-run API key add flow works. Only the Settings page is affected.
 
-The code goal of the phase — secure GitHub SSO, repo access via GitHub App, AES-256-GCM encrypted BYOK key storage — is **fully achieved**. All wiring is substantive (no stubs that matter), all CRUD is scoped, encryption round-trips are tested, and the onboarding flow is wired end-to-end.
+**Fix is one line:** Change line 102 from `createApiKey(provider, label, rawKey)` to `createApiKey(provider, rawKey, label)`.
 
-The only non-critical code note is that the GitHub App callback stores `session.user.name` as `accountLogin` rather than the actual GitHub account login from the App installation API. This is acceptable for Phase 1 display but should be resolved when the GitHub App private key is used in Phase 2 for API calls.
+All other 12 must-haves across Plans 01, 02, and 03 are verified with full artifact, substantive, and wiring checks passing.
 
 ---
 
-*Verified: 2026-03-22*
+*Verified: 2026-03-22T04:30:00Z*
 *Verifier: Claude (gsd-verifier)*
