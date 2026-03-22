@@ -1,24 +1,24 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-// OpenAI structured output requires ALL properties to be in the 'required' array.
-// Use .default() instead of .optional() to satisfy this constraint.
+// OpenAI structured output requires ALL properties in 'required' array.
+// No .optional(), no .default() — every field must be plain required.
 export const AuditFindingSchema = z.object({
-  id: z.string().default(""),
-  phase: z.number().default(0),
-  category: z.string().default("general"),
-  severity: z.enum(["critical", "high", "medium", "low", "info"]).default("info"),
-  title: z.string().default(""),
-  description: z.string().default(""),
-  filePaths: z.array(z.string()).default([]),
-  lineNumbers: z.array(z.number()).default([]),
-  recommendation: z.string().default(""),
+  id: z.string(),
+  phase: z.number(),
+  category: z.string(),
+  severity: z.enum(["critical", "high", "medium", "low", "info"]),
+  title: z.string(),
+  description: z.string(),
+  filePaths: z.array(z.string()),
+  lineNumbers: z.array(z.number()),
+  recommendation: z.string(),
 });
 
 export const PhaseOutputSchema = z.object({
-  findings: z.array(AuditFindingSchema).default([]),
-  summary: z.string().default(""),
-  phaseScore: z.number().min(0).max(10).default(5),
+  findings: z.array(AuditFindingSchema),
+  summary: z.string(),
+  phaseScore: z.number(),
 });
 
 export type PhaseOutput = z.infer<typeof PhaseOutputSchema>;
@@ -35,20 +35,19 @@ export async function runPhaseLlm(
 }> {
   console.log(`[audit-engine] Phase ${phaseNumber}: calling LLM...`);
   const { object, usage } = await generateObject({
-    model: model,
+    model,
     schema: PhaseOutputSchema,
-    prompt,
+    prompt: prompt + "\n\nIMPORTANT: For each finding, always provide all fields including id (use a unique identifier), filePaths (array, empty if not applicable), lineNumbers (array, empty if not applicable), and recommendation.",
     maxOutputTokens: 4096,
   });
 
-  // ai@7 uses inputTokens/outputTokens
   const promptTokens = (usage as any).inputTokens ?? (usage as any).promptTokens ?? 0;
   const completionTokens = (usage as any).outputTokens ?? (usage as any).completionTokens ?? 0;
 
   console.log(`[audit-engine] Phase ${phaseNumber}: LLM returned ${object.findings.length} findings, ${promptTokens + completionTokens} tokens`);
 
   return {
-    findings: object.findings.map((f) => ({ ...f, id: f.id || crypto.randomUUID(), phase: phaseNumber })),
+    findings: object.findings.map((f) => ({ ...f, phase: phaseNumber })),
     summary: object.summary,
     score: object.phaseScore,
     usage: {
