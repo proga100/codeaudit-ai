@@ -1,135 +1,146 @@
-# Phase 1: Foundation - Discussion Log
+# Phase 1: App Shell & Configuration - Discussion Log
 
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
 > Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
 
-**Date:** 2026-03-21
-**Phase:** 01-foundation
-**Areas discussed:** Sign-up flow, API key experience, Landing & first run
+**Date:** 2026-03-22
+**Phase:** 01-app-shell-configuration (rewritten after local-first pivot)
+**Areas discussed:** App startup & auth, Folder selection UX, Audit config layout, Cost estimate display
 
 ---
 
-## Sign-up Flow
+## App Startup & Auth
 
-### Account Creation
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| GitHub SSO only | One-click sign-up via GitHub — simplest, and they need GitHub anyway | ✓ |
-| Email + GitHub SSO | Email/password as primary, GitHub SSO as alternative | |
-| GitHub first, email later | Sign up via GitHub (required), optionally add email/password for backup | |
-
-**User's choice:** GitHub SSO only
-**Notes:** Since GitHub is required for repo access, separate email/password adds unnecessary complexity.
-
-### Post-Sign-up Onboarding
+### Authentication
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Add API key first | Prompt to add an LLM API key immediately | |
-| Show dashboard | Land on empty dashboard, prompt for API key when they try to audit | |
-| Guided setup | Step-by-step: Welcome → Add API key → Pick first repo → Start audit | ✓ |
+| No auth needed | Local tool, like VS Code | ✓ |
+| Simple PIN/password | Optional PIN for API key protection | |
+| You decide | Claude picks | |
 
-**User's choice:** Guided setup
+**User's choice:** No auth needed
 
-### GitHub Repo Access Scope
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| All repos at once | GitHub App installed on account/org — all repos accessible | |
-| Per-repo selection | User picks which repos the app can see during install | ✓ |
-| You decide | Claude picks best UX | |
-
-**User's choice:** Per-repo selection
-
-### Token Revocation Handling
+### Startup Method
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Fail gracefully | Stop audit, save progress, show error asking to reconnect | |
-| You decide | Claude handles — just don't lose data | ✓ |
+| npx command | 'npx codeaudit' — downloads and runs | ✓ |
+| npm global install | 'npm i -g codeaudit' then 'codeaudit' | |
+| Both options | Support both | |
+| You decide | Claude picks | |
 
-**User's choice:** You decide (Claude's discretion)
+**User's choice:** npx command
+
+### First Run Experience
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Straight to main screen | Main screen with prompt to add key | |
+| Quick setup wizard | First time: add API key, then done | ✓ |
+| You decide | Claude picks | |
+
+**User's choice:** Quick setup wizard
 
 ---
 
-## API Key Experience
+## Folder Selection UX
 
-### Key Entry Flow
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Paste and validate | App makes test API call to verify key works before saving | ✓ |
-| Paste and trust | Saved immediately, validated only when audit starts | |
-| You decide | Claude picks | |
-
-**User's choice:** Paste and validate
-
-### Multiple Keys Per Provider
+### Selection Method
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| One key per provider | Simpler — one per provider | |
-| Multiple per provider | Users label keys and pick per audit | ✓ |
+| Path input + browse | Text input + Browse button | ✓ |
+| Drag & drop | Drag folder onto app | |
+| Both | Path + browse + drag & drop | |
 | You decide | Claude picks | |
 
-**User's choice:** Multiple per provider
+**User's choice:** Path input + browse, with multi-folder support. If multiple folders, run individual audits then multi-repo audit.
 
-### Provider Presentation
+### Non-Git Folders
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Equal treatment | All three shown side by side, no preference | ✓ |
-| Recommend Anthropic | Anthropic highlighted as recommended | |
+| Still allow audit | Skip git-specific phases | ✓ |
+| Require git repo | Refuse non-git folders | |
 | You decide | Claude picks | |
 
-**User's choice:** Equal treatment
+**User's choice:** Ask user to confirm, then skip git-specific phases during audit.
+
+### Recent Folders
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Yes, show recents | Main screen shows recently audited folders | ✓ |
+| No, always pick fresh | Select folder each time | |
+| You decide | Claude picks | |
+
+**User's choice:** Yes, show recents
 
 ---
 
-## Landing & First Run
+## Audit Config Layout
 
-### Landing Page
+### Configuration Arrangement
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Marketing page | Hero section, features, pricing — full landing | |
-| Minimal login | Product name, one-liner, Sign in with GitHub button | ✓ |
+| All on one page | Folder + config + estimate on single page | ✓ |
+| Two-step flow | Step 1: folder, Step 2: config | |
 | You decide | Claude picks | |
 
-**User's choice:** Minimal login
+**User's choice:** All on one page
 
-### Navigation Structure
+### Remember Settings
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Sidebar nav | Left sidebar: Dashboard, Audits, Repos, Settings | ✓ |
-| Top nav | Horizontal bar at top | |
+| Yes, remember last | Pre-fill with last used settings | |
+| Always defaults | Always start with full/deep/first key | ✓ |
 | You decide | Claude picks | |
 
-**User's choice:** Sidebar nav
+**User's choice:** Always defaults
 
-### Visual Style
+### Model Selection (user-added requirement)
+
+**User's input:** After selecting a provider, show available models from that provider's API. Anthropic → Sonnet, Opus. Gemini → Flash, Pro. Include "Auto" mode that selects the best model per phase automatically.
+
+---
+
+## Cost Estimate Display
+
+### When Estimate Appears
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Linear-style | Clean, minimal, dark mode default, sharp typography | ✓ |
-| GitHub-style | Familiar to developers, light mode, functional | |
-| You decide | Claude picks modern dev-tool aesthetic | |
-| Let me describe | Custom reference | |
+| After all config set | Appears once everything selected | |
+| Live as you configure | Updates in real-time as config changes | ✓ |
+| You decide | Claude picks | |
 
-**User's choice:** Linear-style
+**User's choice:** Live as you configure
+
+### Start Audit Action
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Simple button | One-click start | |
+| Confirm dialog | Summary dialog before starting | ✓ |
+| You decide | Claude picks | |
+
+**User's choice:** Confirm dialog
 
 ---
 
 ## Claude's Discretion
 
-- Token revocation / GitHub access revocation error handling
-- Loading states and skeleton screens
-- Onboarding step transitions and animations
-- Settings page layout
-- Database schema details
+- Card icons and descriptions for audit types
+- Search/filter for recent folders
+- Setup wizard transitions
+- Cost heuristic formula
+- Model capability mapping for Auto mode
+- Error states for folder permissions
 
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+- Multi-repo audit execution logic — future phase
+- npm global install / Homebrew distribution — v2

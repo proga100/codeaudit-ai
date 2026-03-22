@@ -1,44 +1,62 @@
-# Phase 1: Foundation - Context
+# Phase 1: App Shell & Configuration - Context
 
-**Gathered:** 2026-03-21
-**Status:** Ready for planning
+**Gathered:** 2026-03-22
+**Status:** Ready for planning (REWRITTEN after local-first pivot)
 
 <domain>
 ## Phase Boundary
 
-Users can securely authenticate via GitHub SSO, connect their GitHub account to authorize repo access, and store/manage encrypted LLM API keys for Anthropic, OpenAI, and Gemini. Includes project scaffolding, database schema, and the guided onboarding flow.
+Users can open the app at localhost (via `npx codeaudit`), manage encrypted LLM API keys, select one or more local folders to audit, configure audit type/depth/model, see a live cost estimate, and confirm to start. The app enforces read-only safety on target folders before any audit begins. No authentication — it's a local tool.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Sign-up & Authentication
-- **D-01:** GitHub SSO is the ONLY sign-up/sign-in method — no email/password. Users need GitHub anyway, so one-click auth is sufficient.
-- **D-02:** After sign-up, users enter a guided setup flow: 1) Welcome 2) Add API key 3) Pick first repo 4) Start audit. This flow is skippable but presented by default.
-- **D-03:** GitHub App installation uses per-repo selection — users choose which repos the app can see, not blanket access to all repos.
+### App Startup & Auth
+- **D-01:** No authentication needed — local tool, only the user has access (like VS Code).
+- **D-02:** App starts via `npx codeaudit` — downloads and runs, opens browser at localhost automatically.
+- **D-03:** First-time users see a quick setup wizard: 1) Add API key 2) Done. Then main screen. One-time only.
 
-### GitHub Connection
-- **D-04:** Use GitHub App with `Contents: read` per-repo scope (not OAuth App with `repo` scope) — avoids overprivilege per research pitfall findings.
-- **D-05:** GitHub connection happens during sign-up (GitHub SSO flow also installs the GitHub App).
+### Folder Selection
+- **D-04:** Path input with Browse button for folder selection. Supports selecting multiple folders.
+- **D-05:** If multiple folders selected, app runs individual audits on each first, then proceeds with multi-repo audit (per `multi_repo_review_guide.md`).
+- **D-06:** If selected folder is not a git repo, ask user if they want to proceed. During audit, skip git-specific phases (archaeology, push block, etc.).
+- **D-07:** Main screen shows recently audited folders for quick re-run.
 
-### API Key Management
-- **D-06:** API keys are validated on entry — app makes a test API call to the selected provider to verify the key works before saving.
-- **D-07:** Users can store multiple keys per provider with labels (e.g., "Personal", "Work"). They pick which key to use per audit.
-- **D-08:** All three providers (Anthropic, OpenAI, Gemini) shown equally — no provider recommended over others.
-- **D-09:** Keys stored with AES-256-GCM application-layer encryption (per research recommendation).
+### Audit Configuration
+- **D-08:** All configuration on one page — folder picker at top, then type/depth/model/estimate below. Single scrollable page.
+- **D-09:** Always start with defaults (Full audit, Deep, first key) — no "remember last settings."
+- **D-10:** Audit type selection uses card UI — 4 cards (full, security-only, team, code quality) as established in Phase 2 discussion from prior version.
+- **D-11:** Depth selection uses Quick Scan / Deep Audit toggle with time and cost details.
+- **D-12:** API key selection via dropdown grouped by provider (e.g., "Anthropic — Personal").
 
-### UI & Navigation
-- **D-10:** Landing page is minimal — product name, one-liner description, and "Sign in with GitHub" button. No marketing page for v1.
-- **D-11:** Post-login navigation uses a left sidebar with sections: Dashboard, Audits, Repos, Settings.
-- **D-12:** Visual style follows Linear's aesthetic — clean, minimal, dark mode default, sharp typography.
+### Model Selection
+- **D-13:** After selecting a provider/key, the app fetches available models from that provider's API and shows them in a model selector dropdown.
+- **D-14:** For Anthropic: show Sonnet and Opus models. For OpenAI: show GPT-4o, etc. For Gemini: show Flash, Pro, etc. Models fetched dynamically, not hardcoded.
+- **D-15:** Include an "Auto" mode where the app selects the best model suitable for each audit phase automatically (e.g., cheaper model for simple phases, stronger model for security analysis).
+
+### Cost Estimate
+- **D-16:** Cost estimate updates live as user changes configuration (type, depth, model) — even before folder is picked, shows a range.
+- **D-17:** Cost estimate is a rough range (e.g., "$3–$8") based on folder size heuristic and audit configuration.
+- **D-18:** "Start Audit" button opens a confirmation dialog summarizing: folder(s), type, depth, model, estimated cost — user confirms to proceed.
+
+### Safety Enforcement
+- **D-19:** App locks target folder read-only (`chmod -R a-w`) and blocks git push (`git remote set-url --push origin no_push`) before audit starts — exactly replicating the manual process.
+- **D-20:** App creates a separate audit output directory (`~/audit-{repo-name}/`) for all findings.
+- **D-21:** App unlocks folder after audit completes, is cancelled, or fails.
+
+### UI & Visual Style
+- **D-22:** Linear-style aesthetic carried forward — clean, minimal, dark mode default, sharp typography (from old Phase 1 context D-12).
+- **D-23:** Left sidebar navigation (from old D-11) — adapted for local tool: Dashboard (recent audits), New Audit, Settings (API keys).
 
 ### Claude's Discretion
-- Token revocation / GitHub access revocation error handling — just don't lose data
-- Loading states and skeleton screens
-- Exact onboarding step transitions and animations
-- Settings page layout and organization
-- Database schema details (tables, relations, indexes)
+- Exact card icons/descriptions for audit types
+- Search/filter behavior for recent folders
+- Setup wizard transitions
+- Cost heuristic formula details
+- Model capability mapping for Auto mode
+- Error states for folder permission issues
 
 </decisions>
 
@@ -48,14 +66,32 @@ Users can securely authenticate via GitHub SSO, connect their GitHub account to 
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Audit Process (source of truth)
-- `manual-codebase-review-process/CLAUDE.md` — Safety rules, bootstrap script, Phase 0 auto-detection logic
-- `manual-codebase-review-process/codebase_review_guide.md` — The 13-phase audit engine that will be translated into API calls
-- `manual-codebase-review-process/how_to_run_codebase_audit.md` — User-facing workflow showing what outputs look like
+- `manual-codebase-review-process/CLAUDE.md` — Safety rules, bootstrap script, chmod/push-block procedure
+- `manual-codebase-review-process/codebase_review_guide.md` §"Setup" — Folder locking, audit directory creation
+- `manual-codebase-review-process/codebase_review_guide.md` §"Run modes" — Security-only, team, phase-by-phase modes
+- `manual-codebase-review-process/how_to_run_codebase_audit.md` §"Token budget reality check" — Repo size tiers and cost estimates
+- `manual-codebase-review-process/multi_repo_review_guide.md` — Multi-folder audit flow (individual first, then cross-repo)
 
-### Research
-- `.planning/research/STACK.md` — Recommended tech stack (Next.js 16, Auth.js v5, Drizzle + Neon, etc.)
-- `.planning/research/PITFALLS.md` — Security pitfalls including GitHub OAuth scoping and API key encryption
-- `.planning/research/ARCHITECTURE.md` — System architecture, component boundaries, data flow
+### Research (partially applicable after pivot)
+- `.planning/research/STACK.md` — Vercel AI SDK for multi-LLM support (still relevant)
+- `.planning/research/PITFALLS.md` — API key encryption, multi-provider prompt differences (still relevant)
+- `.planning/research/FEATURES.md` — Table stakes and differentiators (adapted for local tool)
+
+### Existing Code (from old Phase 1 — reusable)
+- `packages/db/src/encryption.ts` — AES-256-GCM encryption utility (reuse for API keys)
+- `packages/db/src/encryption.test.ts` — Encryption unit tests
+- `apps/web/lib/api-key-validator.ts` — Per-provider key validation (reuse)
+- `apps/web/components/nav/sidebar.tsx` — Sidebar nav (adapt for local tool)
+- `apps/web/components/ui/` — Shadcn/ui components (reuse)
+- `packages/db/src/schema.ts` — Drizzle schema (adapt: remove GitHub tables, keep audit/key tables)
+
+### Existing Code (from old Phase 1 — to remove)
+- `apps/web/lib/auth.ts` — Auth.js utilities (remove)
+- `apps/web/lib/github-app.ts` — GitHub App helpers (remove)
+- `apps/web/lib/github-token-refresh.ts` — Token refresh (remove)
+- `apps/web/app/api/github/` — Webhook handler (remove)
+- `apps/web/app/(auth)/` — Sign-in page (remove)
+- `apps/web/middleware.ts` — Auth middleware (remove or simplify)
 
 </canonical_refs>
 
@@ -63,35 +99,46 @@ Users can securely authenticate via GitHub SSO, connect their GitHub account to 
 ## Existing Code Insights
 
 ### Reusable Assets
-- None — greenfield project, no existing code
+- `encryption.ts` + `encryption.test.ts`: AES-256-GCM for API key storage — directly reusable
+- `api-key-validator.ts`: Tests keys against Anthropic/OpenAI/Gemini — reuse and extend with model listing
+- `sidebar.tsx`: Left sidebar component — adapt sections for local tool (Dashboard, New Audit, Settings)
+- `schema.ts`: Drizzle schema with `apiKeys`, `audits`, `auditPhases` tables — adapt (remove GitHub-specific tables)
+- Shadcn/ui components in `components/ui/` — buttons, inputs, cards, dropdowns
+- Docker Compose dev environment (Postgres, Redis)
+- Tailwind CSS 4 + dark mode configuration
 
 ### Established Patterns
-- None yet — Phase 1 establishes the foundational patterns
+- Server actions in `apps/web/actions/` — follow for new audit actions
+- Shadcn/ui component library — reuse for all new UI
+- Dark mode / Linear aesthetic — established CSS variables and design tokens
 
 ### Integration Points
-- GitHub App webhook endpoint needed for installation events
-- API key validation endpoints for each provider (Anthropic, OpenAI, Gemini)
-- Database schema must include structured findings JSON schema (even though consumed in Phase 4/5)
+- New "New Audit" page replacing the old "Repos" page
+- New folder selection component (browser native dialog via backend)
+- New model fetcher service (calls provider API to list available models)
+- Adapt sidebar for Dashboard / New Audit / History / Settings
 
 </code_context>
 
 <specifics>
 ## Specific Ideas
 
-- Linear-style aesthetic: clean, minimal, dark mode default, sharp typography — reference Linear's UI for component design
-- Guided onboarding should feel seamless, not like a wizard with 10 steps — keep it to 3-4 screens max
-- Per-repo GitHub App selection gives users control over what they expose — important for trust when the product opens to external users
+- `npx codeaudit` as the entry point keeps distribution dead simple — no install, no config
+- Multi-folder selection enables the multi-repo audit flow from `multi_repo_review_guide.md` — individual audits first, then cross-repo
+- Auto mode for model selection is a differentiator — cheaper models for simple phases (orientation, docs), stronger models for security/architecture analysis
+- The confirmation dialog before starting is the "last chance" gate — shows everything the user is about to spend
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+- Multi-repo audit execution logic (individual + cross-repo) — noted in D-05 but actual execution is a future phase
+- npm global install / Homebrew distribution — v2 after npx is working
 
 </deferred>
 
 ---
 
-*Phase: 01-foundation*
-*Context gathered: 2026-03-21*
+*Phase: 01-app-shell-configuration*
+*Context gathered: 2026-03-22*
