@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign
-status: Ready to execute
-stopped_at: Completed 06-shell-onboarding-01-PLAN.md
-last_updated: "2026-03-22T19:58:13.750Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 06-shell-onboarding-02-PLAN.md
+last_updated: "2026-03-22T20:02:22.731Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -44,6 +44,7 @@ Plan: 2 of 2
 | Phase 05-foundation P01 | 3 | 2 tasks | 56 files |
 | Phase 05-foundation P02 | 8 | 2 tasks | 8 files |
 | Phase 06-shell-onboarding P01 | 15 | 2 tasks | 2 files |
+| Phase 06-shell-onboarding P02 | 135 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Recent decisions affecting current work:
 - [Phase 05-foundation]: Modal uses simple div-based implementation (not Radix Dialog) per prototype spec
 - [Phase 06-shell-onboarding]: ThemeToggle uses neutral bg-text/text-background colors (NOT accent) per DSYS-03 spec
 - [Phase 06-shell-onboarding]: Setup page lives OUTSIDE (app) route group so it renders without sidebar — correct per SIDE-03
+- [Phase 06-shell-onboarding]: Dashboard split: server page.tsx fetches+serializes data, client recent-audits-table.tsx handles interactivity
+- [Phase 06-shell-onboarding]: Active nav state: exact match for /dashboard, prefix match for other routes to avoid false highlights
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:58:13.747Z
-Stopped at: Completed 06-shell-onboarding-01-PLAN.md
+Last session: 2026-03-22T20:02:22.729Z
+Stopped at: Completed 06-shell-onboarding-02-PLAN.md
 Resume file: None

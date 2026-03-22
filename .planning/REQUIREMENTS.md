@@ -36,15 +36,15 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 ### Sidebar & Layout (SIDE)
 
-- [ ] **SIDE-01**: Persistent sidebar (252px) with logo, nav items (Dashboard, New Audit, History, API Keys), active state with accent styling
-- [ ] **SIDE-02**: Theme toggle at sidebar bottom (segmented sun/moon buttons, neutral colors)
-- [ ] **SIDE-03**: Root layout wraps all pages except setup with sidebar
+- [x] **SIDE-01**: Persistent sidebar (252px) with logo, nav items (Dashboard, New Audit, History, API Keys), active state with accent styling
+- [x] **SIDE-02**: Theme toggle at sidebar bottom (segmented sun/moon buttons, neutral colors)
+- [x] **SIDE-03**: Root layout wraps all pages except setup with sidebar
 
 ### Dashboard (DASH)
 
-- [ ] **DASH-01**: 3 quick-action cards (New Audit, View History, Manage Keys) with hover lift + accent shadow
-- [ ] **DASH-02**: Recent audits table with folder (mono), date, type badge, depth badge, health score ring, edit button
-- [ ] **DASH-03**: "View all →" link navigates to history page
+- [x] **DASH-01**: 3 quick-action cards (New Audit, View History, Manage Keys) with hover lift + accent shadow
+- [x] **DASH-02**: Recent audits table with folder (mono), date, type badge, depth badge, health score ring, edit button
+- [x] **DASH-03**: "View all →" link navigates to history page
 
 ### New Audit (NAUD)
 
@@ -141,12 +141,12 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 | SETUP-02 | Phase 6 | Complete |
 | SETUP-03 | Phase 6 | Complete |
 | SETUP-04 | Phase 6 | Complete |
-| SIDE-01 | Phase 6 | Pending |
-| SIDE-02 | Phase 6 | Pending |
-| SIDE-03 | Phase 6 | Pending |
-| DASH-01 | Phase 6 | Pending |
-| DASH-02 | Phase 6 | Pending |
-| DASH-03 | Phase 6 | Pending |
+| SIDE-01 | Phase 6 | Complete |
+| SIDE-02 | Phase 6 | Complete |
+| SIDE-03 | Phase 6 | Complete |
+| DASH-01 | Phase 6 | Complete |
+| DASH-02 | Phase 6 | Complete |
+| DASH-03 | Phase 6 | Complete |
 | NAUD-01 | Phase 7 | Pending |
 | NAUD-02 | Phase 7 | Pending |
 | NAUD-03 | Phase 7 | Pending |

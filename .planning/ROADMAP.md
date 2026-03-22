@@ -69,7 +69,7 @@ Plans:
 
 Plans:
 - [x] 06-01: Build setup wizard (welcome + API key steps, floating theme toggle, first-run guard)
-- [ ] 06-02: Build sidebar layout (persistent nav, theme toggle) and dashboard page (quick-action cards, recent audits table)
+- [x] 06-02: Build sidebar layout (persistent nav, theme toggle) and dashboard page (quick-action cards, recent audits table)
 
 ### Phase 7: Audit Flows
 **Goal**: A user can fully configure and launch an audit, then watch it run with live progress — the two core interactive flows of the app
