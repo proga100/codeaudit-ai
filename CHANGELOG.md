@@ -6,6 +6,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-03-22 — Complete Design Overhaul (Prototype-Faithful)
+
+### Changed
+
+- **All 8 page components** rewritten to use inline `style={{...}}` with CSS custom properties (`var(--accent)`, `var(--surface)`, etc.), matching the JSX prototype (`docs/codeaudit-ai.jsx`) exactly
+- **Setup Wizard**: Welcome screen with 2x2 feature grid, floating theme toggle, provider SelectCards with accent glow, mono font API key input
+- **Dashboard**: Quick action cards with hover lift/glow, recent audits table with folder icon, monospace folder names, accent/depth badges, HealthScore rings, re-audit edit button
+- **New Audit Form**: Inline SelectCards for audit type (2x2 grid) and depth (1x2 grid) with accent glow when selected, section labels in uppercase muted style
+- **Progress View**: Gradient progress bar with `progressPulse` animation, phase list with colored status circles (green check, spinner, red X, muted dot), cancel button with destructive styling, completion banner with green accent
+- **Results View**: Full page layout with header badges, side-by-side Health Score and Severity cards, cost summary, download buttons, severity filter pills, finding cards with severity left borders
+- **History**: Folder-grouped audit rows with `div role="checkbox"` checkboxes, bulk selection bar, delete confirmation modal with destructive styling, compare button
+- **Compare Page**: Delta banner with arrow icon and success/destructive coloring, side-by-side HealthScore rings, resolved (green strikethrough) / new (red) / persisted (muted) finding sections
+- **API Keys**: Flat key list with provider initials, inline edit/delete, add key form with provider buttons, delete confirmation modal
+- **Page wrappers** simplified -- removed duplicate headers from results, progress, and settings page wrappers since client components now include their own prototype-faithful headers
+
+---
+
 ## 2026-03-22 — Restyle Progress & Results Pages
 
 ### Changed

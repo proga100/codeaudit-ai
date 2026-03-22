@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { Check, X, ChevronRight } from "lucide-react";
 import { cancelAudit } from "@/actions/audit-control";
 import { formatCost, formatTokens } from "@/lib/format";
 
@@ -24,7 +25,6 @@ type AuditEvent = {
   phasesCompleted: number;
 };
 
-// Phase names matching PHASE_REGISTRY from audit-engine (duplicated for client bundle — no server import)
 const PHASE_NAMES: Record<number, string> = {
   0: "Bootstrap", 1: "Orientation", 2: "Dependency Health", 3: "Test Coverage",
   4: "Code Complexity", 5: "Git Archaeology", 6: "Security Audit", 7: "Deep Reads",
@@ -32,7 +32,7 @@ const PHASE_NAMES: Record<number, string> = {
 };
 
 function formatDuration(ms: number | null): string {
-  if (ms == null || ms <= 0) return "—";
+  if (ms == null || ms <= 0) return "\u2014";
   const s = Math.round(ms / 1000);
   if (s < 60) return `${s}s`;
   return `${Math.floor(s / 60)}m ${s % 60}s`;
@@ -52,7 +52,6 @@ export function ProgressView({
   const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    // Connect to SSE stream — reconnects automatically on disconnect (browser EventSource behavior)
     const es = new EventSource(`/api/audit/${auditId}/stream`);
     esRef.current = es;
 
@@ -66,16 +65,13 @@ export function ProgressView({
         });
       } else if (data.type === "audit") {
         setAuditState(data);
-        // Close EventSource on terminal status (server also closes, but belt-and-suspenders)
         if (["completed", "cancelled", "failed"].includes(data.status)) {
           es.close();
         }
       }
     };
 
-    es.onerror = () => {
-      // EventSource auto-reconnects — no manual action needed
-    };
+    es.onerror = () => {};
 
     return () => {
       es.close();
@@ -94,13 +90,19 @@ export function ProgressView({
 
   const percentage = auditState
     ? auditState.phasesTotal > 0
-      ? Math.round((auditState.phasesCompleted / auditState.phasesTotal) * 100)
+      ? Math.round(
+          (auditState.phasesCompleted / auditState.phasesTotal) * 100
+        )
       : 0
     : 0;
 
-  const currentPhaseName = auditState?.currentPhase != null
-    ? PHASE_NAMES[auditState.currentPhase] ?? `Phase ${auditState.currentPhase}`
-    : initialStatus === "queued" ? "Starting..." : "—";
+  const currentPhaseName =
+    auditState?.currentPhase != null
+      ? PHASE_NAMES[auditState.currentPhase] ??
+        `Phase ${auditState.currentPhase}`
+      : initialStatus === "queued"
+        ? "Starting..."
+        : "\u2014";
 
   const isTerminal = auditState
     ? ["completed", "cancelled", "failed"].includes(auditState.status)
@@ -110,73 +112,216 @@ export function ProgressView({
   const statusLabel = auditState?.status ?? initialStatus;
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Main progress card */}
-      <div className="fade-in rounded-[14px] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 flex flex-col gap-3">
-        {/* Phase label + percentage */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">
-            {isTerminal
-              ? statusLabel === "completed" ? "All phases complete" : statusLabel === "cancelled" ? "Audit cancelled" : "Audit failed"
-              : `Phase ${(auditState?.currentPhase ?? 0) + 1}: ${currentPhaseName}`}
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Main progress section */}
+      <div className="fade-in">
+        {/* Badge row */}
+        <div style={{ marginBottom: 8 }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "2px 8px",
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+              background: "var(--accent-subtle)",
+              color: "var(--accent)",
+              border: "1px solid rgba(250,204,21,0.19)",
+            }}
+          >
+            In Progress
           </span>
-          <span className="text-sm font-semibold font-mono">{percentage}%</span>
         </div>
+
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            marginBottom: 32,
+            color: isCompleted ? "var(--success)" : "var(--text)",
+          }}
+        >
+          {isCompleted
+            ? "Audit Complete"
+            : statusLabel === "cancelled"
+              ? "Audit Cancelled"
+              : statusLabel === "failed"
+                ? "Audit Failed"
+                : "Audit in Progress..."}
+        </h1>
 
         {/* Progress bar */}
-        <div className="h-2 rounded-full bg-[hsl(var(--elevated))] overflow-hidden">
+        <div className="fade-in stagger-1" style={{ marginBottom: 16 }}>
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isCompleted
-                ? "bg-gradient-to-r from-green-500 to-emerald-400"
-                : "bg-gradient-to-r from-[hsl(var(--accent))] to-amber-500"
-            } ${!isTerminal ? "animate-[progressPulse_2s_ease-in-out_infinite]" : ""}`}
-            style={{ width: `${percentage}%` }}
-          />
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: 8,
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>
+              {isTerminal
+                ? statusLabel === "completed"
+                  ? "All phases complete"
+                  : statusLabel === "cancelled"
+                    ? "Audit cancelled"
+                    : "Audit failed"
+                : `Phase ${(auditState?.currentPhase ?? 0) + 1}: ${currentPhaseName}`}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                fontFamily: "var(--font-jetbrains-mono), monospace",
+                color: "var(--text)",
+              }}
+            >
+              {percentage}%
+            </span>
+          </div>
+          <div
+            style={{
+              height: 8,
+              borderRadius: 4,
+              background: "var(--elevated)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                borderRadius: 4,
+                transition: "width 0.3s ease",
+                width: `${percentage}%`,
+                background: isCompleted
+                  ? "linear-gradient(90deg, var(--success), #4ade80)"
+                  : "linear-gradient(90deg, var(--accent), #f59e0b)",
+                animation: isTerminal ? "none" : "progressPulse 2s infinite",
+              }}
+            />
+          </div>
         </div>
 
-        {/* Stats row */}
+        {/* Stats */}
         {auditState && (
-          <div className="fade-in stagger-1 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="font-mono">{formatTokens(auditState.totalTokens)} tokens</span>
-            <span>·</span>
-            <span className="font-mono">{formatCost(auditState.totalCostMicro)}</span>
-            <span>·</span>
-            <span>{Math.round(auditState.phasesCompleted)} / {auditState.phasesTotal} phases</span>
+          <div
+            className="fade-in stagger-2"
+            style={{
+              display: "flex",
+              gap: 24,
+              marginBottom: 28,
+              fontSize: 13,
+              color: "var(--text-muted)",
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+              {formatTokens(auditState.totalTokens)} tokens
+            </span>
+            <span>&middot;</span>
+            <span style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+              {formatCost(auditState.totalCostMicro)}
+            </span>
+            <span>&middot;</span>
+            <span>
+              {auditState.phasesCompleted} / {auditState.phasesTotal} phases
+            </span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-3 pt-1">
-          {!isTerminal && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+          {isCompleted ? (
+            <a
+              href={`/audit/${auditId}/results`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "12px 24px",
+                fontSize: 15,
+                fontWeight: 500,
+                borderRadius: 10,
+                border: "none",
+                cursor: "pointer",
+                background: "var(--success)",
+                color: "#fff",
+                textDecoration: "none",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.85";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.transform = "none";
+              }}
+            >
+              <ChevronRight style={{ width: 16, height: 16 }} />
+              View Results
+            </a>
+          ) : !isTerminal ? (
             <button
               type="button"
               onClick={handleCancel}
               disabled={cancelling}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/20 transition-colors disabled:opacity-50"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 16px",
+                fontSize: 13,
+                fontWeight: 500,
+                borderRadius: 10,
+                border: "1px solid rgba(239,68,68,0.19)",
+                cursor: cancelling ? "not-allowed" : "pointer",
+                background: "var(--destructive-subtle)",
+                color: "var(--destructive)",
+                opacity: cancelling ? 0.5 : 1,
+                transition: "all 0.15s ease",
+              }}
             >
+              <X style={{ width: 16, height: 16 }} />
               {cancelling ? "Cancelling..." : "Cancel Audit"}
             </button>
-          )}
+          ) : null}
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+              fontWeight: 500,
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+              background: "transparent",
+              color: "var(--text-secondary)",
+              transition: "all 0.15s ease",
+            }}
           >
-            <span
-              className="inline-block transition-transform duration-200 text-[10px]"
-              style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
-            >
-              ▶
-            </span>
-            {expanded ? "Hide details" : "Show details"}
+            {expanded ? "Hide" : "Show"} details
           </button>
         </div>
       </div>
 
       {/* Phase list */}
       {expanded && (
-        <div className="fade-in rounded-[14px] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] overflow-hidden">
+        <div
+          className="fade-in"
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
           {Array.from({ length: 12 }, (_, i) => i).map((phaseNum) => {
             const phase = phases.get(phaseNum);
             const status = phase?.status ?? "pending";
@@ -184,64 +329,162 @@ export function ProgressView({
             return (
               <div
                 key={phaseNum}
-                className={`grid items-center px-4 py-3 text-sm ${
-                  phaseNum < 11 ? "border-b border-[hsl(var(--border))]/50" : ""
-                } ${status === "pending" ? "opacity-40" : ""}`}
-                style={{ gridTemplateColumns: "28px 1fr 90px 70px 60px" }}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "28px 1fr 80px 70px 60px",
+                  alignItems: "center",
+                  padding: "12px 18px",
+                  borderBottom:
+                    phaseNum < 11
+                      ? "1px solid var(--border-subtle)"
+                      : "none",
+                  opacity: status === "pending" ? 0.4 : 1,
+                }}
               >
-                {/* Status icon in colored circle */}
+                {/* Status icon */}
                 <div>
                   {status === "completed" ? (
-                    <div className="w-5 h-5 rounded-md bg-green-500/15 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: "var(--success-subtle)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Check
+                        style={{ width: 12, height: 12, color: "var(--success)" }}
+                      />
                     </div>
                   ) : status === "running" ? (
-                    <div className="w-5 h-5 rounded-md bg-[hsl(var(--accent))]/15 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full border-2 border-[hsl(var(--accent))] border-t-transparent animate-spin" />
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: "var(--accent-subtle)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          border: "2px solid var(--accent)",
+                          borderTopColor: "transparent",
+                          animation: "spin 0.8s linear infinite",
+                        }}
+                      />
                     </div>
                   ) : status === "failed" ? (
-                    <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: "var(--destructive-subtle)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <X
+                        style={{
+                          width: 12,
+                          height: 12,
+                          color: "var(--destructive)",
+                        }}
+                      />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-md bg-[hsl(var(--elevated))] flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: "var(--elevated)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "var(--text-muted)",
+                          opacity: 0.3,
+                        }}
+                      />
                     </div>
                   )}
                 </div>
 
                 {/* Phase name */}
-                <span className={status === "running" ? "font-semibold" : ""}>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: status === "running" ? 600 : 400,
+                    color: "var(--text)",
+                  }}
+                >
                   {PHASE_NAMES[phaseNum] ?? `Phase ${phaseNum}`}
                 </span>
 
                 {/* Findings count */}
-                <span className="text-xs text-muted-foreground">
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                  }}
+                >
                   {phase && status !== "pending" && status !== "skipped"
                     ? phase.findingsCount > 0
                       ? `${phase.findingsCount} findings`
                       : "no findings"
-                    : status === "skipped" ? "skipped" : "—"}
+                    : status === "skipped"
+                      ? "skipped"
+                      : "\u2014"}
                 </span>
 
                 {/* Duration */}
-                <span className="text-xs font-mono text-muted-foreground">
-                  {phase && status === "completed" ? formatDuration(phase.durationMs) : "—"}
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  {phase && status === "completed"
+                    ? formatDuration(phase.durationMs)
+                    : "\u2014"}
                 </span>
 
                 {/* Cost (proportional) */}
-                <span className="text-xs font-mono text-muted-foreground">
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    color: "var(--text-muted)",
+                  }}
+                >
                   {phase && phase.tokensUsed > 0 && auditState
                     ? formatCost(
                         auditState.totalTokens > 0
-                          ? Math.round((phase.tokensUsed / auditState.totalTokens) * auditState.totalCostMicro)
-                          : 0,
+                          ? Math.round(
+                              (phase.tokensUsed / auditState.totalTokens) *
+                                auditState.totalCostMicro
+                            )
+                          : 0
                       )
-                    : "—"}
+                    : "\u2014"}
                 </span>
               </div>
             );
@@ -251,25 +494,56 @@ export function ProgressView({
 
       {/* Completion banner */}
       {isTerminal && statusLabel === "completed" && (
-        <div className="fade-in rounded-[14px] border border-green-500/20 bg-green-500/5 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-md bg-green-500/15 flex items-center justify-center">
-              <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+        <div
+          className="fade-in"
+          style={{
+            borderRadius: 14,
+            border: "1px solid rgba(34,197,94,0.2)",
+            background: "var(--success-subtle)",
+            padding: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 6,
+                background: "rgba(34,197,94,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Check style={{ width: 12, height: 12, color: "var(--success)" }} />
             </div>
-            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+            <span
+              style={{ fontSize: 14, fontWeight: 500, color: "var(--success)" }}
+            >
               Audit complete
             </span>
           </div>
           <a
             href={`/audit/${auditId}/results`}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 10,
+              background: "var(--success)",
+              padding: "8px 16px",
+              fontSize: 12,
+              fontWeight: 600,
+              color: "#fff",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+            }}
           >
             View Results
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight style={{ width: 14, height: 14 }} />
           </a>
         </div>
       )}

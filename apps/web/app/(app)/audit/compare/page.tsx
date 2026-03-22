@@ -3,13 +3,21 @@ import { notFound } from "next/navigation";
 import { getDb, audits } from "@codeaudit-ai/db";
 import { eq } from "drizzle-orm";
 import type { AuditFinding, AuditFindings } from "@codeaudit-ai/db";
-import { FindingCard } from "@/components/audit/finding-card";
 import { SeverityChart } from "@/components/audit/severity-chart";
 import { HealthScore } from "@/components/ui/health-score";
+import { Check, AlertTriangle, ArrowUp, ArrowDown, Activity } from "lucide-react";
 
 // ---------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------
+
+const SEVERITY: Record<string, { color: string; label: string }> = {
+  critical: { color: "#ef4444", label: "Critical" },
+  high: { color: "#f97316", label: "High" },
+  medium: { color: "#eab308", label: "Medium" },
+  low: { color: "#3b82f6", label: "Low" },
+  info: { color: "#71717a", label: "Info" },
+};
 
 function formatRelativeDate(date: Date): string {
   const diff = Date.now() - date.getTime();
@@ -29,7 +37,7 @@ function formatRelativeDate(date: Date): string {
 
 function diffFindings(
   newerFindings: AuditFinding[],
-  olderFindings: AuditFinding[],
+  olderFindings: AuditFinding[]
 ): {
   newFindings: AuditFinding[];
   resolvedFindings: AuditFinding[];
@@ -46,47 +54,7 @@ function diffFindings(
 }
 
 // ---------------------------------------------------------------
-// Section component
-// ---------------------------------------------------------------
-
-function Section({
-  title,
-  count,
-  icon,
-  accentColor,
-  borderColor,
-  bgColor,
-  strikethrough,
-  children,
-}: {
-  title: string;
-  count: number;
-  icon: React.ReactNode;
-  accentColor: string;
-  borderColor: string;
-  bgColor: string;
-  strikethrough?: boolean;
-  children: React.ReactNode;
-}) {
-  if (count === 0) return null;
-  return (
-    <div className="fade-in">
-      <h3
-        className={`text-sm font-semibold mb-3 flex items-center gap-2 ${accentColor}`}
-      >
-        {icon}
-        {title}{" "}
-        <span className="font-normal text-muted-foreground">({count})</span>
-      </h3>
-      <div className="flex flex-col gap-1.5">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------
-// Finding row for compare view
+// Compare Row
 // ---------------------------------------------------------------
 
 function CompareRow({
@@ -100,32 +68,43 @@ function CompareRow({
   bgColor: string;
   strikethrough?: boolean;
 }) {
-  const severityColors: Record<string, { color: string; label: string }> = {
-    critical: { color: "#ef4444", label: "Critical" },
-    high: { color: "#f97316", label: "High" },
-    medium: { color: "#eab308", label: "Medium" },
-    low: { color: "#3b82f6", label: "Low" },
-    info: { color: "#71717a", label: "Info" },
-  };
-  const sev = severityColors[finding.severity] ?? severityColors.info;
+  const sev = SEVERITY[finding.severity] ?? SEVERITY.info;
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] ${bgColor}`}
-      style={{ borderLeft: `3px solid ${borderColor}` }}
+      style={{
+        padding: "10px 16px",
+        background: bgColor,
+        borderRadius: 10,
+        marginBottom: 6,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        borderLeft: `3px solid ${borderColor}`,
+      }}
     >
       <span
-        className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border"
         style={{
-          background: `${sev.color}18`,
-          color: sev.color,
-          borderColor: `${sev.color}30`,
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "2px 8px",
+          borderRadius: 6,
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+          background: `${sev!.color}18`,
+          color: sev!.color,
+          border: `1px solid ${sev!.color}30`,
         }}
       >
-        {sev.label}
+        {sev!.label}
       </span>
       <span
-        className={`text-sm ${strikethrough ? "line-through text-muted-foreground" : "text-foreground"}`}
+        style={{
+          fontSize: 13,
+          textDecoration: strikethrough ? "line-through" : "none",
+          color: strikethrough ? "var(--text-secondary)" : "var(--text)",
+        }}
       >
         {finding.title}
       </span>
@@ -144,18 +123,30 @@ export default async function ComparePage({
 }) {
   const { a, b } = await searchParams;
 
-  // Both IDs are required
   if (!a || !b) {
     return (
-      <div className="p-8 max-w-[920px]">
-        <div className="rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Two audit IDs are required. Use the Compare button from the History
-            page.
+      <div style={{ padding: "36px 40px", maxWidth: 920 }}>
+        <div
+          style={{
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            padding: 24,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            Two audit IDs are required. Use the Compare button from the History page.
           </p>
           <Link
             href="/history"
-            className="mt-4 inline-block text-xs text-muted-foreground hover:text-foreground transition-colors"
+            style={{
+              marginTop: 16,
+              display: "inline-block",
+              fontSize: 12,
+              color: "var(--text-muted)",
+              textDecoration: "none",
+            }}
           >
             &larr; Back to History
           </Link>
@@ -170,20 +161,31 @@ export default async function ComparePage({
 
   if (!newerAudit || !olderAudit) notFound();
 
-  // Both audits must have completed findings
   if (!newerAudit.findings || !olderAudit.findings) {
     return (
-      <div className="p-8 max-w-[920px]">
+      <div style={{ padding: "36px 40px", maxWidth: 920 }}>
         <Link
           href="/history"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          style={{
+            fontSize: 12,
+            color: "var(--text-muted)",
+            textDecoration: "none",
+          }}
         >
           &larr; Back to History
         </Link>
-        <div className="mt-6 rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            One or both audits have no findings data. Comparison requires
-            completed audits.
+        <div
+          style={{
+            marginTop: 24,
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            padding: 24,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            One or both audits have no findings data. Comparison requires completed audits.
           </p>
         </div>
       </div>
@@ -197,11 +199,10 @@ export default async function ComparePage({
   const olderScore = olderFindings.summary.score;
   const delta = newerScore - olderScore;
   const improved = delta > 0;
-  const deltaLabel = delta > 0 ? `+${delta}` : `${delta}`;
 
   const { newFindings, resolvedFindings, persistedFindings } = diffFindings(
     newerFindings.findings,
-    olderFindings.findings,
+    olderFindings.findings
   );
 
   const olderDate = olderAudit.createdAt ?? new Date();
@@ -210,227 +211,266 @@ export default async function ComparePage({
   const olderGrade = olderFindings.summary.grade;
 
   return (
-    <div className="p-8 max-w-[920px] flex flex-col gap-7">
-      {/* Back link */}
-      <Link
-        href="/history"
-        className="fade-in text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
-      >
-        &larr; Back to History
-      </Link>
-
-      {/* Page header */}
-      <div className="fade-in">
-        <p className="font-mono text-sm font-medium text-muted-foreground mb-1">
+    <div style={{ padding: "36px 40px", maxWidth: 920 }}>
+      {/* Header */}
+      <div className="fade-in" style={{ marginBottom: 8 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontSize: 14,
+            fontWeight: 500,
+            color: "var(--text)",
+          }}
+        >
           {newerAudit.folderName}
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Audit Comparison
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {formatRelativeDate(olderDate)} vs {formatRelativeDate(newerDate)}
-        </p>
+        </span>
       </div>
+      <h1
+        className="fade-in"
+        style={{
+          fontSize: 24,
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          marginBottom: 28,
+          color: "var(--text)",
+        }}
+      >
+        Audit Comparison
+      </h1>
 
       {/* Delta banner */}
       <div
-        className={`fade-in stagger-1 flex items-center gap-4 p-5 rounded-[14px] border ${
-          improved
-            ? "bg-green-500/5 dark:bg-green-500/8 border-green-500/20"
-            : delta < 0
-              ? "bg-red-500/5 dark:bg-red-500/8 border-red-500/20"
-              : "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700"
-        }`}
+        className="fade-in stagger-1"
+        style={{
+          padding: "20px 24px",
+          borderRadius: 14,
+          marginBottom: 28,
+          background: improved
+            ? "var(--success-subtle)"
+            : "var(--destructive-subtle)",
+          border: `1px solid ${
+            improved ? "rgba(34,197,94,0.19)" : "rgba(239,68,68,0.19)"
+          }`,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+        }}
       >
-        {/* Arrow icon in colored circle */}
         <div
-          className={`flex items-center justify-center w-12 h-12 rounded-[14px] shrink-0 ${
-            improved
-              ? "bg-green-500/15"
-              : delta < 0
-                ? "bg-red-500/15"
-                : "bg-zinc-200 dark:bg-zinc-700"
-          }`}
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            background: improved
+              ? "rgba(34,197,94,0.13)"
+              : "rgba(239,68,68,0.13)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={
-              improved
-                ? "stroke-green-500"
-                : delta < 0
-                  ? "stroke-red-500"
-                  : "stroke-muted-foreground"
-            }
-          >
-            {improved ? (
-              <>
-                <line x1="12" y1="19" x2="12" y2="5" />
-                <polyline points="5 12 12 5 19 12" />
-              </>
-            ) : (
-              <>
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <polyline points="19 12 12 19 5 12" />
-              </>
-            )}
-          </svg>
+          {improved ? (
+            <ArrowUp
+              style={{ width: 22, height: 22, color: "var(--success)" }}
+            />
+          ) : (
+            <ArrowDown
+              style={{ width: 22, height: 22, color: "var(--destructive)" }}
+            />
+          )}
         </div>
-
         <div>
           <div
-            className={`text-2xl font-bold ${
-              improved
-                ? "text-green-500"
-                : delta < 0
-                  ? "text-red-500"
-                  : "text-muted-foreground"
-            }`}
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: improved ? "var(--success)" : "var(--destructive)",
+            }}
           >
-            {deltaLabel} points
+            {delta > 0 ? "+" : ""}
+            {delta} points
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
             Score {improved ? "improved" : "degraded"} from {olderScore} to{" "}
             {newerScore}
           </div>
         </div>
       </div>
 
-      {/* Side-by-side cards */}
-      <div className="fade-in stagger-2 grid grid-cols-2 gap-4">
+      {/* Side by side scores */}
+      <div
+        className="fade-in stagger-2"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+          marginBottom: 28,
+        }}
+      >
         {/* Previous */}
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-[14px] p-5 text-center">
-          <p className="text-xs text-muted-foreground mb-3">
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            padding: 20,
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              marginBottom: 12,
+            }}
+          >
             {formatRelativeDate(olderDate)} (Previous)
-          </p>
-          <div className="flex justify-center mb-4">
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 12,
+            }}
+          >
             <HealthScore score={olderScore} grade={olderGrade} size="lg" />
           </div>
           <SeverityChart counts={olderFindings.summary.findings_count} />
         </div>
 
         {/* Latest */}
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-[14px] p-5 text-center">
-          <p className="text-xs text-muted-foreground mb-3">
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            padding: 20,
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              marginBottom: 12,
+            }}
+          >
             {formatRelativeDate(newerDate)} (Latest)
-          </p>
-          <div className="flex justify-center mb-4">
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 12,
+            }}
+          >
             <HealthScore score={newerScore} grade={newerGrade} size="lg" />
           </div>
           <SeverityChart counts={newerFindings.summary.findings_count} />
         </div>
       </div>
 
-      {/* Resolved findings (green) */}
-      <Section
-        title="Resolved"
-        count={resolvedFindings.length}
-        icon={
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Resolved */}
+      {resolvedFindings.length > 0 && (
+        <div className="fade-in stagger-3" style={{ marginBottom: 24 }}>
+          <h3
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: "var(--success)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
           >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        }
-        accentColor="text-green-500"
-        borderColor="#22c55e"
-        bgColor="bg-green-500/5"
-        strikethrough
-      >
-        {resolvedFindings.map((f) => (
-          <CompareRow
-            key={f.id}
-            finding={f}
-            borderColor="#22c55e"
-            bgColor="bg-green-500/5 dark:bg-green-500/8"
-            strikethrough
-          />
-        ))}
-      </Section>
+            <Check style={{ width: 16, height: 16, color: "var(--success)" }} />
+            Resolved ({resolvedFindings.length})
+          </h3>
+          {resolvedFindings.map((f) => (
+            <CompareRow
+              key={f.id}
+              finding={f}
+              borderColor="var(--success)"
+              bgColor="var(--success-subtle)"
+              strikethrough
+            />
+          ))}
+        </div>
+      )}
 
-      {/* New findings (red) */}
-      <Section
-        title="New"
-        count={newFindings.length}
-        icon={
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* New findings */}
+      {newFindings.length > 0 && (
+        <div className="fade-in stagger-4" style={{ marginBottom: 24 }}>
+          <h3
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: "var(--destructive)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
           >
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-        }
-        accentColor="text-red-500"
-        borderColor="#ef4444"
-        bgColor="bg-red-500/5"
-      >
-        {newFindings.map((f) => (
-          <CompareRow
-            key={f.id}
-            finding={f}
-            borderColor="#ef4444"
-            bgColor="bg-red-500/5 dark:bg-red-500/8"
-          />
-        ))}
-      </Section>
+            <AlertTriangle
+              style={{ width: 16, height: 16, color: "var(--destructive)" }}
+            />
+            New ({newFindings.length})
+          </h3>
+          {newFindings.map((f) => (
+            <CompareRow
+              key={f.id}
+              finding={f}
+              borderColor="var(--destructive)"
+              bgColor="var(--destructive-subtle)"
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Persisted findings (muted) */}
-      <Section
-        title="Persisted"
-        count={persistedFindings.length}
-        icon={
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Persisted */}
+      {persistedFindings.length > 0 && (
+        <div className="fade-in stagger-5" style={{ marginBottom: 24 }}>
+          <h3
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
           >
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-        }
-        accentColor="text-muted-foreground"
-        borderColor="hsl(var(--border))"
-        bgColor="bg-muted/10"
-      >
-        {persistedFindings.map((f) => (
-          <CompareRow
-            key={f.id}
-            finding={f}
-            borderColor="hsl(var(--muted-foreground))"
-            bgColor="bg-zinc-100/50 dark:bg-zinc-800/30"
-          />
-        ))}
-      </Section>
+            <Activity
+              style={{ width: 16, height: 16, color: "var(--text-muted)" }}
+            />
+            Persisted ({persistedFindings.length})
+          </h3>
+          {persistedFindings.map((f) => (
+            <CompareRow
+              key={f.id}
+              finding={f}
+              borderColor="var(--border)"
+              bgColor="var(--elevated)"
+            />
+          ))}
+        </div>
+      )}
 
       {/* Empty state */}
       {newFindings.length === 0 &&
         resolvedFindings.length === 0 &&
         persistedFindings.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--text-muted)",
+              textAlign: "center",
+              padding: "32px 0",
+            }}
+          >
             No findings in either audit &mdash; nothing to compare.
           </p>
         )}

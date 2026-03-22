@@ -1,23 +1,14 @@
 import Link from "next/link";
-import { ScanSearch, KeyRound, History, Folder } from "lucide-react";
+import { Plus, Clock, Key, Folder, Pencil } from "lucide-react";
 import { getDb, audits } from "@codeaudit-ai/db";
 import { desc } from "drizzle-orm";
-// HealthScore ring — available when audit results include a score
-// import { HealthScore } from "@/components/ui/health-score";
+import { HealthScore } from "@/components/ui/health-score";
 
 const AUDIT_TYPE_LABELS: Record<string, string> = {
   full: "Full Audit",
   security: "Security-Only",
   "team-collaboration": "Team & Collaboration",
   "code-quality": "Code Quality",
-};
-
-const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  queued:    { label: "Queued",    className: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
-  running:   { label: "Running",   className: "bg-blue-500/10 text-blue-400 border border-blue-500/20" },
-  completed: { label: "Completed", className: "bg-green-500/10 text-green-400 border border-green-500/20" },
-  failed:    { label: "Failed",    className: "bg-red-500/10 text-red-400 border border-red-500/20" },
-  cancelled: { label: "Cancelled", className: "bg-muted text-muted-foreground border border-border" },
 };
 
 function formatRelativeDate(date: Date): string {
@@ -45,6 +36,7 @@ export default async function DashboardPage() {
       depth: audits.depth,
       status: audits.status,
       createdAt: audits.createdAt,
+      findings: audits.findings,
     })
     .from(audits)
     .orderBy(desc(audits.createdAt))
@@ -53,143 +45,312 @@ export default async function DashboardPage() {
 
   const quickActions = [
     {
-      title: "New Audit",
-      description: "Select a local folder and start a comprehensive codebase analysis.",
+      icon: Plus,
+      label: "New Audit",
+      desc: "Start a new codebase audit",
       href: "/audit/new",
-      icon: ScanSearch,
-      cta: "Start audit",
       accent: true,
     },
     {
-      title: "Audit History",
-      description: "Review your previous audit results and compare over time.",
+      icon: Clock,
+      label: "View History",
+      desc: "Browse all past audits",
       href: "/history",
-      icon: History,
-      cta: "View history",
       accent: false,
     },
     {
-      title: "API Keys",
-      description: "Add your Anthropic, OpenAI, or Gemini key to run audits.",
+      icon: Key,
+      label: "Manage Keys",
+      desc: "Add or edit API keys",
       href: "/settings/api-keys",
-      icon: KeyRound,
-      cta: "Manage keys",
       accent: false,
     },
   ] as const;
 
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="mb-8 fade-in">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">
-          Run a codebase audit or review your previous results.
-        </p>
-      </div>
+    <div style={{ padding: "36px 40px", maxWidth: 920 }}>
+      <h1
+        className="fade-in"
+        style={{
+          fontSize: 24,
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          marginBottom: 28,
+          color: "var(--text)",
+        }}
+      >
+        Dashboard
+      </h1>
 
-      {/* Quick action cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-9">
-        {quickActions.map((action, i) => (
+      {/* Quick actions */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 14,
+          marginBottom: 36,
+        }}
+      >
+        {quickActions.map((a, i) => (
           <Link
-            key={action.href}
-            href={action.href}
-            className={`fade-in stagger-${i + 1} group bg-[hsl(var(--surface))] border border-border rounded-[14px] p-5 hover:-translate-y-[1px] hover:shadow-lg transition-all duration-200`}
+            key={a.href}
+            href={a.href}
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 14,
+              padding: 18,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(250,204,21,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
+            }}
           >
-            <div className="mb-3.5">
+            <div className={`fade-in stagger-${i + 1}`}>
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${
-                  action.accent
-                    ? "bg-[hsl(var(--accent-subtle))]"
-                    : "bg-[hsl(var(--elevated))]"
-                }`}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  marginBottom: 14,
+                  background: a.accent ? "var(--accent-subtle)" : "var(--elevated)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <action.icon
-                  className={`h-[18px] w-[18px] ${
-                    action.accent ? "text-[hsl(var(--accent))]" : "text-muted-foreground"
-                  }`}
-                  aria-hidden="true"
+                <a.icon
+                  style={{
+                    width: 18,
+                    height: 18,
+                    color: a.accent ? "var(--accent)" : "var(--text-muted)",
+                  }}
                 />
               </div>
+              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, color: "var(--text)" }}>
+                {a.label}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{a.desc}</div>
             </div>
-            <h2 className="text-sm font-semibold text-foreground mb-1">{action.title}</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed">{action.description}</p>
           </Link>
         ))}
       </div>
 
       {/* Recent audits */}
       <div className="fade-in stagger-3">
-        <div className="flex items-center justify-between mb-3.5">
-          <h2 className="text-[15px] font-semibold text-foreground">Recent Audits</h2>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 14,
+          }}
+        >
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>Recent Audits</h2>
           <Link
             href="/history"
-            className="text-xs font-medium text-[hsl(var(--accent))] hover:opacity-80 transition-opacity"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--accent)",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              textDecoration: "none",
+            }}
           >
             View all &rarr;
           </Link>
         </div>
 
-        <div className="bg-[hsl(var(--surface))] border border-border rounded-[14px] overflow-hidden">
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
           {recentAudits.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ScanSearch className="h-8 w-8 text-muted-foreground/40 mb-3" aria-hidden="true" />
-              <p className="text-sm text-muted-foreground">No audits yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "48px 0",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ fontSize: 14, color: "var(--text-muted)" }}>No audits yet</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", opacity: 0.6, marginTop: 4 }}>
                 Run your first audit to see results here.
               </p>
               <Link
                 href="/audit/new"
-                className="mt-4 inline-flex items-center gap-1.5 rounded-[10px] bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm"
+                style={{
+                  marginTop: 16,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  borderRadius: 10,
+                  background: "var(--accent)",
+                  color: "#0a0a0b",
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
               >
                 Start an audit
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-border/50">
-              {recentAudits.map((audit) => {
-                const badge = STATUS_BADGE[audit.status] ?? STATUS_BADGE.queued!;
-                const typeLabel = AUDIT_TYPE_LABELS[audit.auditType] ?? audit.auditType;
-                const depthLabel = audit.depth === "quick" ? "Quick" : "Deep";
-                const date = audit.createdAt ?? new Date();
-                return (
-                  <Link
-                    key={audit.id}
-                    href={`/audit/${audit.id}/queued`}
-                    className="grid grid-cols-[1.5fr_1fr_0.8fr_0.6fr] items-center px-5 py-3.5 hover:bg-[hsl(var(--hover))] transition-colors"
-                  >
-                    {/* Folder name */}
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-sm font-medium text-foreground font-mono truncate">
-                        {audit.folderName}
-                      </span>
-                    </div>
+            recentAudits.map((audit, i) => {
+              const typeLabel = AUDIT_TYPE_LABELS[audit.auditType] ?? audit.auditType;
+              const depthLabel = audit.depth === "quick" ? "Quick" : "Deep";
+              const date = audit.createdAt ?? new Date();
+              const findings = audit.findings as { summary?: { score?: number; grade?: string } } | null;
+              const score = findings?.summary?.score;
+              const grade = findings?.summary?.grade;
 
-                    {/* Type & Depth badges */}
-                    <div className="flex gap-1.5">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide bg-[hsl(var(--accent-subtle))] text-[hsl(var(--accent))] border border-[hsl(var(--accent)/0.2)]">
-                        {typeLabel}
-                      </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide bg-muted text-muted-foreground border border-border">
-                        {depthLabel}
-                      </span>
-                    </div>
-
-                    {/* Date */}
-                    <span className="text-xs text-muted-foreground">
-                      {formatRelativeDate(date)}
-                    </span>
-
-                    {/* Status badge */}
+              return (
+                <Link
+                  key={audit.id}
+                  href={`/audit/${audit.id}/results`}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.5fr 1fr 0.8fr 0.6fr 80px 40px",
+                    alignItems: "center",
+                    padding: "14px 20px",
+                    cursor: "pointer",
+                    borderBottom:
+                      i < recentAudits.length - 1
+                        ? "1px solid var(--border-subtle)"
+                        : "none",
+                    transition: "background 0.15s",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--hover)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  {/* Folder name */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Folder style={{ width: 16, height: 16, color: "var(--text-muted)" }} />
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold ${badge.className}`}
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 500,
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        color: "var(--text)",
+                      }}
                     >
-                      {badge.label}
+                      {audit.folderName}
                     </span>
-                  </Link>
-                );
-              })}
-            </div>
+                  </div>
+
+                  {/* Date */}
+                  <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                    {formatRelativeDate(date)}
+                  </span>
+
+                  {/* Type badge */}
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        letterSpacing: "0.02em",
+                        background: "var(--accent-subtle)",
+                        color: "var(--accent)",
+                        border: "1px solid rgba(250,204,21,0.19)",
+                      }}
+                    >
+                      {typeLabel}
+                    </span>
+                  </div>
+
+                  {/* Depth badge */}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      padding: "2px 8px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: "0.02em",
+                      background:
+                        audit.depth === "deep"
+                          ? "var(--accent-subtle)"
+                          : "rgba(113,113,122,0.12)",
+                      color:
+                        audit.depth === "deep" ? "var(--accent)" : "var(--text-muted)",
+                      border: `1px solid ${
+                        audit.depth === "deep"
+                          ? "rgba(250,204,21,0.19)"
+                          : "rgba(113,113,122,0.19)"
+                      }`,
+                    }}
+                  >
+                    {depthLabel}
+                  </span>
+
+                  {/* Health score */}
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    {score != null && grade != null ? (
+                      <HealthScore score={score} grade={grade} size="sm" />
+                    ) : (
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "capitalize" }}>
+                        {audit.status}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Re-audit button */}
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Link
+                      href="/audit/new"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 8,
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "background 0.15s",
+                        textDecoration: "none",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "var(--elevated)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <Pencil style={{ width: 14, height: 14, color: "var(--text-muted)" }} />
+                    </Link>
+                  </div>
+                </Link>
+              );
+            })
           )}
         </div>
       </div>

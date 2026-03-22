@@ -6,11 +6,10 @@ import { useRouter } from "next/navigation";
 import {
   Folder,
   Trash2,
-  CheckSquare,
-  Square,
-  AlertTriangle,
   ArrowRightLeft,
   Loader2,
+  AlertTriangle,
+  Check,
 } from "lucide-react";
 import { deleteAudit, deleteAudits } from "@/actions/audit-delete";
 import { HealthScore } from "@/components/ui/health-score";
@@ -55,7 +54,7 @@ function formatRelativeDate(iso: string): string {
 }
 
 // ---------------------------------------------------------------
-// Checkbox component
+// Checkbox component (using div role="checkbox" to avoid nesting)
 // ---------------------------------------------------------------
 
 function Checkbox({
@@ -74,15 +73,20 @@ function Checkbox({
         e.preventDefault();
         onChange();
       }}
-      className={`
-        flex items-center justify-center w-5 h-5 rounded-md border-[1.5px] shrink-0
-        transition-all duration-150 cursor-pointer
-        ${
-          checked
-            ? "border-yellow-400 bg-yellow-400 dark:border-yellow-400 dark:bg-yellow-400"
-            : "border-zinc-300 bg-transparent dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500"
-        }
-      `}
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: 6,
+        border: `1.5px solid ${checked ? "var(--accent)" : "var(--border)"}`,
+        background: checked ? "var(--accent)" : "transparent",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "all 0.15s ease",
+        flexShrink: 0,
+        padding: 0,
+      }}
     >
       {checked && (
         <svg
@@ -118,49 +122,142 @@ function DeleteConfirmModal({
   isPending: boolean;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="fade-in w-full max-w-md mx-4 rounded-[14px] border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 shadow-2xl">
-        {/* Icon + title */}
-        <div className="flex gap-3.5 mb-5">
-          <div className="flex items-center justify-center w-11 h-11 rounded-xl shrink-0 bg-red-500/10">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(8px)",
+        }}
+        onClick={onCancel}
+      />
+      <div
+        className="fade-in"
+        style={{
+          position: "relative",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 18,
+          padding: 28,
+          maxWidth: 480,
+          width: "90%",
+          boxShadow: "0 24px 48px rgba(0,0,0,0.3)",
+        }}
+      >
+        <div style={{ display: "flex", gap: 14, marginBottom: 18 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              flexShrink: 0,
+              background: "var(--destructive-subtle)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Trash2 style={{ width: 20, height: 20, color: "var(--destructive)" }} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-foreground">
-              Delete {count} audit{count > 1 ? "s" : ""}?
+            <h3
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 4,
+                color: "var(--text)",
+              }}
+            >
+              Delete audit{count > 1 ? "s" : ""}?
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              This will permanently delete{" "}
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--text-secondary)",
+                lineHeight: 1.5,
+              }}
+            >
               {count > 1
-                ? `${count} selected audits and all associated reports.`
-                : "this audit and all associated reports."}
+                ? `This will permanently delete ${count} selected audits and all associated reports.`
+                : "This will permanently delete this audit and all associated reports."}
             </p>
           </div>
         </div>
 
-        {/* Warning banner */}
-        <div className="rounded-lg px-3 py-2.5 mb-5 bg-orange-500/10 dark:bg-orange-500/10">
-          <p className="text-xs font-medium text-orange-600 dark:text-orange-400">
-            This action cannot be undone.
-          </p>
-        </div>
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--warning)",
+            padding: "10px 12px",
+            background: "var(--warning-subtle)",
+            borderRadius: 8,
+            marginBottom: 20,
+          }}
+        >
+          This action cannot be undone.
+        </p>
 
-        {/* Actions */}
-        <div className="flex gap-2.5 justify-end">
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button
             onClick={onCancel}
             disabled={isPending}
-            className="px-4 py-2 text-sm font-medium rounded-[10px] border border-zinc-200 dark:border-zinc-700 bg-transparent text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+              fontWeight: 500,
+              borderRadius: 10,
+              background: "var(--elevated)",
+              color: "var(--text)",
+              border: "1px solid var(--border)",
+              cursor: "pointer",
+              opacity: isPending ? 0.5 : 1,
+              transition: "all 0.15s ease",
+            }}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={isPending}
-            className="px-4 py-2 text-sm font-medium rounded-[10px] bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              fontSize: 13,
+              fontWeight: 500,
+              borderRadius: 10,
+              background: "var(--destructive-subtle)",
+              color: "var(--destructive)",
+              border: "1px solid rgba(239,68,68,0.19)",
+              cursor: isPending ? "not-allowed" : "pointer",
+              opacity: isPending ? 0.5 : 1,
+              transition: "all 0.15s ease",
+            }}
           >
-            {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            <Trash2 className="h-3.5 w-3.5" />
+            {isPending && (
+              <Loader2
+                style={{
+                  width: 14,
+                  height: 14,
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            )}
+            <Trash2 style={{ width: 14, height: 14 }} />
             Delete
           </button>
         </div>
@@ -177,11 +274,11 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<"bulk" | string | null>(
-    null,
+    null
   );
   const [isPending, startTransition] = useTransition();
 
-  // Group by folderPath — rows are already newest-first
+  // Group by folderPath
   const grouped = new Map<string, HistoryAudit[]>();
   for (const row of audits) {
     if (!grouped.has(row.folderPath)) grouped.set(row.folderPath, []);
@@ -189,7 +286,8 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
   }
 
   const allIds = audits.map((a) => a.id);
-  const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
+  const allSelected =
+    allIds.length > 0 && allIds.every((id) => selected.has(id));
 
   const toggleOne = (id: string) => {
     setSelected((prev) => {
@@ -225,26 +323,63 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
   const deleteCount =
     deleteTarget === "bulk" ? selected.size : deleteTarget ? 1 : 0;
 
-  // ── Empty state ──
+  // Empty state
   if (audits.length === 0) {
     return (
-      <div className="p-8 max-w-[920px]">
-        <div className="fade-in mb-7">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+      <div style={{ padding: "36px 40px", maxWidth: 920 }}>
+        <div className="fade-in" style={{ marginBottom: 28 }}>
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              letterSpacing: "-0.03em",
+              color: "var(--text)",
+            }}
+          >
             History
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            All past audits grouped by folder.
-          </p>
         </div>
-        <div className="flex flex-col items-center justify-center rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 py-16 text-center">
-          <p className="text-sm text-muted-foreground">No audits yet.</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            padding: "64px 0",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+            No audits yet.
+          </p>
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              opacity: 0.6,
+              marginTop: 4,
+            }}
+          >
             Run your first audit to see results here.
           </p>
           <Link
             href="/audit/new"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-[10px] bg-yellow-400 text-zinc-900 px-4 py-2 text-xs font-semibold hover:bg-yellow-300 transition-colors"
+            style={{
+              marginTop: 16,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 10,
+              background: "var(--accent)",
+              color: "#0a0a0b",
+              padding: "8px 16px",
+              fontSize: 12,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
           >
             Start an audit
           </Link>
@@ -254,51 +389,111 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
   }
 
   return (
-    <div className="p-8 max-w-[920px]">
+    <div style={{ padding: "36px 40px", maxWidth: 920 }}>
       {/* Header */}
-      <div className="fade-in flex items-center justify-between mb-7">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            History
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            All past audits grouped by folder.
-          </p>
-        </div>
-        <div
-          onClick={toggleAll}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-transparent text-xs cursor-pointer select-none"
-          style={{ color: "var(--text-muted)" }}
+      <div
+        className="fade-in"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 28,
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            color: "var(--text)",
+          }}
         >
-          <Checkbox checked={allSelected} onChange={toggleAll} />
-          {allSelected ? "Deselect all" : "Select all"}
+          History
+        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div
+            onClick={toggleAll}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 8,
+              border: "1px solid var(--border)",
+              background: "transparent",
+              color: "var(--text-muted)",
+              fontSize: 12,
+              cursor: "pointer",
+            }}
+          >
+            <Checkbox checked={allSelected} onChange={toggleAll} />
+            Select all
+          </div>
         </div>
       </div>
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
-        <div className="fade-in flex items-center justify-between px-4 py-2.5 rounded-xl mb-5 bg-zinc-50 dark:bg-zinc-900 border border-yellow-400/30">
-          <span className="text-sm">
-            <span className="font-bold text-yellow-500 dark:text-yellow-400">
+        <div
+          className="fade-in"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px 16px",
+            borderRadius: 12,
+            marginBottom: 18,
+            background: "var(--surface)",
+            border: "1px solid rgba(250,204,21,0.19)",
+          }}
+        >
+          <span style={{ fontSize: 13, fontWeight: 500 }}>
+            <span style={{ color: "var(--accent)", fontWeight: 700 }}>
               {selected.size}
             </span>
-            <span className="text-muted-foreground">
+            <span style={{ color: "var(--text-secondary)" }}>
               {" "}
               audit{selected.size > 1 ? "s" : ""} selected
             </span>
           </span>
-          <div className="flex gap-2">
+          <div style={{ display: "flex", gap: 8 }}>
             <button
               onClick={() => setSelected(new Set())}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-zinc-200 dark:border-zinc-700 bg-transparent text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 12px",
+                fontSize: 13,
+                fontWeight: 500,
+                borderRadius: 10,
+                background: "var(--elevated)",
+                color: "var(--text)",
+                border: "1px solid var(--border)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
             >
               Deselect
             </button>
             <button
               onClick={() => setDeleteTarget("bulk")}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 12px",
+                fontSize: 13,
+                fontWeight: 500,
+                borderRadius: 10,
+                background: "var(--destructive-subtle)",
+                color: "var(--destructive)",
+                border: "1px solid rgba(239,68,68,0.19)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 style={{ width: 14, height: 14 }} />
               Delete selected
             </button>
           </div>
@@ -314,16 +509,41 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
         return (
           <div
             key={folderPath}
-            className={`fade-in stagger-${Math.min(gi + 1, 5)} mb-7`}
+            className={`fade-in stagger-${Math.min(gi + 1, 5)}`}
+            style={{ marginBottom: 28 }}
           >
             {/* Folder header */}
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="flex items-center gap-2">
-                <Folder className="h-4 w-4 text-muted-foreground" />
-                <span className="font-mono text-sm font-medium text-foreground">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 10,
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: 8 }}
+              >
+                <Folder
+                  style={{
+                    width: 16,
+                    height: 16,
+                    color: "var(--text-muted)",
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "var(--text)",
+                  }}
+                >
                   {latest.folderName}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span
+                  style={{ fontSize: 12, color: "var(--text-muted)" }}
+                >
                   ({folderAudits.length} audit
                   {folderAudits.length !== 1 ? "s" : ""})
                 </span>
@@ -331,16 +551,37 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
               {hasCompare && (
                 <Link
                   href={`/audit/compare?a=${latest.id}&b=${previous!.id}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 12px",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    borderRadius: 10,
+                    background: "transparent",
+                    color: "var(--text-secondary)",
+                    border: "none",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    transition: "all 0.15s ease",
+                  }}
                 >
-                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                  <ArrowRightLeft style={{ width: 14, height: 14 }} />
                   Compare
                 </Link>
               )}
             </div>
 
             {/* Audit rows card */}
-            <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-[14px] overflow-hidden">
+            <div
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 14,
+                overflow: "hidden",
+              }}
+            >
               {folderAudits.map((audit, i) => {
                 const typeLabel =
                   AUDIT_TYPE_LABELS[audit.auditType] ?? audit.auditType;
@@ -352,47 +593,110 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
                   <Link
                     key={audit.id}
                     href={`/audit/${audit.id}/results`}
-                    className={`
-                      grid grid-cols-[32px_1fr_auto_auto_60px_36px] items-center
-                      px-5 py-3.5 transition-colors
-                      ${i < folderAudits.length - 1 ? "border-b border-zinc-100 dark:border-zinc-800/60" : ""}
-                      ${isSelected ? "bg-yellow-400/8 dark:bg-yellow-400/5" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40"}
-                    `}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "32px 1fr 1fr 0.7fr 80px 40px",
+                      alignItems: "center",
+                      padding: "14px 20px",
+                      cursor: "pointer",
+                      borderBottom:
+                        i < folderAudits.length - 1
+                          ? "1px solid var(--border-subtle)"
+                          : "none",
+                      transition: "background 0.15s",
+                      background: isSelected
+                        ? "var(--accent-subtle)"
+                        : "transparent",
+                      textDecoration: "none",
+                      color: "inherit",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected)
+                        e.currentTarget.style.background = "var(--hover)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected)
+                        e.currentTarget.style.background = "transparent";
+                    }}
                   >
-                    {/* Checkbox */}
                     <Checkbox
                       checked={isSelected}
                       onChange={() => toggleOne(audit.id)}
                     />
 
-                    {/* Folder name + date */}
-                    <div className="min-w-0 pl-1">
-                      <p className="text-xs text-muted-foreground font-mono truncate">
-                        {folderPath}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                        {formatRelativeDate(audit.createdAt)}
-                      </p>
-                    </div>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {formatRelativeDate(audit.createdAt)}
+                    </span>
 
-                    {/* Type badge */}
-                    <div className="flex gap-1.5 px-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 border border-yellow-400/20">
+                    <div style={{ display: "flex", gap: 6 }}>
+                      {/* Type badge */}
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          padding: "2px 8px",
+                          borderRadius: 6,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: "0.02em",
+                          background: "var(--accent-subtle)",
+                          color: "var(--accent)",
+                          border: "1px solid rgba(250,204,21,0.19)",
+                        }}
+                      >
                         {typeLabel}
                       </span>
+                      {/* Depth badge */}
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold tracking-wide border ${
-                          audit.depth === "deep"
-                            ? "bg-yellow-400/10 text-yellow-600 dark:text-yellow-400 border-yellow-400/20"
-                            : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
-                        }`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          padding: "2px 8px",
+                          borderRadius: 6,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: "0.02em",
+                          background:
+                            audit.depth === "deep"
+                              ? "var(--accent-subtle)"
+                              : "rgba(113,113,122,0.12)",
+                          color:
+                            audit.depth === "deep"
+                              ? "var(--accent)"
+                              : "var(--text-muted)",
+                          border: `1px solid ${
+                            audit.depth === "deep"
+                              ? "rgba(250,204,21,0.19)"
+                              : "rgba(113,113,122,0.19)"
+                          }`,
+                        }}
                       >
                         {depthLabel}
                       </span>
                     </div>
 
-                    {/* Health Score ring */}
-                    <div className="flex justify-end px-2">
+                    {/* Status */}
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: "var(--success)",
+                      }}
+                    >
+                      &#9679; {audit.status}
+                    </span>
+
+                    {/* Health score */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       {audit.score != null && audit.grade != null ? (
                         <HealthScore
                           score={audit.score}
@@ -400,28 +704,59 @@ export function HistoryClient({ audits }: { audits: HistoryAudit[] }) {
                           size="sm"
                         />
                       ) : (
-                        <span className="text-xs text-muted-foreground/40 capitalize">
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: "var(--text-muted)",
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {audit.status}
                         </span>
                       )}
                     </div>
 
-                    {/* Date (compact) */}
-                    <div className="text-[11px] text-muted-foreground text-right tabular-nums">
-                      {formatRelativeDate(audit.createdAt)}
-                    </div>
-
                     {/* Delete button */}
-                    <div className="flex justify-end">
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           e.preventDefault();
                           setDeleteTarget(audit.id);
                         }}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-red-500/10"
+                        style={{
+                          width: 30,
+                          height: 30,
+                          borderRadius: 8,
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transition: "all 0.15s",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            "var(--destructive-subtle)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background =
+                            "transparent")
+                        }
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
+                        <Trash2
+                          style={{
+                            width: 14,
+                            height: 14,
+                            color: "var(--text-muted)",
+                          }}
+                        />
                       </button>
                     </div>
                   </Link>

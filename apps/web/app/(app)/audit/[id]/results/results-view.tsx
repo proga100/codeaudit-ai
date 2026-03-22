@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronUp, ChevronDown, Download } from "lucide-react";
 import type { FindingsSeverity, AuditFindings } from "@codeaudit-ai/db";
 import { SeverityChart } from "@/components/audit/severity-chart";
 import { FindingCard } from "@/components/audit/finding-card";
@@ -37,20 +38,23 @@ type ResultsViewProps = {
   phases: PhaseRow[];
 };
 
+const SEVERITY: Record<
+  FindingsSeverity,
+  { color: string; bg: string; label: string }
+> = {
+  critical: { color: "#ef4444", bg: "rgba(239,68,68,0.12)", label: "Critical" },
+  high: { color: "#f97316", bg: "rgba(249,115,22,0.12)", label: "High" },
+  medium: { color: "#eab308", bg: "rgba(234,179,8,0.12)", label: "Medium" },
+  low: { color: "#3b82f6", bg: "rgba(59,130,246,0.12)", label: "Low" },
+  info: { color: "#71717a", bg: "rgba(113,113,122,0.12)", label: "Info" },
+};
+
 const SEVERITY_ORDER: Record<FindingsSeverity, number> = {
   critical: 0,
   high: 1,
   medium: 2,
   low: 3,
   info: 4,
-};
-
-const SEVERITY_PILL_COLORS: Record<FindingsSeverity, { active: string; border: string }> = {
-  critical: { active: "bg-red-500/15 text-red-500 border-red-500/30", border: "border-red-500/30" },
-  high:     { active: "bg-orange-500/15 text-orange-500 border-orange-500/30", border: "border-orange-500/30" },
-  medium:   { active: "bg-yellow-500/15 text-yellow-500 border-yellow-500/30", border: "border-yellow-500/30" },
-  low:      { active: "bg-blue-500/15 text-blue-500 border-blue-500/30", border: "border-blue-500/30" },
-  info:     { active: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30", border: "border-zinc-500/30" },
 };
 
 const SCORE_LABEL: Record<string, string> = {
@@ -69,56 +73,200 @@ export function ResultsView({ auditId, audit, phases }: ResultsViewProps) {
 
   const isTerminal = TERMINAL_STATUSES.has(audit.status);
 
-  // Gather all findings -- from audit.findings if completed, or from phases if cancelled/failed
   const allFindings = audit.findings
     ? audit.findings.findings
     : phases.flatMap((p) => p.findings ?? []);
 
-  // Apply filter
   const filtered = allFindings
     .filter((f) => filter === "all" || f.severity === filter)
     .sort((a, b) => {
       if (sortBy === "severity") {
-        return (SEVERITY_ORDER[a.severity] ?? 99) - (SEVERITY_ORDER[b.severity] ?? 99);
+        return (
+          (SEVERITY_ORDER[a.severity] ?? 99) -
+          (SEVERITY_ORDER[b.severity] ?? 99)
+        );
       }
       return a.phase - b.phase;
     });
 
+  const auditTypeLabel =
+    audit.auditType === "full"
+      ? "Full Audit"
+      : audit.auditType === "security"
+        ? "Security Only"
+        : audit.auditType === "team-collaboration"
+          ? "Team & Collaboration"
+          : "Code Quality";
+  const depthLabel = audit.depth === "quick" ? "Quick" : "Deep";
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Section 1 -- Health Score + Severity Breakdown side by side */}
+    <div style={{ padding: "36px 40px", maxWidth: 920 }}>
+      {/* Header */}
+      <div className="fade-in" style={{ marginBottom: 28 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 6,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--font-jetbrains-mono), monospace",
+              fontSize: 14,
+              fontWeight: 500,
+              color: "var(--text)",
+            }}
+          >
+            {audit.folderName}
+          </span>
+          {/* Type badge */}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "2px 8px",
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+              background: "var(--accent-subtle)",
+              color: "var(--accent)",
+              border: "1px solid rgba(250,204,21,0.19)",
+            }}
+          >
+            {auditTypeLabel}
+          </span>
+          {/* Depth badge */}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "2px 8px",
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+              background:
+                audit.depth === "deep"
+                  ? "var(--accent-subtle)"
+                  : "rgba(113,113,122,0.12)",
+              color:
+                audit.depth === "deep" ? "var(--accent)" : "var(--text-muted)",
+              border: `1px solid ${
+                audit.depth === "deep"
+                  ? "rgba(250,204,21,0.19)"
+                  : "rgba(113,113,122,0.19)"
+              }`,
+            }}
+          >
+            {depthLabel}
+          </span>
+        </div>
+        {audit.completedAt && (
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+            Completed {audit.completedAt.toLocaleDateString()}
+          </span>
+        )}
+      </div>
+
+      {/* Score + Severity */}
       {audit.findings && (
-        <div className="fade-in stagger-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          className="fade-in stagger-1"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+            marginBottom: 28,
+          }}
+        >
           {/* Health Score card */}
-          <div className="rounded-[14px] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5 flex items-center gap-6">
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 14,
+              padding: 20,
+              display: "flex",
+              alignItems: "center",
+              gap: 24,
+            }}
+          >
             <HealthScore
               score={audit.findings.summary.score}
               grade={audit.findings.summary.grade}
               size="lg"
             />
             <div>
-              <div className="text-xs text-muted-foreground mb-1">Health Score</div>
-              <div className="text-2xl font-bold font-mono tracking-tight">
-                {audit.findings.summary.score}{" "}
-                <span className="text-base font-normal text-muted-foreground">/ 100</span>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "var(--text-muted)",
+                  marginBottom: 4,
+                }}
+              >
+                Health Score
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
+              <div
+                style={{
+                  fontSize: 26,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  letterSpacing: "-0.03em",
+                  color: "var(--text)",
+                }}
+              >
+                {audit.findings.summary.score}{" "}
+                <span
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 400,
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  / 100
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--warning)",
+                  marginTop: 4,
+                }}
+              >
                 {SCORE_LABEL[audit.findings.summary.grade] ?? ""}
               </div>
             </div>
           </div>
 
           {/* Severity Breakdown card */}
-          <div className="rounded-[14px] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-5">
-            <div className="text-xs text-muted-foreground mb-3">Severity Breakdown</div>
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 14,
+              padding: 20,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--text-muted)",
+                marginBottom: 12,
+              }}
+            >
+              Severity Breakdown
+            </div>
             <SeverityChart counts={audit.findings.summary.findings_count} />
           </div>
         </div>
       )}
 
-      {/* Section 2 -- Cost summary + action buttons */}
+      {/* Cost summary */}
       {isTerminal && (
-        <div className="fade-in stagger-2">
+        <div className="fade-in stagger-2" style={{ marginBottom: 16 }}>
           <CostSummary
             actualCostMicrodollars={audit.actualCostMicrodollars}
             estimatedCostMicrodollars={audit.estimatedCostMicrodollars}
@@ -128,82 +276,140 @@ export function ResultsView({ auditId, audit, phases }: ResultsViewProps) {
         </div>
       )}
 
-      {/* Action buttons row */}
-      <div className="fade-in stagger-2 flex flex-wrap gap-2">
-        <a
-          href={`/audit/${auditId}/executive`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--elevated))] transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Executive Report
-        </a>
-        <a
-          href={`/audit/${auditId}/technical`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--elevated))] transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Technical Report
-        </a>
-        <a
-          href={`/api/audit/${auditId}/download`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--elevated))] transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Download All
-        </a>
+      {/* Report download buttons */}
+      <div
+        className="fade-in stagger-2"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 8,
+          marginBottom: 28,
+        }}
+      >
+        {[
+          { href: `/audit/${auditId}/executive`, label: "Executive Report" },
+          { href: `/audit/${auditId}/technical`, label: "Technical Report" },
+          { href: `/api/audit/${auditId}/download`, label: "Download All" },
+        ].map((btn) => (
+          <a
+            key={btn.label}
+            href={btn.href}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              fontSize: 13,
+              fontWeight: 500,
+              borderRadius: 10,
+              border: "1px solid var(--border)",
+              background: "var(--elevated)",
+              color: "var(--text)",
+              textDecoration: "none",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.85";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "none";
+            }}
+          >
+            <Download style={{ width: 14, height: 14 }} />
+            {btn.label}
+          </a>
+        ))}
       </div>
 
-      {/* Section 3 -- Partial results notice (cancelled/failed with no audit.findings) */}
+      {/* Partial results notice */}
       {!audit.findings && isTerminal && (
-        <div className="fade-in rounded-[14px] bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 text-sm text-yellow-400">
-          This audit was cancelled before completing -- showing partial findings from{" "}
-          {phases.filter((p) => p.status === "completed").length} completed phases.
+        <div
+          className="fade-in"
+          style={{
+            padding: "12px 16px",
+            borderRadius: 12,
+            marginBottom: 20,
+            background: "var(--warning-subtle)",
+            border: "1px solid rgba(249,115,22,0.2)",
+            fontSize: 13,
+            color: "var(--warning)",
+          }}
+        >
+          This audit was cancelled before completing -- showing partial findings
+          from {phases.filter((p) => p.status === "completed").length} completed
+          phases.
         </div>
       )}
 
-      {/* Section 4 -- Filter bar with severity pills */}
+      {/* Filter bar */}
       {allFindings.length > 0 && (
-        <div className="fade-in stagger-3 flex items-center gap-1.5 flex-wrap">
-          {(["all", "critical", "high", "medium", "low", "info"] as const).map((sev) => {
-            const isActive = filter === sev;
-            const count = sev !== "all" && audit.findings
-              ? audit.findings.summary.findings_count[sev] ?? 0
-              : sev === "all" ? allFindings.length : 0;
+        <div
+          className="fade-in stagger-3"
+          style={{
+            display: "flex",
+            gap: 6,
+            marginBottom: 18,
+            flexWrap: "wrap",
+          }}
+        >
+          {(
+            ["all", "critical", "high", "medium", "low", "info"] as const
+          ).map((key) => {
+            const isActive = filter === key;
+            const count =
+              key === "all"
+                ? allFindings.length
+                : audit.findings
+                  ? audit.findings.summary.findings_count[key] ?? 0
+                  : allFindings.filter((f) => f.severity === key).length;
 
-            const activeStyle = sev === "all"
-              ? "bg-[hsl(var(--accent))]/15 text-[hsl(var(--accent))] border-[hsl(var(--accent))]/30"
-              : SEVERITY_PILL_COLORS[sev].active;
+            const sev = key !== "all" ? SEVERITY[key] : null;
+            const activeColor = sev?.color ?? "var(--accent)";
+            const activeBg = sev?.bg ?? "var(--accent-subtle)";
 
             return (
               <button
-                key={sev}
+                key={key}
                 type="button"
-                onClick={() => setFilter(sev)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border capitalize ${
-                  isActive
-                    ? activeStyle
-                    : "text-muted-foreground border-[hsl(var(--border))] hover:text-foreground hover:bg-[hsl(var(--elevated))]"
-                }`}
+                onClick={() => setFilter(key)}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${
+                    isActive ? activeColor + "50" : "var(--border)"
+                  }`,
+                  background: isActive ? activeBg : "transparent",
+                  color: isActive ? activeColor : "var(--text-muted)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  textTransform: "capitalize",
+                  transition: "all 0.15s ease",
+                }}
               >
-                {sev === "all" ? "All" : sev}
-                <span className={`text-[10px] rounded-full px-1.5 py-0.5 font-semibold leading-none ${
-                  isActive ? "bg-white/10" : "bg-[hsl(var(--elevated))]"
-                }`}>
-                  {count}
-                </span>
+                {key === "all"
+                  ? `All (${count})`
+                  : `${SEVERITY[key].label} (${count})`}
               </button>
             );
           })}
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "severity" | "phase")}
-            className="ml-auto text-xs bg-[hsl(var(--surface))] border border-[hsl(var(--border))] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) =>
+              setSortBy(e.target.value as "severity" | "phase")
+            }
+            style={{
+              marginLeft: "auto",
+              fontSize: 12,
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              padding: "5px 10px",
+              color: "var(--text)",
+              outline: "none",
+            }}
           >
             <option value="severity">Sort by severity</option>
             <option value="phase">Sort by phase</option>
@@ -211,21 +417,38 @@ export function ResultsView({ auditId, audit, phases }: ResultsViewProps) {
         </div>
       )}
 
-      {/* Section 5 -- Findings list with stagger */}
+      {/* Findings list */}
       {filtered.length > 0 ? (
-        <div className="flex flex-col gap-3">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {filtered.map((f, i) => (
-            <div key={f.id} className={`fade-in stagger-${Math.min(i + 1, 5)}`}>
+            <div
+              key={f.id}
+              className={`fade-in stagger-${Math.min(i + 1, 5)}`}
+            >
               <FindingCard finding={f} />
             </div>
           ))}
         </div>
       ) : allFindings.length > 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
+        <p
+          style={{
+            fontSize: 14,
+            color: "var(--text-muted)",
+            textAlign: "center",
+            padding: "32px 0",
+          }}
+        >
           No findings match this filter.
         </p>
       ) : (
-        <p className="text-sm text-muted-foreground text-center py-8">
+        <p
+          style={{
+            fontSize: 14,
+            color: "var(--text-muted)",
+            textAlign: "center",
+            padding: "32px 0",
+          }}
+        >
           No findings available.
         </p>
       )}

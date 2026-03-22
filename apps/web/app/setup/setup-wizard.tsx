@@ -4,46 +4,44 @@ import { useState, useEffect, useTransition } from "react";
 import {
   Loader2,
   CheckCircle2,
-  Key,
   ShieldCheck,
   Sparkles,
   Activity,
   GitCompareArrows,
-  ArrowRight,
+  Key,
+  ChevronLeft,
   Sun,
   Moon,
 } from "lucide-react";
 import { createApiKey } from "@/actions/api-keys";
 import { completeSetup } from "./actions";
-import { SelectCard } from "@/components/ui/select-card";
-import { Input } from "@/components/ui/input";
 import type { Provider } from "@/lib/api-key-validator";
 
 const PROVIDERS: { id: Provider; label: string; hint: string }[] = [
-  { id: "anthropic", label: "Anthropic", hint: "Starts with sk-ant-" },
-  { id: "openai", label: "OpenAI", hint: "Starts with sk-" },
-  { id: "gemini", label: "Google Gemini", hint: "AIza... format" },
+  { id: "anthropic", label: "Anthropic", hint: "sk-ant-api03-..." },
+  { id: "openai", label: "OpenAI", hint: "sk-proj-..." },
+  { id: "gemini", label: "Google Gemini", hint: "AIza..." },
 ];
 
 const FEATURES = [
   {
     icon: ShieldCheck,
-    title: "13-Phase Audit",
-    description: "Security, code quality, dependencies, and more",
+    title: "13-phase audit",
+    description: "Security, quality, dependencies, and more",
   },
   {
-    icon: Sparkles,
-    title: "Multi-Provider",
-    description: "Anthropic, OpenAI, and Google Gemini",
+    icon: Key,
+    title: "Multi-provider",
+    description: "Anthropic, OpenAI, Google Gemini",
   },
   {
     icon: Activity,
-    title: "Live Tracking",
-    description: "Real-time progress with cost monitoring",
+    title: "Live tracking",
+    description: "Real-time progress and cost monitoring",
   },
   {
     icon: GitCompareArrows,
-    title: "Compare Audits",
+    title: "Compare audits",
     description: "Track improvements over time",
   },
 ];
@@ -67,37 +65,59 @@ function ThemeToggle() {
   }
 
   return (
-    <div className="flex rounded-[10px] bg-[hsl(var(--elevated))] p-1">
+    <div
+      style={{
+        display: "flex",
+        borderRadius: 10,
+        overflow: "hidden",
+        border: "1px solid var(--border)",
+        background: "var(--elevated)",
+      }}
+    >
       <button
         onClick={() => setTheme(false)}
-        className={`flex h-7 w-9 items-center justify-center rounded-[8px] transition-all ${
-          !isDark ? "bg-[hsl(var(--surface))]" : ""
-        }`}
-        title="Light mode"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 34,
+          height: 28,
+          border: "none",
+          cursor: "pointer",
+          background: !isDark ? "var(--text)" : "transparent",
+          padding: 0,
+          transition: "all 0.2s ease",
+        }}
       >
         <Sun
-          className={`h-3.5 w-3.5 ${
-            !isDark
-              ? "text-[hsl(var(--foreground))]"
-              : "text-[hsl(var(--text-secondary))]"
-          }`}
-          aria-hidden="true"
+          style={{
+            width: 14,
+            height: 14,
+            color: !isDark ? "var(--background)" : "var(--text-muted)",
+          }}
         />
       </button>
       <button
         onClick={() => setTheme(true)}
-        className={`flex h-7 w-9 items-center justify-center rounded-[8px] transition-all ${
-          isDark ? "bg-[hsl(var(--surface))]" : ""
-        }`}
-        title="Dark mode"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 34,
+          height: 28,
+          border: "none",
+          cursor: "pointer",
+          background: isDark ? "var(--text)" : "transparent",
+          padding: 0,
+          transition: "all 0.2s ease",
+        }}
       >
         <Moon
-          className={`h-3.5 w-3.5 ${
-            isDark
-              ? "text-[hsl(var(--foreground))]"
-              : "text-[hsl(var(--text-secondary))]"
-          }`}
-          aria-hidden="true"
+          style={{
+            width: 14,
+            height: 14,
+            color: isDark ? "var(--background)" : "var(--text-muted)",
+          }}
         />
       </button>
     </div>
@@ -128,201 +148,389 @@ export function SetupWizard() {
         return;
       }
       setSuccess(true);
-      // Small delay to show success state before redirect
       await new Promise((r) => setTimeout(r, 800));
       await completeSetup();
     });
   }
 
+  if (step === 1) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          background: "var(--background)",
+          position: "relative",
+        }}
+      >
+        {/* Floating theme toggle */}
+        <div style={{ position: "absolute", top: 20, right: 24 }}>
+          <ThemeToggle />
+        </div>
+
+        <div className="fade-in" style={{ maxWidth: 500, textAlign: "center", padding: 40 }}>
+          {/* Logo */}
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 20,
+              margin: "0 auto 28px",
+              background: "linear-gradient(135deg, var(--accent), #f59e0b)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 12px 40px rgba(250,204,21,0.15)",
+            }}
+          >
+            <ShieldCheck style={{ width: 32, height: 32, color: "#0a0a0b" }} />
+          </div>
+
+          <h1
+            style={{
+              fontSize: 30,
+              fontWeight: 700,
+              letterSpacing: "-0.03em",
+              marginBottom: 12,
+              color: "var(--text)",
+            }}
+          >
+            Welcome to CodeAudit AI
+          </h1>
+          <p
+            style={{
+              fontSize: 15,
+              color: "var(--text-secondary)",
+              lineHeight: 1.6,
+              marginBottom: 36,
+            }}
+          >
+            Run comprehensive code audits on your local codebase using AI.
+            <br />
+            Your code never leaves your machine.
+          </p>
+
+          {/* Feature grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              textAlign: "left",
+              marginBottom: 40,
+            }}
+          >
+            {FEATURES.map(({ icon: Icon, title, description }, i) => (
+              <div
+                key={title}
+                className={`fade-in stagger-${i + 1}`}
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  padding: 14,
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    flexShrink: 0,
+                    background: "var(--accent-subtle)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon style={{ width: 16, height: 16, color: "var(--accent)" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2, color: "var(--text)" }}>
+                    {title}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Get Started button */}
+          <button
+            onClick={() => setStep(2)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+              padding: "12px 24px",
+              fontSize: 15,
+              fontWeight: 500,
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+              background: "var(--accent)",
+              color: "#0a0a0b",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.85";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "none";
+            }}
+          >
+            Get Started
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 2: API Key form
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background px-4">
-      {/* Theme toggle — top-right corner */}
-      <div className="absolute top-4 right-4">
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        background: "var(--background)",
+        position: "relative",
+      }}
+    >
+      {/* Floating theme toggle */}
+      <div style={{ position: "absolute", top: 20, right: 24 }}>
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-lg">
-        {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div
-            className={`h-2 w-2 rounded-full transition-colors ${
-              step === 1
-                ? "bg-[hsl(var(--accent))]"
-                : "bg-[hsl(var(--text-muted))]"
-            }`}
-          />
-          <div
-            className={`h-2 w-2 rounded-full transition-colors ${
-              step === 2
-                ? "bg-[hsl(var(--accent))]"
-                : "bg-[hsl(var(--text-muted))]"
-            }`}
-          />
-        </div>
+      <div className="fade-in" style={{ maxWidth: 460, width: "100%", padding: 40 }}>
+        {/* Back button */}
+        <button
+          onClick={() => setStep(1)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 13,
+            marginBottom: 24,
+            padding: 0,
+          }}
+        >
+          <ChevronLeft style={{ width: 16, height: 16 }} /> Back
+        </button>
 
-        {step === 1 && (
-          <>
-            {/* Welcome Header */}
-            <div className="text-center mb-8 fade-in">
-              <div className="inline-flex items-center justify-center h-[72px] w-[72px] rounded-[20px] bg-gradient-to-br from-yellow-400 to-amber-500 shadow-[0_0_40px_rgba(250,204,21,0.15)] mb-5">
-                <ShieldCheck className="h-9 w-9 text-[#0a0a0b]" />
-              </div>
-              <h1 className="text-[30px] font-bold tracking-[-0.03em] text-foreground">
-                Welcome to CodeAudit AI
-              </h1>
-              <p className="mt-3 text-[hsl(var(--text-secondary))] max-w-md mx-auto leading-relaxed">
-                Run comprehensive code audits on your local codebase using AI.
-                Your code never leaves your machine — only LLM API calls are
-                made with your own key.
-              </p>
-            </div>
+        <h2
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            marginBottom: 8,
+            color: "var(--text)",
+          }}
+        >
+          Add your API key
+        </h2>
+        <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 28 }}>
+          Choose a provider and enter your API key to get started.
+        </p>
 
-            {/* Feature cards — 2x2 grid */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {FEATURES.map(({ icon: Icon, title, description }, i) => (
-                <div
-                  key={title}
-                  className={`fade-in stagger-${i + 1} rounded-[14px] border border-[hsl(var(--border))] bg-[hsl(var(--surface))] p-4`}
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[hsl(var(--accent-subtle))] mb-3">
-                    <Icon className="h-[18px] w-[18px] text-[hsl(var(--accent))]" />
-                  </div>
-                  <p className="font-bold text-foreground leading-tight">
-                    {title}
-                  </p>
-                  <p className="text-sm text-[hsl(var(--text-muted))] mt-1 leading-snug">
-                    {description}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Get Started button */}
-            <button
-              onClick={() => setStep(2)}
-              className="w-full py-3 px-4 text-sm font-medium rounded-[10px] bg-[hsl(var(--accent))] text-[#0a0a0b] hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              Get Started
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            {/* Header */}
-            <div className="text-center mb-8 fade-in">
-              <div className="inline-flex items-center justify-center h-14 w-14 rounded-[16px] bg-[hsl(var(--accent-subtle))] mb-4">
-                <Key className="h-6 w-6 text-[hsl(var(--accent))]" />
-              </div>
-              <h1 className="text-[30px] font-bold tracking-[-0.03em] text-foreground">
-                Add Your API Key
-              </h1>
-              <p className="mt-2 text-[hsl(var(--text-secondary))] max-w-md mx-auto">
-                Add your first LLM API key to get started. Your key is encrypted
-                and stored locally.
-              </p>
-            </div>
-
-            {/* Form area */}
-            {success ? (
-              <div className="flex flex-col items-center gap-3 py-8 fade-in">
-                <CheckCircle2 className="h-10 w-10 text-green-500" />
-                <p className="text-sm font-medium text-foreground">
-                  API key added — redirecting…
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5 fade-in">
-                {/* Provider selector — 3 SelectCards in a row */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Provider
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {PROVIDERS.map((p) => (
-                      <SelectCard
-                        key={p.id}
-                        selected={provider === p.id}
-                        onClick={() => setProvider(p.id)}
-                        className="!p-3 text-center"
-                      >
-                        <span
-                          className={`text-xs font-medium ${
-                            provider === p.id
-                              ? "text-[hsl(var(--accent))]"
-                              : "text-[hsl(var(--text-secondary))]"
-                          }`}
-                        >
-                          {p.label}
-                        </span>
-                      </SelectCard>
-                    ))}
-                  </div>
-                </div>
-
-                {/* API Key */}
-                <div className="space-y-2">
-                  <label
-                    htmlFor="apiKey"
-                    className="text-sm font-medium text-foreground"
+        {success ? (
+          <div className="fade-in" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "32px 0" }}>
+            <CheckCircle2 style={{ width: 40, height: 40, color: "var(--success)" }} />
+            <p style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>
+              API key added — redirecting...
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            {/* Provider selector */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  marginBottom: 8,
+                  display: "block",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Provider
+              </label>
+              <div style={{ display: "flex", gap: 8 }}>
+                {PROVIDERS.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => setProvider(p.id)}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      textAlign: "center",
+                      borderRadius: 12,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      background: provider === p.id ? "var(--accent-subtle)" : "var(--surface)",
+                      border: `2px solid ${provider === p.id ? "var(--accent)" : "var(--border)"}`,
+                      boxShadow:
+                        provider === p.id
+                          ? "0 0 0 1px var(--accent), 0 4px 12px rgba(250,204,21,0.08)"
+                          : "none",
+                    }}
                   >
-                    API Key
-                  </label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder={
-                      PROVIDERS.find((p) => p.id === provider)?.hint
-                    }
-                    required
-                    mono
-                  />
-                </div>
-
-                {/* Label (optional) */}
-                <div className="space-y-2">
-                  <label
-                    htmlFor="keyLabel"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Label{" "}
-                    <span className="text-xs text-[hsl(var(--text-muted))] font-normal">
-                      (optional)
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: provider === p.id ? 600 : 400,
+                        color: provider === p.id ? "var(--accent)" : "var(--text-secondary)",
+                      }}
+                    >
+                      {p.label}
                     </span>
-                  </label>
-                  <Input
-                    id="keyLabel"
-                    type="text"
-                    value={label}
-                    onChange={(e) => setLabel(e.target.value)}
-                    placeholder="Personal key"
-                  />
-                </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Error */}
-                {error && (
-                  <p className="text-xs text-destructive">{error}</p>
-                )}
+            {/* API Key */}
+            <div style={{ marginBottom: 16 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  marginBottom: 8,
+                  display: "block",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                API Key
+              </label>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder={PROVIDERS.find((p) => p.id === provider)?.hint}
+                required
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: "var(--elevated)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text)",
+                  fontSize: 13,
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              />
+            </div>
 
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={isPending || !apiKey.trim()}
-                  className="w-full py-3 px-4 text-sm font-medium rounded-[10px] bg-[hsl(var(--accent))] text-[#0a0a0b] hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {isPending ? "Validating…" : "Add Key & Continue"}
-                </button>
+            {/* Label */}
+            <div style={{ marginBottom: 28 }}>
+              <label
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  marginBottom: 8,
+                  display: "block",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Label <span style={{ fontWeight: 400, textTransform: "none" }}>(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="e.g. Personal, Work"
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: "var(--elevated)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text)",
+                  fontSize: 13,
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              />
+            </div>
 
-                <p className="text-xs text-center text-[hsl(var(--text-muted))]">
-                  You can add more keys in Settings → API Keys at any time.
-                </p>
-              </form>
+            {/* Error */}
+            {error && (
+              <p style={{ fontSize: 12, color: "var(--destructive)", marginBottom: 12 }}>{error}</p>
             )}
-          </>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isPending || !apiKey.trim()}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                width: "100%",
+                padding: "12px 24px",
+                fontSize: 15,
+                fontWeight: 500,
+                borderRadius: 10,
+                border: "none",
+                cursor: isPending || !apiKey.trim() ? "not-allowed" : "pointer",
+                background: "var(--accent)",
+                color: "#0a0a0b",
+                opacity: isPending || !apiKey.trim() ? 0.5 : 1,
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!isPending && apiKey.trim()) {
+                  e.currentTarget.style.opacity = "0.85";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity =
+                  isPending || !apiKey.trim() ? "0.5" : "1";
+                e.currentTarget.style.transform = "none";
+              }}
+            >
+              {isPending && <Loader2 style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} />}
+              {isPending ? "Validating..." : "Add Key & Continue"}
+            </button>
+
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--text-muted)",
+                marginTop: 16,
+                textAlign: "center",
+              }}
+            >
+              You can add more keys in Settings &rarr; API Keys
+            </p>
+          </form>
         )}
       </div>
     </div>
