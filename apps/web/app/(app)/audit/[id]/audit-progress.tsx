@@ -148,6 +148,14 @@ export function AuditProgress({ audit }: { audit: AuditData }) {
   const [elapsed, setElapsed] = useState(0);
   const [cancelling, setCancelling] = useState(false);
 
+  // Kick off the audit engine when status is "queued"
+  useEffect(() => {
+    if (status !== "queued") return;
+    fetch(`/api/audit/${audit.id}`, { method: "POST" }).catch((err) =>
+      console.error("Failed to start audit:", err)
+    );
+  }, [audit.id, status]);
+
   // SSE connection
   useEffect(() => {
     if (["completed", "cancelled", "failed"].includes(status)) return;
@@ -173,7 +181,10 @@ export function AuditProgress({ audit }: { audit: AuditData }) {
         setTotalCostMicro(data.totalCostMicro);
       }
     };
-    es.onerror = () => es.close();
+    es.onerror = () => {
+      // Don't close — let EventSource auto-reconnect.
+      // Only close if audit is done (terminal states handled above).
+    };
     return () => es.close();
   }, [audit.id, status]);
 
