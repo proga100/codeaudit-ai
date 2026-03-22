@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign
-status: Ready to plan
-stopped_at: Completed 05-foundation-02-PLAN.md
-last_updated: "2026-03-22T19:25:21.705Z"
+status: Ready to execute
+stopped_at: Completed 06-shell-onboarding-01-PLAN.md
+last_updated: "2026-03-22T19:58:13.750Z"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22 after v1.1 milestone start)
 
 **Core value:** Anyone can run a thorough codebase audit on any local folder without CLI setup — just open the app, pick a folder, and run.
-**Current focus:** Phase 05 — foundation
+**Current focus:** Phase 06 — shell-onboarding
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (shell-onboarding) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Plan: Not started
 *Updated after each plan completion*
 | Phase 05-foundation P01 | 3 | 2 tasks | 56 files |
 | Phase 05-foundation P02 | 8 | 2 tasks | 8 files |
+| Phase 06-shell-onboarding P01 | 15 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -59,6 +60,8 @@ Recent decisions affecting current work:
 - [Phase 05-foundation]: Badge uses inline style for dynamic color; falls back to accent Tailwind classes
 - [Phase 05-foundation]: Button uses cva pattern with Slot for asChild composition
 - [Phase 05-foundation]: Modal uses simple div-based implementation (not Radix Dialog) per prototype spec
+- [Phase 06-shell-onboarding]: ThemeToggle uses neutral bg-text/text-background colors (NOT accent) per DSYS-03 spec
+- [Phase 06-shell-onboarding]: Setup page lives OUTSIDE (app) route group so it renders without sidebar — correct per SIDE-03
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T19:19:26.954Z
-Stopped at: Completed 05-foundation-02-PLAN.md
+Last session: 2026-03-22T19:58:13.747Z
+Stopped at: Completed 06-shell-onboarding-01-PLAN.md
 Resume file: None

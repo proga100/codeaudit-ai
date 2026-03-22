@@ -11,7 +11,7 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 - [x] **DSYS-01**: App uses dark theme by default with design tokens (#0a0a0b bg, #111113 surface, #facc15 accent, full token set from guide)
 - [x] **DSYS-02**: App supports light theme with correct token mapping (#fafafa bg, #ffffff surface, #ca8a04 accent)
-- [ ] **DSYS-03**: User can toggle between dark/light themes (persisted preference)
+- [x] **DSYS-03**: User can toggle between dark/light themes (persisted preference)
 - [x] **DSYS-04**: Tailwind CSS 4 config uses design tokens as CSS variables for both themes
 - [x] **DSYS-05**: Geist (sans) and JetBrains Mono (mono) fonts are loaded and applied globally
 - [x] **DSYS-06**: Animations work: fadeIn, slideIn, progressPulse, spin, stagger-1 through stagger-5
@@ -29,10 +29,10 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 ### Setup Wizard (SETUP)
 
-- [ ] **SETUP-01**: Welcome step shows centered layout with logo, heading, feature grid (2x2), "Get Started" button
-- [ ] **SETUP-02**: API Key step shows provider selector (3 cards), key input (password, mono), label input, "Add Key & Continue" button
-- [ ] **SETUP-03**: Floating theme toggle appears in top-right corner on both steps
-- [ ] **SETUP-04**: Setup wizard only appears on first run (no API key stored)
+- [x] **SETUP-01**: Welcome step shows centered layout with logo, heading, feature grid (2x2), "Get Started" button
+- [x] **SETUP-02**: API Key step shows provider selector (3 cards), key input (password, mono), label input, "Add Key & Continue" button
+- [x] **SETUP-03**: Floating theme toggle appears in top-right corner on both steps
+- [x] **SETUP-04**: Setup wizard only appears on first run (no API key stored)
 
 ### Sidebar & Layout (SIDE)
 
@@ -137,10 +137,10 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 | COMP-06 | Phase 5 | Complete |
 | COMP-07 | Phase 5 | Complete |
 | COMP-08 | Phase 5 | Complete |
-| SETUP-01 | Phase 6 | Pending |
-| SETUP-02 | Phase 6 | Pending |
-| SETUP-03 | Phase 6 | Pending |
-| SETUP-04 | Phase 6 | Pending |
+| SETUP-01 | Phase 6 | Complete |
+| SETUP-02 | Phase 6 | Complete |
+| SETUP-03 | Phase 6 | Complete |
+| SETUP-04 | Phase 6 | Complete |
 | SIDE-01 | Phase 6 | Pending |
 | SIDE-02 | Phase 6 | Pending |
 | SIDE-03 | Phase 6 | Pending |

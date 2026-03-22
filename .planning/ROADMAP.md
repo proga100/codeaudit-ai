@@ -68,7 +68,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: Build setup wizard (welcome + API key steps, floating theme toggle, first-run guard)
+- [x] 06-01: Build setup wizard (welcome + API key steps, floating theme toggle, first-run guard)
 - [ ] 06-02: Build sidebar layout (persistent nav, theme toggle) and dashboard page (quick-action cards, recent audits table)
 
 ### Phase 7: Audit Flows
