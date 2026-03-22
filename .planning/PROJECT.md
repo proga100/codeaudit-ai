@@ -66,6 +66,8 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 - **Phase 5 complete (2026-03-22):** Old frontend deleted (5,967 lines), new design token system (dark/light themes, #facc15 accent), 8 shared components built (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal). Also fixed PhaseRunner import bug + audit.provider field.
 - **Phase 6 complete (2026-03-22):** ThemeToggle with localStorage persistence, two-step setup wizard, 252px sidebar with active state, dashboard with quick-action cards and recent audits table.
 - **Phase 7 complete (2026-03-22):** New Audit single-page form (folder validation, type/depth SelectCards, provider/model dropdowns, live cost estimate, confirmation modal) + Audit Progress SSE-driven view (animated bar, live stats, cancel, expandable 13-phase list, completion state).
+- **Phase 8 complete (2026-03-23):** Results dashboard (health ring, severity bars, cost summary, filterable findings), History (folder grouping, checkbox selection, bulk delete, compare), Comparison (delta banner, side-by-side, finding diff), API Keys settings (masked list, edit/delete, inline add).
+- **v1.1 UI Redesign shipped (2026-03-23):** All 4 phases complete, 57 requirements delivered. Complete frontend rebuild from scratch.
 
 ## Constraints
 
@@ -107,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after Phase 7 completion*
+*Last updated: 2026-03-23 after v1.1 milestone completion*
