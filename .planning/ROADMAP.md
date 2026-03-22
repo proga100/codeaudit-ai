@@ -79,11 +79,11 @@ Plans:
   2. User can open any past audit and view its full findings dashboard
   3. When a folder has two or more audits, user can generate a comparison report showing score changes, resolved findings, and newly introduced findings
   4. Comparison report highlights specific findings that were fixed or regressed since the previous audit
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Audit history list (per-folder, date/type/depth/score), past audit result viewer, inline delta summary in history list
-- [ ] 04-02: Comparison report — delta query (resolved vs. new findings diff), comparison UI with score changes and finding status
+- [ ] 04-01-PLAN.md — Audit history page (/history): all audits grouped by folder, date/type/depth/score badge, click-to-view, Compare button for folders with 2+ audits
+- [ ] 04-02-PLAN.md — Comparison report (/audit/compare): score delta banner, side-by-side severity charts, resolved/new/persisted finding sections via title+filePath diff
 
 ## Progress
 
