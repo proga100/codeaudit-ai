@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import { getDb, audits, auditPhases, apiKeys } from "@codeaudit-ai/db";
 import { eq, and } from "drizzle-orm";
 import { decryptApiKey } from "@codeaudit-ai/db";
-import "./phases/index.js"; // side-effect: registers all phase runners (plan 02)
+import "./phases/index"; // side-effect: registers all phase runners (plan 02)
 import { getPhasesForAuditType } from "./phases/index";
 import { markPhaseRunning, markPhaseCompleted, markPhaseSkipped, markPhaseFailed } from "./progress-emitter";
 
