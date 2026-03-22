@@ -31,9 +31,21 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 
 ### Active
 
+- [ ] Complete UI redesign — delete all existing page/component code, rebuild from scratch using new design system (dark/light themes, yellow accent, Geist/JetBrains Mono fonts, Linear aesthetic)
 - [ ] Multi-repo cross-product analysis (run individual audits + cross-repo review)
 - [ ] npm global install / Homebrew distribution
 - [ ] Model accuracy/quality metrics display
+
+## Current Milestone: v1.1 UI Redesign
+
+**Goal:** Completely replace all frontend UI code with new design system from `docs/UI_IMPLEMENTATION_GUIDE.md` and `docs/codeaudit-ai.jsx` mockup. Zero old design code reused — clean slate rebuild of every page and component. Backend stays intact.
+
+**Target features:**
+- New design token system (dark `#0a0a0b` / light `#fafafa` themes, accent `#facc15`, sacred severity colors)
+- New shared component library (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal)
+- Geist + JetBrains Mono fonts, animations (fadeIn, slideIn, progressPulse, stagger)
+- Redesigned: Setup Wizard, Sidebar, Dashboard, New Audit, Audit Progress, Results, History, Comparison, API Keys
+- All inline prototype styles converted to Tailwind CSS 4 classes + shadcn/ui components
 
 ### Out of Scope
 
@@ -92,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after v1.0 milestone*
+*Last updated: 2026-03-22 after v1.1 milestone start*
