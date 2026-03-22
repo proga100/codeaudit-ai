@@ -108,11 +108,20 @@ function Checkbox({
   onChange: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="checkbox"
+      aria-checked={checked}
+      tabIndex={0}
       onClick={(e) => {
         e.stopPropagation();
         onChange();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          onChange();
+        }
       }}
       className="flex items-center justify-center flex-shrink-0 rounded-md transition-all duration-150"
       style={{
@@ -129,7 +138,7 @@ function Checkbox({
           <CheckIcon />
         </span>
       )}
-    </button>
+    </div>
   );
 }
 
