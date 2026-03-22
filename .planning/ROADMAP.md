@@ -49,7 +49,7 @@
   3. All 8 shared components (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal) render correctly in isolation with their documented variants
   4. Fade-in, slide-in, and progress-pulse animations play on load/transition triggers
   5. No old page-level CSS conflicts remain — previous component/layout files are gone
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 05-01: Delete old frontend code and set up Tailwind CSS 4 design token system with dark/light themes
