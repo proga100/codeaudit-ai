@@ -57,12 +57,12 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 ### Audit Progress (PROG)
 
-- [ ] **PROG-01**: Header shows folder name + type/depth badges
-- [ ] **PROG-02**: Animated progress bar with accent gradient and pulse glow
-- [ ] **PROG-03**: Live stats display (token count, running cost, elapsed time)
-- [ ] **PROG-04**: Cancel audit button (destructive variant)
-- [ ] **PROG-05**: Expandable phase list (13 rows with status icons, findings count, duration, cost)
-- [ ] **PROG-06**: On completion: green progress bar + "View Results" button
+- [x] **PROG-01**: Header shows folder name + type/depth badges
+- [x] **PROG-02**: Animated progress bar with accent gradient and pulse glow
+- [x] **PROG-03**: Live stats display (token count, running cost, elapsed time)
+- [x] **PROG-04**: Cancel audit button (destructive variant)
+- [x] **PROG-05**: Expandable phase list (13 rows with status icons, findings count, duration, cost)
+- [x] **PROG-06**: On completion: green progress bar + "View Results" button
 
 ### Results Dashboard (RSLT)
 
@@ -153,12 +153,12 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 | NAUD-04 | Phase 7 | Pending |
 | NAUD-05 | Phase 7 | Pending |
 | NAUD-06 | Phase 7 | Pending |
-| PROG-01 | Phase 7 | Pending |
-| PROG-02 | Phase 7 | Pending |
-| PROG-03 | Phase 7 | Pending |
-| PROG-04 | Phase 7 | Pending |
-| PROG-05 | Phase 7 | Pending |
-| PROG-06 | Phase 7 | Pending |
+| PROG-01 | Phase 7 | Complete |
+| PROG-02 | Phase 7 | Complete |
+| PROG-03 | Phase 7 | Complete |
+| PROG-04 | Phase 7 | Complete |
+| PROG-05 | Phase 7 | Complete |
+| PROG-06 | Phase 7 | Complete |
 | RSLT-01 | Phase 8 | Pending |
 | RSLT-02 | Phase 8 | Pending |
 | RSLT-03 | Phase 8 | Pending |

@@ -31,7 +31,7 @@
 
 #### Phase 7: Audit Flows
 
-- [ ] **Phase 7: Audit Flows** - Rebuild the New Audit configuration form and the live Audit Progress view
+- [x] **Phase 7: Audit Flows** - Rebuild the New Audit configuration form and the live Audit Progress view (completed 2026-03-22)
 
 #### Phase 8: Data Views
 
@@ -85,8 +85,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Build New Audit page (folder input, type/depth SelectCards, provider/model selectors, cost estimate, confirmation modal)
-- [ ] 07-02: Build Audit Progress page (animated progress bar, live stats, cancel button, expandable phase list, completion state)
+- [x] 07-01: Build New Audit page (folder input, type/depth SelectCards, provider/model selectors, cost estimate, confirmation modal)
+- [x] 07-02: Build Audit Progress page (animated progress bar, live stats, cancel button, expandable phase list, completion state)
 
 ### Phase 8: Data Views
 **Goal**: Users can fully explore audit results, manage audit history with bulk operations, compare two audits side-by-side, and manage API keys — all from pages that match the new design system
@@ -117,7 +117,7 @@ Plans:
 | 4. History & Comparison | v1.0 | 2/2 | Complete | 2026-03-22 |
 | 5. Design System & Shared Components | v1.1 | 0/2 | Not started | - |
 | 6. Shell & Onboarding | v1.1 | 0/2 | Not started | - |
-| 7. Audit Flows | v1.1 | 0/2 | Not started | - |
+| 7. Audit Flows | v1.1 | 2/2 | Complete   | 2026-03-22 |
 | 8. Data Views | v1.1 | 0/3 | Not started | - |
 
 ---

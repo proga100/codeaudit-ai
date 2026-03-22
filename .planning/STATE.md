@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign
-status: Ready to plan
-stopped_at: Completed 06-shell-onboarding-02-PLAN.md
-last_updated: "2026-03-22T20:05:43.415Z"
+status: Ready to execute
+stopped_at: Completed 07-audit-flows-02-PLAN.md
+last_updated: "2026-03-22T20:20:17.763Z"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22 after v1.1 milestone start)
 
 **Core value:** Anyone can run a thorough codebase audit on any local folder without CLI setup — just open the app, pick a folder, and run.
-**Current focus:** Phase 06 — shell-onboarding
+**Current focus:** Phase 07 — audit-flows
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
+Phase: 07 (audit-flows) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Plan: Not started
 | Phase 05-foundation P02 | 8 | 2 tasks | 8 files |
 | Phase 06-shell-onboarding P01 | 15 | 2 tasks | 2 files |
 | Phase 06-shell-onboarding P02 | 135 | 2 tasks | 4 files |
+| Phase 07-audit-flows P02 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 06-shell-onboarding]: Setup page lives OUTSIDE (app) route group so it renders without sidebar — correct per SIDE-03
 - [Phase 06-shell-onboarding]: Dashboard split: server page.tsx fetches+serializes data, client recent-audits-table.tsx handles interactivity
 - [Phase 06-shell-onboarding]: Active nav state: exact match for /dashboard, prefix match for other routes to avoid false highlights
+- [Phase 07-audit-flows]: PHASE_NAMES constant defined in client component — audit-engine is server-only, cannot be imported in client bundles
+- [Phase 07-audit-flows]: SSE useEffect depends on [audit.id, status] — terminal status values prevent re-opening connections after audit ends
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T20:02:22.729Z
-Stopped at: Completed 06-shell-onboarding-02-PLAN.md
+Last session: 2026-03-22T20:20:17.760Z
+Stopped at: Completed 07-audit-flows-02-PLAN.md
 Resume file: None
