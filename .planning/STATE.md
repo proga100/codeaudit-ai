@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-audit-setup-01-PLAN.md
-last_updated: "2026-03-22T08:42:24.775Z"
+stopped_at: Completed 02-audit-setup-02-PLAN.md
+last_updated: "2026-03-22T08:50:26.759Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-22 after local-first pivot)
 ## Current Position
 
 Phase: 02 (audit-engine) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Plan: 2 of 3
 | Phase 01-foundation P02 | 5 | 2 tasks | 13 files |
 | Phase 01-foundation P03 | 7 | 3 tasks | 15 files |
 | Phase 02-audit-setup P01 | 8 | 3 tasks | 19 files |
+| Phase 02-audit-setup P02 | 5 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 02-audit-setup]: Use LanguageModelV1 from @ai-sdk/provider@1.1.3 — providers return V1 at runtime, ai@6 internal handling works for both
 - [Phase 02-audit-setup]: unlockFolderLocal inlined in orchestrator (not imported from apps/web) to avoid cross-package dependency
 - [Phase 02-audit-setup]: Phase runner registry pattern: registerPhaseRunner() allows plan 02 to add phase implementations without modifying orchestrator
+- [Phase 02-audit-setup]: shared.ts helper module created for getRepoContext/getModel/headLimit — avoids repeating boilerplate across 11 phase files
+- [Phase 02-audit-setup]: Phase 0 uses generateObject with RepoContextSchema (not PhaseOutputSchema) — produces repo context, not AuditFindings
+- [Phase 02-audit-setup]: Phase 11 uses generateText (not generateObject) — HTML output is unstructured string, not typed JSON
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T08:42:24.772Z
-Stopped at: Completed 02-audit-setup-01-PLAN.md
+Last session: 2026-03-22T08:50:26.756Z
+Stopped at: Completed 02-audit-setup-02-PLAN.md
 Resume file: None

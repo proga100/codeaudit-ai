@@ -30,15 +30,15 @@
 
 ### Audit Execution
 
-- [ ] **EXEC-01**: App runs Phase 0 bootstrap to auto-detect repo stack, structure, production URLs, contributors, and lines of code
-- [ ] **EXEC-02**: App executes audit phases 1-10 as structured LLM API calls using the user's selected provider and key
-- [ ] **EXEC-03**: App executes Phase 11 to generate interactive HTML reports (management + technical dashboards)
-- [ ] **EXEC-04**: Audit engine supports all three LLM providers (Anthropic, OpenAI, Gemini) with provider-tuned prompts
-- [ ] **EXEC-05**: Audit engine respects audit type selection by running only relevant phases
-- [ ] **EXEC-06**: Audit engine respects depth selection (quick scan uses sampling and phase subset; deep audit runs full process)
-- [ ] **EXEC-07**: App writes all output to the audit directory, never to the target folder
-- [ ] **EXEC-08**: App handles audit failures gracefully — checkpoints progress so audits can be resumed
-- [ ] **EXEC-09**: App cleans up (unlocks folder) after audit completes or fails
+- [x] **EXEC-01**: App runs Phase 0 bootstrap to auto-detect repo stack, structure, production URLs, contributors, and lines of code
+- [x] **EXEC-02**: App executes audit phases 1-10 as structured LLM API calls using the user's selected provider and key
+- [x] **EXEC-03**: App executes Phase 11 to generate interactive HTML reports (management + technical dashboards)
+- [x] **EXEC-04**: Audit engine supports all three LLM providers (Anthropic, OpenAI, Gemini) with provider-tuned prompts
+- [x] **EXEC-05**: Audit engine respects audit type selection by running only relevant phases
+- [x] **EXEC-06**: Audit engine respects depth selection (quick scan uses sampling and phase subset; deep audit runs full process)
+- [x] **EXEC-07**: App writes all output to the audit directory, never to the target folder
+- [x] **EXEC-08**: App handles audit failures gracefully — checkpoints progress so audits can be resumed
+- [x] **EXEC-09**: App cleans up (unlocks folder) after audit completes or fails
 
 ### Live Progress
 
@@ -112,15 +112,15 @@
 | CONF-03 | Phase 1 | Complete |
 | CONF-04 | Phase 1 | Complete |
 | CONF-05 | Phase 1 | Complete |
-| EXEC-01 | Phase 2 | Pending |
-| EXEC-02 | Phase 2 | Pending |
-| EXEC-03 | Phase 2 | Pending |
-| EXEC-04 | Phase 2 | Pending |
-| EXEC-05 | Phase 2 | Pending |
-| EXEC-06 | Phase 2 | Pending |
-| EXEC-07 | Phase 2 | Pending |
-| EXEC-08 | Phase 2 | Pending |
-| EXEC-09 | Phase 2 | Pending |
+| EXEC-01 | Phase 2 | Complete |
+| EXEC-02 | Phase 2 | Complete |
+| EXEC-03 | Phase 2 | Complete |
+| EXEC-04 | Phase 2 | Complete |
+| EXEC-05 | Phase 2 | Complete |
+| EXEC-06 | Phase 2 | Complete |
+| EXEC-07 | Phase 2 | Complete |
+| EXEC-08 | Phase 2 | Complete |
+| EXEC-09 | Phase 2 | Complete |
 | PROG-01 | Phase 2 | Pending |
 | PROG-02 | Phase 2 | Pending |
 | PROG-03 | Phase 2 | Pending |

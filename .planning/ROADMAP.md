@@ -52,7 +52,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — LLM adapter (all 3 providers + AUTO model selection), audit engine core (commands, prompt-builder, finding-extractor, phase registry, orchestrator), POST /api/audit/[id] detached engine launcher
-- [ ] 02-02-PLAN.md — All 12 phase runners (phase-00 bootstrap through phase-11 HTML reports), phase-type mapping, depth sampling, registered with orchestrator
+- [x] 02-02-PLAN.md — All 12 phase runners (phase-00 bootstrap through phase-11 HTML reports), phase-type mapping, depth sampling, registered with orchestrator
 - [ ] 02-03-PLAN.md — SSE progress stream, cancel endpoint, cancel/resume Server Actions, live progress page replacing /queued stub, ProgressView client component
 
 ### Phase 3: Results & Cost
@@ -93,6 +93,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. App Shell & Configuration | 1/3 | In Progress|  |
-| 2. Audit Engine | 1/3 | In Progress|  |
+| 2. Audit Engine | 2/3 | In Progress|  |
 | 3. Results & Cost | 0/2 | Not started | - |
 | 4. History & Comparison | 0/2 | Not started | - |
