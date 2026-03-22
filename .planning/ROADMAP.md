@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Strip GitHub OAuth/Auth.js/Neon, migrate to SQLite, adapt sidebar/layout, npx CLI launcher
+- [x] 01-01-PLAN.md — Strip GitHub OAuth/Auth.js/Neon, migrate to SQLite, adapt sidebar/layout, npx CLI launcher
 - [ ] 01-02-PLAN.md — Folder safety service (chmod/git-push-block), validateFolder action, FolderPicker component, first-time setup wizard
 - [ ] 01-03-PLAN.md — Audit type cards, depth toggle, model selector, live cost estimate, confirm dialog — complete New Audit page
 
@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. App Shell & Configuration | 0/3 | Planned | - |
+| 1. App Shell & Configuration | 1/3 | In Progress|  |
 | 2. Audit Engine | 0/3 | Not started | - |
 | 3. Results & Cost | 0/2 | Not started | - |
 | 4. History & Comparison | 0/2 | Not started | - |

@@ -7,10 +7,10 @@
 
 ### Local Setup & Configuration
 
-- [ ] **SETUP-01**: User can open the app in their browser at localhost after running one start command
-- [ ] **SETUP-02**: User can add, update, and delete encrypted LLM API keys for Anthropic, OpenAI, and Gemini
-- [ ] **SETUP-03**: User can store multiple keys per provider with labels (e.g., "Personal", "Work")
-- [ ] **SETUP-04**: API keys are validated on entry via test API call to the selected provider
+- [x] **SETUP-01**: User can open the app in their browser at localhost after running one start command
+- [x] **SETUP-02**: User can add, update, and delete encrypted LLM API keys for Anthropic, OpenAI, and Gemini
+- [x] **SETUP-03**: User can store multiple keys per provider with labels (e.g., "Personal", "Work")
+- [x] **SETUP-04**: API keys are validated on entry via test API call to the selected provider
 
 ### Folder Selection & Safety
 
@@ -98,10 +98,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | Phase 1 | Pending |
-| SETUP-02 | Phase 1 | Pending |
-| SETUP-03 | Phase 1 | Pending |
-| SETUP-04 | Phase 1 | Pending |
+| SETUP-01 | Phase 1 | Complete |
+| SETUP-02 | Phase 1 | Complete |
+| SETUP-03 | Phase 1 | Complete |
+| SETUP-04 | Phase 1 | Complete |
 | FOLD-01 | Phase 1 | Pending |
 | FOLD-02 | Phase 1 | Pending |
 | FOLD-03 | Phase 1 | Pending |
