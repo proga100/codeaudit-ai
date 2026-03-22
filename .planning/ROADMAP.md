@@ -98,7 +98,7 @@ Plans:
   3. The history page groups audits by folder; user can select rows with yellow-accent checkboxes, bulk-delete with confirmation modal, and click Compare on any folder group with 2+ audits
   4. The comparison page shows the score delta banner (green/red with direction arrow), side-by-side health score + severity bars, and three labeled finding sections (Resolved, New, Persisted)
   5. The API Keys settings page lists keys with masked display, edit and delete buttons per row, and "Add New Key" opens an inline form matching the setup wizard pattern
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
 - [ ] 08-01: Build Results dashboard (health score ring, severity bars, cost summary, action buttons, findings list with filter pills and finding cards)
