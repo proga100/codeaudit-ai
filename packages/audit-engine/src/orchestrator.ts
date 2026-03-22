@@ -3,24 +3,18 @@ import { promisify } from "node:util";
 import { getDb, audits, auditPhases, apiKeys } from "@codeaudit-ai/db";
 import { eq, and } from "drizzle-orm";
 import { decryptApiKey } from "@codeaudit-ai/db";
-import "./phases/index"; // side-effect: registers all phase runners (plan 02)
 import { getPhasesForAuditType } from "./phases/index";
+import { getPhaseRunner } from "./phase-registry";
 import { markPhaseRunning, markPhaseCompleted, markPhaseSkipped, markPhaseFailed } from "./progress-emitter";
+
+// Side-effect import: registers all phase runners. Must come AFTER phase-registry is defined.
+import "./phases/index";
 
 const execFileAsync = promisify(execFile);
 
 // Inlined from apps/web/lib/folder-safety.ts to avoid cross-package dependency (D-10)
 async function unlockFolderLocal(folderPath: string): Promise<void> {
   await execFileAsync("chmod", ["-R", "u+w", folderPath]);
-}
-
-// runPhase is implemented per-phase in plan 02. Stub here — replaced in plan 02.
-export type PhaseRunner = (config: AuditRunContext, phaseNumber: number) => Promise<void>;
-
-// Registry populated by plan 02
-const phaseRunners: Map<number, PhaseRunner> = new Map();
-export function registerPhaseRunner(phaseNumber: number, runner: PhaseRunner): void {
-  phaseRunners.set(phaseNumber, runner);
 }
 
 export type AuditEngineConfig = {
@@ -66,9 +60,9 @@ export async function runAudit(config: AuditEngineConfig): Promise<void> {
         .get();
       if (existing?.status === "completed") continue;
 
-      const runner = phaseRunners.get(phaseNum);
+      const runner = getPhaseRunner(phaseNum);
       if (!runner) {
-        // Phase not yet implemented (plan 02 stub) — skip gracefully
+        // Phase not yet implemented — skip gracefully
         await markPhaseSkipped(config.auditId, phaseNum);
         continue;
       }

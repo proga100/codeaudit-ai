@@ -1,5 +1,7 @@
-export { runAudit, registerPhaseRunner } from "./orchestrator";
-export type { AuditEngineConfig, AuditRunContext, PhaseRunner } from "./orchestrator";
+export { runAudit } from "./orchestrator";
+export type { AuditEngineConfig, AuditRunContext } from "./orchestrator";
+export { registerPhaseRunner, getPhaseRunner } from "./phase-registry";
+export type { PhaseRunner } from "./phase-registry";
 export { getPhasesForAuditType, getPhaseName, PHASE_REGISTRY } from "./phases/index";
 export type { PhaseDefinition } from "./phases/index";
 export { execCommand } from "./commands";

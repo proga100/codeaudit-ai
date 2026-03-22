@@ -48,7 +48,7 @@ export function getPhaseName(phaseNumber: number): string {
 // Phase runner registrations (plan 02)
 // Import side-effect: registers all phase implementations with the orchestrator.
 // ============================================================
-import { registerPhaseRunner } from "../orchestrator";
+import { registerPhaseRunner } from "../phase-registry";
 import { phase00Runner } from "./phase-00";
 import { phase01Runner } from "./phase-01";
 import { phase02Runner } from "./phase-02";
