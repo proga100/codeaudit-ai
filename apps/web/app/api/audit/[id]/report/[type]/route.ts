@@ -24,7 +24,9 @@ export async function GET(
   const filePath = path.join(audit.auditOutputDir, htmlFile);
 
   try {
-    const html = await fs.readFile(filePath, "utf-8");
+    let html = await fs.readFile(filePath, "utf-8");
+    // Strip markdown code fences that LLMs sometimes wrap around HTML output
+    html = html.replace(/^```\s*html?\s*\n?/i, "").replace(/\n?```\s*$/i, "").trim();
     return new Response(html, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
