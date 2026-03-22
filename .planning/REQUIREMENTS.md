@@ -11,7 +11,7 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 - [x] **DSYS-01**: App uses dark theme by default with design tokens (#0a0a0b bg, #111113 surface, #facc15 accent, full token set from guide)
 - [x] **DSYS-02**: App supports light theme with correct token mapping (#fafafa bg, #ffffff surface, #ca8a04 accent)
-- [x] **DSYS-03**: User can toggle between dark/light themes (persisted preference)
+- [ ] **DSYS-03**: User can toggle between dark/light themes (persisted preference)
 - [x] **DSYS-04**: Tailwind CSS 4 config uses design tokens as CSS variables for both themes
 - [x] **DSYS-05**: Geist (sans) and JetBrains Mono (mono) fonts are loaded and applied globally
 - [x] **DSYS-06**: Animations work: fadeIn, slideIn, progressPulse, spin, stagger-1 through stagger-5
