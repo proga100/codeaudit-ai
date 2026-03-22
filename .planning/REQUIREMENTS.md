@@ -119,17 +119,71 @@ Complete UI redesign — delete all existing page/component/layout code and rebu
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| CLEN-01 | Phase 5 | Pending |
+| CLEN-02 | Phase 5 | Pending |
+| DSYS-01 | Phase 5 | Pending |
+| DSYS-02 | Phase 5 | Pending |
+| DSYS-03 | Phase 5 | Pending |
+| DSYS-04 | Phase 5 | Pending |
+| DSYS-05 | Phase 5 | Pending |
+| DSYS-06 | Phase 5 | Pending |
+| COMP-01 | Phase 5 | Pending |
+| COMP-02 | Phase 5 | Pending |
+| COMP-03 | Phase 5 | Pending |
+| COMP-04 | Phase 5 | Pending |
+| COMP-05 | Phase 5 | Pending |
+| COMP-06 | Phase 5 | Pending |
+| COMP-07 | Phase 5 | Pending |
+| COMP-08 | Phase 5 | Pending |
+| SETUP-01 | Phase 6 | Pending |
+| SETUP-02 | Phase 6 | Pending |
+| SETUP-03 | Phase 6 | Pending |
+| SETUP-04 | Phase 6 | Pending |
+| SIDE-01 | Phase 6 | Pending |
+| SIDE-02 | Phase 6 | Pending |
+| SIDE-03 | Phase 6 | Pending |
+| DASH-01 | Phase 6 | Pending |
+| DASH-02 | Phase 6 | Pending |
+| DASH-03 | Phase 6 | Pending |
+| NAUD-01 | Phase 7 | Pending |
+| NAUD-02 | Phase 7 | Pending |
+| NAUD-03 | Phase 7 | Pending |
+| NAUD-04 | Phase 7 | Pending |
+| NAUD-05 | Phase 7 | Pending |
+| NAUD-06 | Phase 7 | Pending |
+| PROG-01 | Phase 7 | Pending |
+| PROG-02 | Phase 7 | Pending |
+| PROG-03 | Phase 7 | Pending |
+| PROG-04 | Phase 7 | Pending |
+| PROG-05 | Phase 7 | Pending |
+| PROG-06 | Phase 7 | Pending |
+| RSLT-01 | Phase 8 | Pending |
+| RSLT-02 | Phase 8 | Pending |
+| RSLT-03 | Phase 8 | Pending |
+| RSLT-04 | Phase 8 | Pending |
+| RSLT-05 | Phase 8 | Pending |
+| RSLT-06 | Phase 8 | Pending |
+| RSLT-07 | Phase 8 | Pending |
+| HIST-01 | Phase 8 | Pending |
+| HIST-02 | Phase 8 | Pending |
+| HIST-03 | Phase 8 | Pending |
+| HIST-04 | Phase 8 | Pending |
+| HIST-05 | Phase 8 | Pending |
+| HIST-06 | Phase 8 | Pending |
+| CMPR-01 | Phase 8 | Pending |
+| CMPR-02 | Phase 8 | Pending |
+| CMPR-03 | Phase 8 | Pending |
+| KEYS-01 | Phase 8 | Pending |
+| KEYS-02 | Phase 8 | Pending |
+| KEYS-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 42 total
-- Mapped to phases: 0
-- Unmapped: 42 ⚠️
+- v1.1 requirements: 57 total
+- Mapped to phases: 57
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-22*
-*Last updated: 2026-03-22 after initial definition*
+*Last updated: 2026-03-22 — traceability complete after roadmap creation*
