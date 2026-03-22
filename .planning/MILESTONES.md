@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.1 UI Redesign (Shipped: 2026-03-22)
+
+**Phases completed:** 4 phases, 9 plans, 16 tasks
+
+**Key accomplishments:**
+
+- Deleted all old frontend code (5,967 lines) and established Tailwind CSS 4 design token system with dark/light themes, Geist + JetBrains Mono fonts, 6 keyframe animations, and complete @theme block
+- Segmented dark/light ThemeToggle with localStorage persistence and a two-step setup wizard at /setup wired to addApiKey + completeSetup server actions
+- One-liner:
+- Single-page audit configuration form at /audit/new with live cost estimation, folder validation, SelectCard grids for type/depth, provider/model dropdowns, and a confirmation modal that fires startAudit and redirects to /audit/[id]
+- Real-time audit progress page at /audit/[id] with SSE-driven animated progress bar, live token/cost/elapsed stats, expandable 13-phase list with status icons, cancel button, and completion state with View Results button
+- One-liner:
+- Folder-grouped audit history with yellow-accent checkbox selection, bulk delete modal, and Compare navigation built from Drizzle server component + interactive client component
+- Set-based audit comparison page with delta banner and three-section finding diff, plus full CRUD API Keys settings page with SelectCard provider picker and inline edit/delete
+
+---
+
 ## v1.0 CodeAudit MVP (Shipped: 2026-03-22)
 
 **Phases completed:** 4 phases, 10 plans, 22 tasks

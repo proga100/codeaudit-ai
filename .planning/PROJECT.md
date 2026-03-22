@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A local web application (`npx codeaudit`) that wraps a manual 13-phase codebase audit process into a browser-based UI. Users run it on their machine at localhost, point it at local folders, choose an audit type/depth/LLM model, and get a comprehensive codebase health report — viewable in-app with severity charts, filterable findings, PDF/zip download, and audit comparison over time. No code ever leaves the user's machine.
+A local web application (`npx codeaudit`) that wraps a manual 13-phase codebase audit process into a polished browser-based UI. Users run it on their machine at localhost, point it at local folders, choose an audit type/depth/LLM model, and get a comprehensive codebase health report — viewable in-app with severity charts, filterable findings, PDF/zip download, and audit comparison over time. No code ever leaves the user's machine.
 
 ## Core Value
 
@@ -28,24 +28,24 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 - ✓ Audit comparison (delta report: resolved/new/persisted findings) — v1.0
 - ✓ Budget monitoring (real-time token/cost display, overrun warnings) — v1.0
 - ✓ Audit output directory (~/audit-{name}/) — v1.0
+- ✓ Complete UI redesign with new design system (dark/light themes, yellow accent, Geist/JetBrains Mono, Linear aesthetic) — v1.1
+- ✓ Dark/light theme toggle with localStorage persistence — v1.1
+- ✓ 8 shared UI components (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal) — v1.1
+- ✓ Setup wizard (welcome + API key steps, floating theme toggle) — v1.1
+- ✓ Persistent sidebar (252px, active state, theme toggle) — v1.1
+- ✓ Dashboard with quick-action cards and recent audits table — v1.1
+- ✓ New Audit single-page form with live cost estimate and confirmation modal — v1.1
+- ✓ Audit Progress with animated bar, live stats, expandable phase list — v1.1
+- ✓ Results dashboard with health ring, severity bars, filterable findings — v1.1
+- ✓ History with folder grouping, selection system, bulk delete — v1.1
+- ✓ Comparison with delta banner, side-by-side cards, finding sections — v1.1
+- ✓ API Keys settings with masked list, edit/delete, inline add — v1.1
 
 ### Active
 
-- [ ] Complete UI redesign — delete all existing page/component code, rebuild from scratch using new design system (dark/light themes, yellow accent, Geist/JetBrains Mono fonts, Linear aesthetic)
 - [ ] Multi-repo cross-product analysis (run individual audits + cross-repo review)
 - [ ] npm global install / Homebrew distribution
 - [ ] Model accuracy/quality metrics display
-
-## Current Milestone: v1.1 UI Redesign
-
-**Goal:** Completely replace all frontend UI code with new design system from `docs/UI_IMPLEMENTATION_GUIDE.md` and `docs/codeaudit-ai.jsx` mockup. Zero old design code reused — clean slate rebuild of every page and component. Backend stays intact.
-
-**Target features:**
-- New design token system (dark `#0a0a0b` / light `#fafafa` themes, accent `#facc15`, sacred severity colors)
-- New shared component library (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal)
-- Geist + JetBrains Mono fonts, animations (fadeIn, slideIn, progressPulse, stagger)
-- Redesigned: Setup Wizard, Sidebar, Dashboard, New Audit, Audit Progress, Results, History, Comparison, API Keys
-- All inline prototype styles converted to Tailwind CSS 4 classes + shadcn/ui components
 
 ### Out of Scope
 
@@ -60,14 +60,8 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 ## Context
 
 - **v1.0 shipped (2026-03-22):** 7,860 LOC TypeScript, 93 commits, 171 files. Next.js 16, SQLite, Drizzle ORM, Vercel AI SDK 6, Shadcn/ui, Tailwind CSS 4, Recharts, Puppeteer.
-- **Architecture pivot (2026-03-22):** Changed from cloud webapp with GitHub OAuth to local-first. Users won't trust giving repo access to third-party tools.
+- **v1.1 shipped (2026-03-23):** Complete UI redesign — 4,632 LOC across 69 files in apps/web. 18 feature commits, 9 plans, 4 phases. New design token system, 8 shared components, all 9 pages rebuilt from scratch.
 - The manual audit process (6 guide files in `manual-codebase-review-process/`) is the source of truth for audit logic.
-- Known issue: `packages/audit-engine/src/progress-emitter.ts` references `audit.provider` which is missing from the DB schema. Documented in deferred items.
-- **Phase 5 complete (2026-03-22):** Old frontend deleted (5,967 lines), new design token system (dark/light themes, #facc15 accent), 8 shared components built (Badge, Button, Card, SelectCard, Input, HealthScore, SeverityBar, Modal). Also fixed PhaseRunner import bug + audit.provider field.
-- **Phase 6 complete (2026-03-22):** ThemeToggle with localStorage persistence, two-step setup wizard, 252px sidebar with active state, dashboard with quick-action cards and recent audits table.
-- **Phase 7 complete (2026-03-22):** New Audit single-page form (folder validation, type/depth SelectCards, provider/model dropdowns, live cost estimate, confirmation modal) + Audit Progress SSE-driven view (animated bar, live stats, cancel, expandable 13-phase list, completion state).
-- **Phase 8 complete (2026-03-23):** Results dashboard (health ring, severity bars, cost summary, filterable findings), History (folder grouping, checkbox selection, bulk delete, compare), Comparison (delta banner, side-by-side, finding diff), API Keys settings (masked list, edit/delete, inline add).
-- **v1.1 UI Redesign shipped (2026-03-23):** All 4 phases complete, 57 requirements delivered. Complete frontend rebuild from scratch.
 
 ## Constraints
 
@@ -90,6 +84,9 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 | Per-phase guide chunks | Token-efficient, avoids sending 93K guide per LLM call | ✓ Good |
 | Structured JSON storage | Web UI renders from JSON; markdown/PDF are export formats | ✓ Good |
 | SSE for progress (not WebSockets) | One-way server-to-client, simpler, auto-reconnects | ✓ Good |
+| Full UI rebuild (not incremental) | Old design was unfixable — clean slate with new design system is faster and cleaner | ✓ Good |
+| Design tokens as CSS variables + @theme | Tailwind CSS 4 native approach, enables both dark/light themes from one config | ✓ Good |
+| Server/client component split pattern | Server page.tsx loads data, client component handles interactivity — consistent across all pages | ✓ Good |
 
 ## Evolution
 
@@ -109,4 +106,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-23 after v1.1 milestone completion*
+*Last updated: 2026-03-23 after v1.1 milestone*
