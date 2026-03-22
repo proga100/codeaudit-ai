@@ -57,10 +57,11 @@ export function SeverityChart({ counts }: SeverityChartProps) {
           <Tooltip
             cursor={{ fill: "rgba(255,255,255,0.05)" }}
             contentStyle={{
-              background: "hsl(var(--card))",
+              background: "hsl(var(--surface))",
               border: "1px solid hsl(var(--border))",
-              borderRadius: 6,
+              borderRadius: 8,
               fontSize: 12,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}
             formatter={(value) => [value, "Findings"]}
           />

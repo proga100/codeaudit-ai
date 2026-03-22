@@ -1,11 +1,11 @@
 import type { FindingsSeverity } from "@codeaudit-ai/db";
 
-const SEVERITY_STYLES: Record<FindingsSeverity, string> = {
-  critical: "bg-red-500/15 text-red-400 border-red-500/30",
-  high:     "bg-orange-500/15 text-orange-400 border-orange-500/30",
-  medium:   "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  low:      "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  info:     "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+const SEVERITY_COLORS: Record<FindingsSeverity, string> = {
+  critical: "#ef4444",
+  high: "#f97316",
+  medium: "#eab308",
+  low: "#3b82f6",
+  info: "#71717a",
 };
 
 type SeverityBadgeProps = {
@@ -13,9 +13,16 @@ type SeverityBadgeProps = {
 };
 
 export function SeverityBadge({ severity }: SeverityBadgeProps) {
+  const color = SEVERITY_COLORS[severity];
+
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium uppercase ${SEVERITY_STYLES[severity]}`}
+      className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase border"
+      style={{
+        backgroundColor: `${color}1a`, // ~10% opacity
+        color,
+        borderColor: `${color}33`, // ~20% opacity
+      }}
     >
       {severity}
     </span>

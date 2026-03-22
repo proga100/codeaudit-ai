@@ -6,6 +6,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2026-03-22 — Design Overhaul Phase 1 & 2: Foundation & UI Primitives
+
+### Added
+
+- **CSS design tokens**: Full dark/light theme color system matching design prototype (accent yellow, surface/elevated layers, severity colors)
+- **Keyframe animations**: `fadeIn`, `slideIn`, `progressPulse`, `shimmer` with staggered delay utility classes
+- **JetBrains Mono font**: Added via `next/font/google` as `--font-jetbrains-mono` CSS variable
+- **`SelectCard` component**: Reusable selection card with accent border, subtle bg, and box-shadow glow on selected state
+- **`HealthScore` component**: SVG ring gauge with score/grade display, color-coded by threshold (green >70, yellow >40, red <40), sm/lg sizes
+- **`primary` button variant**: Yellow accent bg with dark text, hover brightness lift
+
+### Changed
+
+- **CSS variables rewritten**: Mapped all Shadcn HSL variables to CodeAudit design tokens; `--primary`/`--accent` now map to yellow accent color; `--radius` set to 14px
+- **Button component**: All variants now use `rounded-[10px]`, `transition-all duration-150`, `hover:-translate-y-[1px]`; destructive variant switched to subtle red bg/border style
+- **Input component**: Updated to elevated bg, accent border on focus, `rounded-[10px]`, added `mono` prop for JetBrains Mono
+- **Select trigger**: Matches input styling — elevated bg, accent focus, 10px radius
+- **Alert dialog**: Content uses surface bg, 18px radius, border from design tokens; overlay already had backdrop blur
+- **Severity badge**: Uses exact hex severity colors as inline styles for bg (10% opacity) and border (20% opacity)
+- **Severity chart**: Tooltip uses surface bg with enhanced shadow
+
+---
+
 ## 2026-03-22 — Replace LLM-Generated HTML Reports with Local Templates
 
 ### Changed
