@@ -1,139 +1,93 @@
-# Phase 2: Audit Setup - Discussion Log
+# Phase 2: Audit Engine - Discussion Log
 
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
-> Decisions are captured in CONTEXT.md — this log preserves the alternatives considered.
 
 **Date:** 2026-03-22
-**Phase:** 02-audit-setup
-**Areas discussed:** Repo browser UX, Audit config flow, Cost estimate gate, Sandbox behavior
+**Phase:** 02-audit-engine (rewritten after local-first pivot)
+**Areas discussed:** Prompt strategy, Progress experience, Cancellation & recovery, Multi-provider behavior
 
 ---
 
-## Repo Browser UX
+## Prompt Strategy
 
-### Repo List Organization
+### Command Execution
+| Option | Selected |
+|--------|----------|
+| App runs commands (Node.js child_process) | |
+| LLM runs them (tool use) | |
+| You decide | ✓ |
+**User's choice:** Claude's discretion
 
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Flat searchable list | All repos in one list with search bar — simple, like GitHub's repo tab | ✓ |
-| Grouped by org | Repos grouped under org headers with search within | |
-| You decide | Claude picks | |
+### Guide Chunking
+| Option | Selected |
+|--------|----------|
+| Per-phase chunks | ✓ |
+| Full guide + phase instruction | |
+**User's choice:** Per-phase chunks
 
-**User's choice:** Flat searchable list
-
-### Repo Info Display
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Name + description | Repo name and GitHub description | ✓ |
-| Language + size | Primary language badge, repo size | |
-| Last activity | Last push/commit date | |
-| Audit status | Whether audited before, last audit date | ✓ |
-
-**User's choice:** Name + description, Audit status (multi-select)
-
-### Repo Click Behavior
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Opens config page | Dedicated audit configuration page | |
-| Inline config panel | Expands config panel in the repo list | ✓ |
-| You decide | Claude picks | |
-
-**User's choice:** Inline config panel
+### Output Format
+| Option | Selected |
+|--------|----------|
+| Same as manual (markdown) | |
+| Adapted for web (JSON) | |
+| Both | |
+**User's choice:** Adapt for web (structured JSON), with export in multiple formats (md, json, text, pdf)
 
 ---
 
-## Audit Config Flow
+## Progress Experience
 
-### Audit Type Selection
+### Simplified View
+| Option | Selected |
+|--------|----------|
+| Phase name + bar | ✓ |
+| Terminal-style log | |
+**User's choice:** Phase name + progress bar + token count
 
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Card selection | 4 cards with icons, name, description, estimated time | ✓ |
-| Radio buttons | Simple radio list with type name and description | |
-| You decide | Claude picks | |
-
-**User's choice:** Card selection
-
-### Depth Selection
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Toggle with details | Quick/Deep toggle showing estimated time and cost | ✓ |
-| Comparison table | Side-by-side comparison of what's included | |
-| You decide | Claude picks | |
-
-**User's choice:** Toggle with details
-
-### API Key Picker
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Dropdown grouped by provider | One dropdown: "Anthropic — Personal", "OpenAI — Work", etc. | ✓ |
-| Provider first, then key | Pick provider card, then pick key | |
-| You decide | Claude picks | |
-
-**User's choice:** Dropdown grouped by provider
+### Detailed View (multi-select)
+Selected: Status icon, Findings count, Duration, Token cost — all four.
 
 ---
 
-## Cost Estimate Gate
+## Cancellation & Recovery
 
-### Estimate Precision
+### Partial Results
+| Option | Selected |
+|--------|----------|
+| Keep partial results | ✓ |
+| Discard everything | |
+**User's choice:** Keep partial results, show as "partial audit"
 
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Rough range | "$3–$8 estimated" based on repo size heuristic | ✓ |
-| Detailed breakdown | Per-phase token estimates with provider pricing | |
-| You decide | Claude picks | |
-
-**User's choice:** Rough range
-
-### Expensive Audit Handling
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Warning + confirm | Yellow warning banner, explicit "Start audit" click | ✓ |
-| Suggest alternatives | Suggest quick scan to reduce cost, option to proceed | |
-| You decide | Claude handles | |
-
-**User's choice:** Warning + confirm
+### Resume
+| Option | Selected |
+|--------|----------|
+| Resume from checkpoint | ✓ |
+| Start over | |
+**User's choice:** Resume from last completed phase
 
 ---
 
-## Sandbox Behavior
+## Multi-Provider Behavior
 
-### Clone Visibility
+### Auto Mode
+**User's choice:** Cost-optimized by default. Show estimated token usage and cost per model so user can override. If feasible, show model accuracy indicator.
 
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Invisible | Cloning happens behind the scenes | |
-| Brief status | "Cloning repository..." message, then transitions | ✓ |
-| You decide | Claude picks | |
-
-**User's choice:** Brief status
-
-### Clone Error Handling
-
-| Option | Description | Selected |
-|--------|-------------|----------|
-| Clear error + retry | Error message explaining issue, with Retry button | ✓ |
-| You decide | Claude handles | |
-
-**User's choice:** Clear error + retry
+### Output Normalization
+| Option | Selected |
+|--------|----------|
+| Normalize output | ✓ |
+| Show provider info | |
+**User's choice:** Normalize — same format regardless of provider
 
 ---
 
 ## Claude's Discretion
-
-- Card icons and descriptions for audit types
-- Search debounce and empty states
-- Inline config panel transitions
-- Cost heuristic formula
-- Sandbox container configuration
-- Clone timeout/retry limits
+- App-side vs LLM tool-use for bash commands
+- Phase chunking boundaries
+- SSE vs polling for progress
+- Checkpoint format and resume logic
+- Rate limit handling
 
 ## Deferred Ideas
-
-None — discussion stayed within phase scope
+- PDF export — follow-up after core formats
+- Model accuracy metrics — research needed

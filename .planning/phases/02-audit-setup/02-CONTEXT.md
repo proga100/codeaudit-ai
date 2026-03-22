@@ -1,43 +1,47 @@
-# Phase 2: Audit Setup - Context
+# Phase 2: Audit Engine - Context
 
 **Gathered:** 2026-03-22
-**Status:** Ready for planning
+**Status:** Ready for planning (REWRITTEN after local-first pivot — this phase is now Audit Engine, not Audit Setup)
 
 <domain>
 ## Phase Boundary
 
-Users can browse their GitHub repos, configure an audit (type, depth, provider/key), review a cost estimate, and submit for execution. Backend clones the selected repo into a sandboxed read-only container. This phase bridges the auth/key foundation (Phase 1) and the audit engine (Phase 3).
+A configured audit runs end-to-end — Phase 0 bootstrap through Phase 11 report generation — with live per-phase progress visible in the browser, real-time cost tracking, and safe folder cleanup on completion, cancellation, or failure. This is the core product — everything else is UI wrapper.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Repo Browser
-- **D-01:** Flat searchable list — all repos in one list with search bar, no org grouping.
-- **D-02:** Each repo shows: name, GitHub description, and audit status (whether audited before, last audit date).
-- **D-03:** Clicking a repo expands an inline config panel right in the list — no page navigation.
+### Prompt Strategy
+- **D-01:** The 93K audit guide is split into per-phase chunks. Each phase gets only its relevant section as context, not the full guide. This is critical for token efficiency.
+- **D-02:** Claude's discretion on whether the app runs bash commands itself (Node.js child_process) or uses LLM tool-use/function-calling. Pick the approach that's most reliable and safe.
+- **D-03:** Store structured JSON for the web UI — markdown/text files are export options, not the primary format.
+- **D-04:** Export supports multiple formats: markdown, JSON, text, PDF. User chooses format when downloading.
 
-### Audit Configuration
-- **D-04:** Audit type selection uses card UI — 4 cards with icons, name, description, and estimated time. Click to select. Types: full audit, security-only, team & collaboration, code quality.
-- **D-05:** Depth selection uses a toggle (Quick Scan / Deep Audit) that shows estimated time and cost for each option when selected.
-- **D-06:** API key selection uses a single dropdown grouped by provider (e.g., "Anthropic — Personal", "OpenAI — Work"). Multiple keys per provider from Phase 1 (D-07) are listed here.
+### Progress Experience
+- **D-05:** Simplified progress view shows: current phase name + progress bar (e.g., "Phase 4: Code Complexity — 35%") with token count below.
+- **D-06:** Expandable detailed view shows per-phase rows with: status icon (✓ complete, ▶ running, ○ pending, ✗ failed), findings count ("12 findings (3 critical)"), duration, and token cost per phase.
+- **D-07:** Progress state persists server-side — user can leave the tab and return to see accurate state.
 
-### Cost Estimate Gate
-- **D-07:** Cost estimate is a rough range (e.g., "$3–$8 estimated") based on repo size heuristic and audit type/depth. Not a per-phase breakdown.
-- **D-08:** When estimate exceeds $20, show a yellow warning banner with the cost. User must explicitly click "Start audit" to proceed. No automatic blocking.
+### Cancellation & Recovery
+- **D-08:** When user cancels mid-audit, keep partial results. Completed phases' findings are saved and shown in dashboard as "partial audit."
+- **D-09:** Resume from checkpoint — user can click "Resume" to continue from the last completed phase. No need to restart the full audit.
+- **D-10:** Folder is always unlocked on completion, cancellation, or failure — guaranteed cleanup.
 
-### Sandbox & Cloning
-- **D-09:** Cloning shows a brief status message ("Cloning repository...") before transitioning to audit progress view. Not invisible, not detailed.
-- **D-10:** Clone failures show a clear error message explaining what went wrong (access revoked, repo too large, timeout) with a "Retry" button.
+### Multi-Provider & Auto Mode
+- **D-11:** Auto mode defaults to cost-optimized model selection (cheapest model that meets phase complexity). Show estimated token usage and cost per model so user can override.
+- **D-12:** If possible, show model accuracy/quality indicator alongside cost to help users choose.
+- **D-13:** Normalize output across providers — same finding format regardless of which LLM produced it. User shouldn't notice which model ran.
 
 ### Claude's Discretion
-- Exact card icons and descriptions for audit types
-- Search debounce timing and empty state design
-- Inline config panel animation/transition
-- Cost heuristic formula (repo size × phases × provider pricing)
-- Sandbox container configuration details (Docker flags, network policy)
-- Clone timeout thresholds and retry limits
+- Whether to use LLM tool-use or app-side command execution for bash commands
+- Phase chunking strategy (exact section boundaries from the audit guide)
+- SSE vs polling for progress updates
+- Checkpoint storage format and resume logic
+- Model accuracy/quality metrics (if feasible to measure)
+- Rate limit handling and retry strategy
+- Context window management for large repos (sampling strategy)
 
 </decisions>
 
@@ -46,25 +50,29 @@ Users can browse their GitHub repos, configure an audit (type, depth, provider/k
 
 **Downstream agents MUST read these before planning or implementing.**
 
-### Audit Process (source of truth)
-- `manual-codebase-review-process/CLAUDE.md` — Safety rules, bootstrap script, sandbox requirements
-- `manual-codebase-review-process/codebase_review_guide.md` §"Run modes" — Defines security-only, team, and phase-by-phase audit modes
-- `manual-codebase-review-process/how_to_run_codebase_audit.md` §"Token budget reality check" — Repo size tiers and cost estimates
+### Audit Process (THE source of truth for what each phase does)
+- `manual-codebase-review-process/CLAUDE.md` — Safety rules, bootstrap script (Phase 0), progress tracking, budget monitoring, finding format, security finding format
+- `manual-codebase-review-process/codebase_review_guide.md` — The complete 13-phase audit engine. Every command, every check. This is what gets translated into LLM API calls.
+- `manual-codebase-review-process/how_to_run_codebase_audit.md` — Run modes (full, security-only, team, phase-by-phase), work volume estimation, budget gates
 
-### Research
-- `.planning/research/STACK.md` — Recommended stack including BullMQ for job queue
-- `.planning/research/PITFALLS.md` — Git hook RCE (CVE-2025-48384), sandbox isolation requirements
-- `.planning/research/ARCHITECTURE.md` — Sandbox container design, clone safety
+### Research (from project init — still relevant)
+- `.planning/research/STACK.md` — Vercel AI SDK 6 for multi-LLM abstraction
+- `.planning/research/ARCHITECTURE.md` — Web-Queue-Worker pattern, SSE for progress
+- `.planning/research/PITFALLS.md` — Prompt injection via repo contents, multi-provider prompt differences
 
 ### Phase 1 Code (integration points)
-- `apps/web/components/nav/sidebar.tsx` — Existing sidebar with "Repos" and "Audits" nav items
-- `apps/web/lib/github-app.ts` — GitHub App URL helpers for repo access
-- `apps/web/lib/github-token-refresh.ts` — Token refresh for GitHub API calls
-- `apps/web/lib/api-key-validator.ts` — Key validation service (reuse for key picker)
-- `packages/db/src/schema.ts` — Database schema including `audits` and `audit_phases` tables
+- `apps/web/actions/audit-start.ts` — Server Action that locks folder + creates DB record + redirects to queued page
+- `apps/web/lib/folder-safety.ts` — lockFolder/unlockFolder (guaranteed cleanup)
+- `apps/web/lib/cost-estimator.ts` — Pre-audit cost range estimation
+- `apps/web/lib/api-key-validator.ts` — Key validation per provider
+- `packages/db/src/schema.ts` — `audits` and `auditPhases` tables with JSONB findings
+- `packages/db/src/encryption.ts` — Key decryption for making API calls
+- `packages/audit-engine/` — Stub package (to be implemented)
+- `packages/llm-adapter/` — Stub package (to be implemented)
+- `apps/web/app/api/models/route.ts` — Dynamic model listing from provider APIs
 
 ### Phase 1 Context (prior decisions)
-- `.planning/phases/01-foundation/01-CONTEXT.md` — D-03 (per-repo selection), D-07 (multiple keys per provider), D-11 (sidebar nav), D-12 (Linear aesthetic)
+- `.planning/phases/01-foundation/01-CONTEXT.md` — D-15 (Auto mode), D-13 (fetch models from API), D-22 (Linear aesthetic)
 
 </canonical_refs>
 
@@ -72,45 +80,47 @@ Users can browse their GitHub repos, configure an audit (type, depth, provider/k
 ## Existing Code Insights
 
 ### Reusable Assets
-- `sidebar.tsx`: Sidebar nav already has "Repos" and "Audits" menu items — repo browser goes in the Repos route
-- `github-app.ts`: GitHub App helpers can fetch repo list via GitHub API
-- `github-token-refresh.ts`: Token refresh needed for GitHub API calls to list repos
-- `api-key-validator.ts`: Validation logic can be reused for the key picker UI (show validation status)
-- `schema.ts`: `audits` table with `repoId`, `auditType`, `auditDepth`, `status`, `apiKeyId` columns already exist
-- `encryption.ts`: AES-256-GCM utilities for decrypting keys server-side when starting an audit
+- `audit-start.ts`: Already creates audit record with status "queued", locks folder, creates output dir — the engine picks up from here
+- `folder-safety.ts`: lockFolder/unlockFolder with CRITICAL ORDER enforcement + guaranteed cleanup
+- `cost-estimator.ts`: Provider-aware cost estimation — reuse for per-phase cost tracking
+- `encryption.ts`: Decrypt API keys to make LLM calls
+- `api/models/route.ts`: Lists available models per provider — reuse for Auto mode model selection
+- `schema.ts`: `audits` table has `status`, `auditType`, `auditDepth`, `totalTokens`, `totalCost` columns; `auditPhases` has per-phase JSONB findings
+- Stub packages: `packages/audit-engine/`, `packages/llm-adapter/` ready to implement
 
 ### Established Patterns
-- Auth.js v5 database sessions — all server actions use `getRequiredSession()`
-- Server actions pattern in `apps/web/actions/` — follow for audit creation
-- Shadcn/ui components — reuse for cards, dropdowns, search input
-- Dark mode / Linear aesthetic — established in Phase 1
+- Server Actions in `apps/web/actions/` — use for audit control (start, cancel, resume)
+- SQLite with Drizzle ORM — use for audit state, phase checkpoints
+- Shadcn/ui + dark mode — use for progress UI components
 
 ### Integration Points
-- New "Repos" page at `apps/web/app/(dashboard)/repos/page.tsx`
-- New audit creation server action at `apps/web/actions/audits.ts`
-- Sandbox cloning logic goes in `packages/repo-sandbox/` (stub exists from Phase 1)
-- Audit job enqueue connects to BullMQ worker (stub exists at `worker/`)
+- `audit-start.ts` sets status to "queued" → engine picks up queued audits
+- `auditPhases` table stores per-phase results as JSONB → progress UI reads from here
+- `audits.status` field tracks: queued → running → completed / cancelled / failed / partial
+- SSE endpoint needed for real-time progress push to browser
+- Unlock must be called from engine on any exit path (complete, cancel, fail, crash)
 
 </code_context>
 
 <specifics>
 ## Specific Ideas
 
-- Inline config panel in repo list keeps the flow tight — user doesn't lose context navigating away
-- Card-based audit type selection should feel like Linear's project views — clean cards with clear icons
-- Cost estimate as a rough range manages expectations better than false precision
-- "Cloning repository..." status is a brief transitional state, not a full progress view (that's Phase 3)
+- The audit guide's bash commands (grep, find, git log) should be run by the app and results fed to the LLM — this is more reliable than LLM tool-use and keeps the safety model intact
+- Per-phase chunks from the audit guide should include the "finding format" template so the LLM outputs structured data
+- The "partial audit" state is valuable — even 5 completed phases give useful security insights
+- Resume should be seamless: click "Resume" on a partial audit, app picks up from the next unfinished phase
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+- PDF export (D-04) — requires a PDF generation library. Core JSON/markdown/text export in this phase; PDF can be added as a quick follow-up.
+- Model accuracy/quality metrics (D-12) — may not be feasible to measure reliably. Implement cost display first, add quality indicators if research finds a reliable method.
 
 </deferred>
 
 ---
 
-*Phase: 02-audit-setup*
+*Phase: 02-audit-engine*
 *Context gathered: 2026-03-22*
