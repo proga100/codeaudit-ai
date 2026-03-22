@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-22T10:01:51.285Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-22T10:05:43.511Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -55,6 +55,7 @@ Plan: 2 of 2
 | Phase 03-results-cost P01 | 15 | 3 tasks | 10 files |
 | Phase 03-results-cost P02 | 8 | 2 tasks | 5 files |
 | Phase 04-history-comparison P01 | 4 | 1 tasks | 1 files |
+| Phase 04-history-comparison P02 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase 03-results-cost]: Readable.toWeb cast uses import('node:stream').Readable type to satisfy TypeScript (not NodeJS.ReadableStream)
 - [Phase 04-history-comparison]: History page uses server-side Map grouping by folderPath — rows pre-sorted newest-first from DB, index 0=latest, index 1=previous, no client-side sort needed
 - [Phase 04-history-comparison]: Compare button pre-fills /audit/compare?a={latest.id}&b={previous.id} — history page is the primary entry point for compare flow
+- [Phase 04-history-comparison]: Findings diff uses Set-based matching with composite key (title + filePath[0]) — O(n) lookup, handles multi-file findings correctly
+- [Phase 04-history-comparison]: Section helper returns null when count===0 — no empty section headers, clean conditional rendering at call site
 
 ### Pending Todos
 
@@ -106,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T10:01:51.282Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-22T10:05:43.509Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
