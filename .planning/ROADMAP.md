@@ -64,11 +64,11 @@ Plans:
   2. User can filter and sort findings by severity (Critical, High, Medium, Low, Info) and switch between executive and technical report views
   3. User can download all audit artifacts — HTML dashboards and markdown reports — as a single zip file
   4. User sees total tokens used and total cost after an audit completes, and a budget warning if token usage significantly exceeded the estimate during the run
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: In-app results dashboard — findings list with filter/sort, score display, severity chart, executive vs. technical report tabs
-- [ ] 03-02: Report download (zip of HTML + markdown), cost/token summary on completion page, budget warning display
+- [x] 03-01-PLAN.md — Shared format utilities, SeverityBadge/SeverityChart/FindingCard/CostSummary components, results page (server + client with filter/sort), progress-view "View Results" transition
+- [ ] 03-02-PLAN.md — Zip download API route (archiver streaming), PDF generation route (Puppeteer), HTML report serve route, executive/technical in-app viewer pages (iframe)
 
 ### Phase 4: History & Comparison
 **Goal**: Users can browse all past audits for any folder and generate a delta comparison report when two or more audits exist for the same folder
@@ -94,5 +94,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. App Shell & Configuration | 1/3 | In Progress|  |
 | 2. Audit Engine | 3/3 | Complete   | 2026-03-22 |
-| 3. Results & Cost | 0/2 | Not started | - |
+| 3. Results & Cost | 1/2 | In Progress|  |
 | 4. History & Comparison | 0/2 | Not started | - |

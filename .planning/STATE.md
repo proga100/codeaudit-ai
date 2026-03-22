@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-22T09:08:44.783Z"
+stopped_at: Completed 03-results-cost-01-PLAN.md
+last_updated: "2026-03-22T09:36:28.180Z"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-22 after local-first pivot)
 
 **Core value:** Anyone can run a thorough codebase audit on any local folder without CLI setup — just open the app, pick a folder, and run.
-**Current focus:** Phase 02 — audit-engine
+**Current focus:** Phase 03 — results-cost
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
+Phase: 03 (results-cost) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Plan: Not started
 | Phase 02-audit-setup P01 | 8 | 3 tasks | 19 files |
 | Phase 02-audit-setup P02 | 5 | 2 tasks | 15 files |
 | Phase 02-audit-setup P03 | 3 | 2 tasks | 6 files |
+| Phase 03-results-cost P01 | 15 | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 02-audit-setup]: SSE stream polls SQLite every 500ms directly (no Redis pub/sub) — sufficient for local-first single-user app
 - [Phase 02-audit-setup]: State replay on reconnect: server emits all phase rows from DB immediately on connect, not just deltas
 - [Phase 02-audit-setup]: PHASE_NAMES duplicated in progress-view.tsx client bundle — audit-engine is server-only package
+- [Phase 03-results-cost]: Recharts installed directly (not via Shadcn chart CLI) since recharts is the underlying library — avoids adding chart.tsx wrapper overhead
+- [Phase 03-results-cost]: ResultsView accepts typed AuditRow/PhaseRow inline types instead of importing Drizzle select type — avoids server-module leak into client bundle
+- [Phase 03-results-cost]: View Results uses <a href> not router.push — intentional full navigation to trigger fresh server component load
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T09:08:44.775Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-results-cost/03-CONTEXT.md
+Last session: 2026-03-22T09:36:28.178Z
+Stopped at: Completed 03-results-cost-01-PLAN.md
+Resume file: None
