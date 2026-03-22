@@ -10,13 +10,27 @@ const exec = promisify(execFile);
  * CRITICAL ORDER: git push block MUST run before chmod -R a-w.
  * Once chmod runs, .git/config becomes unwritable and git remote set-url will fail.
  * See: manual-codebase-review-process/codebase_review_guide.md §Setup
+ *
+ * If the folder is already locked (from a previous failed run), unlock it first
+ * to ensure a clean lock cycle.
  */
 export async function lockFolder(folderPath: string): Promise<void> {
+  // Safety: unlock first if already locked (previous crash/failed audit)
+  try {
+    await exec("chmod", ["-R", "u+w", folderPath]);
+  } catch {
+    // Ignore — folder might not exist or already be writable
+  }
+
   const gitRepo = await isGitRepo(folderPath);
 
   // Step 1: Block git push FIRST (while .git/config is still writable)
   if (gitRepo) {
-    await exec("git", ["-C", folderPath, "remote", "set-url", "--push", "origin", "no_push"]);
+    try {
+      await exec("git", ["-C", folderPath, "remote", "set-url", "--push", "origin", "no_push"]);
+    } catch {
+      // Ignore — repo may not have an origin remote (local-only repo)
+    }
   }
 
   // Step 2: Lock filesystem read-only
@@ -24,8 +38,13 @@ export async function lockFolder(folderPath: string): Promise<void> {
 }
 
 export async function unlockFolder(folderPath: string): Promise<void> {
-  // Restore owner write access only (not group/other)
-  await exec("chmod", ["-R", "u+w", folderPath]);
+  try {
+    // Restore owner write access only (not group/other)
+    await exec("chmod", ["-R", "u+w", folderPath]);
+  } catch (err) {
+    console.error(`[folder-safety] Failed to unlock ${folderPath}:`, err);
+    // Don't rethrow — unlock failure shouldn't crash the app
+  }
 }
 
 export async function isGitRepo(folderPath: string): Promise<boolean> {
