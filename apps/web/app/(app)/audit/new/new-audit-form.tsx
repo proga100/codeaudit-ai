@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { SelectCard } from "@/components/ui/select-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -193,7 +193,27 @@ export function NewAuditForm({
     []
   );
 
+  // Debounced live validation on every keystroke (400ms)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleFolderChange = useCallback(
+    (value: string) => {
+      setFolder(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (!value.trim()) {
+        setFolderValidation(null);
+        setFolderStats(null);
+        return;
+      }
+      debounceRef.current = setTimeout(() => {
+        triggerValidation(value);
+      }, 400);
+    },
+    [triggerValidation]
+  );
+
   const handleFolderBlur = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     triggerValidation(folder);
   }, [folder, triggerValidation]);
 
@@ -332,7 +352,7 @@ export function NewAuditForm({
             mono
             placeholder="/Users/you/Projects/my-repo"
             value={folder}
-            onChange={(e) => setFolder(e.target.value)}
+            onChange={(e) => handleFolderChange(e.target.value)}
             onBlur={handleFolderBlur}
           />
           {/* Spinner while validating */}
