@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Clock, Key, Folder, Pencil } from "lucide-react";
 import { HealthScore } from "@/components/ui/health-score";
 
@@ -42,6 +43,7 @@ const quickActions = [
 ];
 
 export function DashboardClient({ audits }: { audits: DashboardAudit[] }) {
+  const router = useRouter();
   return (
     <div style={{ padding: "36px 40px", maxWidth: 920 }}>
       <h1 className="fade-in" style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", marginBottom: 28, color: "var(--text)" }}>
@@ -132,14 +134,14 @@ export function DashboardClient({ audits }: { audits: DashboardAudit[] }) {
                     )}
                   </div>
                   <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Link href="/audit/new"
-                      style={{ width: 30, height: 30, borderRadius: 8, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "background 0.15s" }}
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      style={{ width: 30, height: 30, borderRadius: 8, background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer", transition: "background 0.15s" }}
+                      onClick={(e) => { e.stopPropagation(); e.preventDefault(); router.push("/audit/new"); }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--elevated)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
                       <Pencil style={{ width: 14, height: 14, color: "var(--text-muted)" }} />
-                    </Link>
+                    </button>
                   </div>
                 </Link>
               );
