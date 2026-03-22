@@ -39,8 +39,8 @@ export function SeverityChart({ counts }: SeverityChartProps) {
   }));
 
   return (
-    <div style={{ height: 120 }}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: "100%", height: 200, minHeight: 200 }}>
+      <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ top: 4, right: 4, bottom: 4, left: -20 }}>
           <XAxis
             dataKey="severity"
