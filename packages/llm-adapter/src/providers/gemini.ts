@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import type { LanguageModelV1 } from "@ai-sdk/provider";
+import type { LanguageModel } from "ai";
 
-export function createGeminiProvider(apiKey: string, model: string): LanguageModelV1 {
+export function createGeminiProvider(apiKey: string, model: string): LanguageModel {
   const provider = createGoogleGenerativeAI({ apiKey });
   return provider(model);
 }

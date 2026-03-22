@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import type { LanguageModelV1 } from "@ai-sdk/provider";
+import type { LanguageModel } from "ai";
 
 export const AuditFindingSchema = z.object({
   id: z.string().default(() => crypto.randomUUID()),
@@ -23,7 +23,7 @@ export const PhaseOutputSchema = z.object({
 export type PhaseOutput = z.infer<typeof PhaseOutputSchema>;
 
 export async function runPhaseLlm(
-  model: LanguageModelV1,
+  model: LanguageModel,
   prompt: string,
   phaseNumber: number,
 ): Promise<{

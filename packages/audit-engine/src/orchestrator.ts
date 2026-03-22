@@ -47,30 +47,44 @@ export async function runAudit(config: AuditEngineConfig): Promise<void> {
     .where(eq(audits.id, config.auditId)).run();
 
   const phasesToRun = getPhasesForAuditType(config.auditType, config.depth);
+  console.log(`[audit-engine] Starting audit ${config.auditId}`);
+  console.log(`[audit-engine]   Folder: ${config.repoPath}`);
+  console.log(`[audit-engine]   Type: ${config.auditType}, Depth: ${config.depth}`);
+  console.log(`[audit-engine]   Provider: ${config.llmProvider}, Model: ${config.selectedModel ?? "AUTO"}`);
+  console.log(`[audit-engine]   Phases to run: ${phasesToRun.join(", ")}`);
 
   try {
     for (const phaseNum of phasesToRun) {
       // Poll cancel flag between phases (D-09 + PROG-05)
       const currentAudit = db.select().from(audits).where(eq(audits.id, config.auditId)).get();
-      if (currentAudit?.status === "cancelled") break;
+      if (currentAudit?.status === "cancelled") {
+        console.log(`[audit-engine] Audit cancelled by user — stopping at phase ${phaseNum}`);
+        break;
+      }
 
       // Skip already-completed phases — supports resume from checkpoint (D-09, EXEC-08)
       const existing = db.select().from(auditPhases)
         .where(and(eq(auditPhases.auditId, config.auditId), eq(auditPhases.phaseNumber, phaseNum)))
         .get();
-      if (existing?.status === "completed") continue;
+      if (existing?.status === "completed") {
+        console.log(`[audit-engine] Phase ${phaseNum} already completed — skipping`);
+        continue;
+      }
 
       const runner = getPhaseRunner(phaseNum);
       if (!runner) {
-        // Phase not yet implemented — skip gracefully
+        console.log(`[audit-engine] Phase ${phaseNum} has no runner — skipping`);
         await markPhaseSkipped(config.auditId, phaseNum);
         continue;
       }
 
+      console.log(`[audit-engine] ▶ Starting phase ${phaseNum}...`);
       await markPhaseRunning(config.auditId, phaseNum);
       try {
         await runner(ctx, phaseNum);
+        console.log(`[audit-engine] ✓ Phase ${phaseNum} completed`);
       } catch (err) {
+        console.error(`[audit-engine] ✗ Phase ${phaseNum} failed:`, err);
         await markPhaseFailed(config.auditId, phaseNum, String(err));
         // Non-fatal: continue with next phase
       }

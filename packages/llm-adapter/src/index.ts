@@ -1,4 +1,4 @@
-import type { LanguageModelV1 } from "@ai-sdk/provider";
+import type { LanguageModel } from "ai";
 import { createAnthropicProvider } from "./providers/anthropic";
 import { createOpenAIProvider } from "./providers/openai";
 import { createGeminiProvider } from "./providers/gemini";
@@ -11,9 +11,9 @@ export type LlmAdapterConfig = {
   model: string;  // already resolved via resolveModel()
 };
 
-// Returns the provider's LanguageModelV1 instance.
-// Vercel AI SDK's generateObject / generateText accept LanguageModelV1 at runtime.
-export function createLlmProvider(config: LlmAdapterConfig): LanguageModelV1 {
+// Returns the provider's LanguageModel instance.
+// Vercel AI SDK's generateObject / generateText accept LanguageModel at runtime.
+export function createLlmProvider(config: LlmAdapterConfig): LanguageModel {
   switch (config.provider) {
     case "anthropic": return createAnthropicProvider(config.apiKey, config.model);
     case "openai":    return createOpenAIProvider(config.apiKey, config.model);

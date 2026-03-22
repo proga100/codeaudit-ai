@@ -1,7 +1,7 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
-import type { LanguageModelV1 } from "@ai-sdk/provider";
+import type { LanguageModel } from "ai";
 
-export function createAnthropicProvider(apiKey: string, model: string): LanguageModelV1 {
+export function createAnthropicProvider(apiKey: string, model: string): LanguageModel {
   const provider = createAnthropic({ apiKey });
   return provider(model);
 }
