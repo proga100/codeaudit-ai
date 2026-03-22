@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A local web application that wraps the manual codebase audit process into a browser-based UI. Users run it on their machine (localhost), point it at a local folder, choose an audit type and depth, provide their own LLM API key (Anthropic, OpenAI, or Gemini), and get a comprehensive codebase health report — viewable in-app with option to download full reports. No code ever leaves the user's machine. Built initially for internal use, designed to distribute as a downloadable tool.
+A local web application (`npx codeaudit`) that wraps a manual 13-phase codebase audit process into a browser-based UI. Users run it on their machine at localhost, point it at local folders, choose an audit type/depth/LLM model, and get a comprehensive codebase health report — viewable in-app with severity charts, filterable findings, PDF/zip download, and audit comparison over time. No code ever leaves the user's machine.
 
 ## Core Value
 
@@ -12,82 +12,84 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Local folder selection with multi-folder support — v1.0
+- ✓ LLM API key management (AES-256-GCM encrypted, multiple per provider) — v1.0
+- ✓ Audit type selection (full, security-only, team, code quality) — v1.0
+- ✓ Audit depth selection (quick scan / deep audit) — v1.0
+- ✓ Local safety enforcement (chmod + git push block, guaranteed unlock) — v1.0
+- ✓ Full 13-phase audit engine with 3 LLM providers + AUTO model selection — v1.0
+- ✓ Phase 0 bootstrap (auto-detect stack, LOC, contributors) — v1.0
+- ✓ Phases 1-10 execution via structured LLM API calls — v1.0
+- ✓ Phase 11 HTML report generation (management + technical dashboards) — v1.0
+- ✓ Live SSE progress tracking with expandable per-phase detail — v1.0
+- ✓ In-app results dashboard (scores, severity charts, filterable findings) — v1.0
+- ✓ Downloadable reports (zip with HTML, markdown, JSON, PDF) — v1.0
+- ✓ Audit history per folder with score badges — v1.0
+- ✓ Audit comparison (delta report: resolved/new/persisted findings) — v1.0
+- ✓ Budget monitoring (real-time token/cost display, overrun warnings) — v1.0
+- ✓ Audit output directory (~/audit-{name}/) — v1.0
 
 ### Active
 
-- [ ] Local folder selection — users pick a local directory to audit via folder picker or path input
-- [ ] LLM API key management — users provide their own API keys (Anthropic, OpenAI, Gemini)
-- [ ] Audit type selection — users choose audit focus: full audit, security-only, team & collaboration, code quality
-- [ ] Audit depth selection — users choose between quick scan (~30 min) and deep audit (hours)
-- [ ] Local safety enforcement — app locks the target folder read-only, blocks git push, exactly like the manual process
-- [ ] Audit engine — translates the 13-phase CLI audit process into structured LLM API calls, running locally
-- [ ] Phase 0 bootstrap — auto-detects repo stack, structure, production URLs, contributors (same as manual CLAUDE.md bootstrap)
-- [ ] Phases 1-10 execution — orientation, dependencies, tests, complexity, git archaeology, security, deep reads, CI/CD, docs, final report
-- [ ] Phase 11 HTML reports — generates interactive management and technical dashboards
-- [ ] Live progress tracking — users see phase-by-phase status with simplified default view and expandable detail
-- [ ] In-app results dashboard — render findings with scores, charts, findings list directly in the app
-- [ ] Downloadable reports — users can download full HTML and markdown reports
-- [ ] Audit history — store completed audits locally so users can re-run and compare over time
-- [ ] Audit comparison (Phase 12) — when previous audit exists, generate comparison showing improvements/degradations
-- [ ] Budget monitoring — track and display token usage per audit using the user's API key
-- [ ] Audit output directory — all output goes to a separate audit directory (~/audit-{repo-name}/), never inside the repo
+- [ ] Multi-repo cross-product analysis (run individual audits + cross-repo review)
+- [ ] npm global install / Homebrew distribution
+- [ ] Model accuracy/quality metrics display
 
 ### Out of Scope
 
-- Multi-repo cross-product analysis — deferred to v2 milestone after single-repo is validated
-- Self-hosted LLM support — only cloud API providers for v1
-- Cloud/SaaS deployment — this is a local-first tool, no server infrastructure
-- GitHub OAuth / repo access — users point at local folders, no remote repo access needed
-- Mobile app — desktop browser only
+- Cloud/SaaS deployment — local-first tool by design
+- GitHub OAuth / remote repo access — users point at local folders
+- Automated fix/PR generation — read-only audit
 - Real-time collaborative auditing — single-user tool
-- Automated fix/PR generation — read-only audit, no code modifications
+- IDE plugin — web UI is the interface
+- Continuous monitoring — local tool, runs on demand
+- Mobile app — desktop browser only
 
 ## Context
 
-- **PIVOT (2026-03-22):** Architecture changed from cloud webapp with GitHub OAuth to local-first app. Reason: users won't trust giving repo access to third-party tools. The app now runs entirely on the user's machine — same flow as the manual process but with a UI wrapper.
-- The audit process is fully documented across 6 guide files in `manual-codebase-review-process/`
-- The manual process: clone/lock folder → run Claude Code → paste audit prompt → wait for results. This app automates all of that.
-- Safety model is defense-in-depth: filesystem lock → git push block → audit rules. The app enforces these programmatically on the local folder.
-- Users bring their own LLM API keys — no platform costs
-- The audit produces: findings.md, codebase_health.md, two HTML dashboards, budget log, progress tracking
-- Audit run modes: full, security-only, team & collaboration, phase-by-phase
-- Phase 1 code (Next.js, Drizzle, dark mode UI, API key encryption) is partially reusable for the local web UI
+- **v1.0 shipped (2026-03-22):** 7,860 LOC TypeScript, 93 commits, 171 files. Next.js 16, SQLite, Drizzle ORM, Vercel AI SDK 6, Shadcn/ui, Tailwind CSS 4, Recharts, Puppeteer.
+- **Architecture pivot (2026-03-22):** Changed from cloud webapp with GitHub OAuth to local-first. Users won't trust giving repo access to third-party tools.
+- The manual audit process (6 guide files in `manual-codebase-review-process/`) is the source of truth for audit logic.
+- Known issue: `packages/audit-engine/src/progress-emitter.ts` references `audit.provider` which is missing from the DB schema. Documented in deferred items.
 
 ## Constraints
 
-- **Local execution**: All code stays on the user's machine. No data sent anywhere except LLM API calls with the user's own key.
-- **Safety**: Target folder must be locked read-only before audit starts, git push must be blocked — exactly replicating the manual process.
-- **Multi-LLM**: Must support at least Anthropic, OpenAI, and Gemini APIs from day one.
-- **Cost transparency**: Users pay for their own tokens — the app must show real-time token usage and cost estimates.
-- **Existing guides**: The 13-phase audit logic in `codebase_review_guide.md` is the source of truth. The app implements this, not a reimagined version.
+- **Local execution**: All code stays on the user's machine. Only LLM API calls go outbound.
+- **Safety**: chmod read-only + git push block before every audit, guaranteed unlock on exit.
+- **Multi-LLM**: Anthropic, OpenAI, Gemini with provider-tuned prompts.
+- **Cost transparency**: Real-time token/cost display with budget overrun warnings.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Local-first (not cloud webapp) | Users won't trust giving repo access to third-party tools | ✓ Good |
-| Local web UI (localhost server) | Familiar browser-based UX, no Electron overhead | — Pending |
+| Local web UI (localhost server) | Familiar browser-based UX, no Electron overhead | ✓ Good |
 | BYOK (bring your own key) model | No platform AI costs; user controls spend | ✓ Good |
-| Single-repo first, multi-repo v2 | Reduce scope; validate core value before expanding | — Pending |
-| Wrapper around manual process | Exact same audit flow, just with a UI — proven process | — Pending |
+| Single-repo first, multi-repo v2 | Reduce scope; validate core value before expanding | ✓ Good |
+| Wrapper around manual process | Exact same audit flow, just with a UI — proven process | ✓ Good |
+| SQLite (not PostgreSQL) | Local tool needs zero-config storage | ✓ Good |
+| App-side command execution | More reliable than LLM tool-use, keeps safety model intact | ✓ Good |
+| Per-phase guide chunks | Token-efficient, avoids sending 93K guide per LLM call | ✓ Good |
+| Structured JSON storage | Web UI renders from JSON; markdown/PDF are export formats | ✓ Good |
+| SSE for progress (not WebSockets) | One-way server-to-client, simpler, auto-reconnects | ✓ Good |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd:transition`):
+**After each phase transition:**
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
 4. Decisions to log? → Add to Key Decisions
 5. "What This Is" still accurate? → Update if drifted
 
-**After each milestone** (via `/gsd:complete-milestone`):
+**After each milestone:**
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after local-first pivot*
+*Last updated: 2026-03-22 after v1.0 milestone*
