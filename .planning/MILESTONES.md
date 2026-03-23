@@ -1,5 +1,20 @@
 # Milestones
 
+## v1.2 Polyglot Audit Engine (Shipped: 2026-03-23)
+
+**Phases completed:** 4 phases, 6 plans, 12 tasks
+
+**Key accomplishments:**
+
+- Zod RepoContextSchema with 12 polyglot fields, audits.repo_context SQLite column, and dual getRepoContext/getRepoContextObject API with pre-v1.2 backward compatibility
+- Rewrote phase-00.ts to detect 9+ language ecosystems, per-language LOC for 11 groups, 7 CI systems, and polyglot monorepo tools — all persisted to audits.repoContext via Drizzle after generateObject
+- Sandboxed execCommand tool + runPhaseWithTools helper enabling LLM-driven polyglot auditing via Vercel AI SDK generateText with tools and PhaseOutputSchema structured output
+- Phases 1-5 (Orientation, Dependency Health, Test Coverage, Code Complexity, Git History) migrated from hardcoded JS/TS shell commands to LLM tool-use delegation via runPhaseWithTools()
+- Phases 6-9 (Security, Deep Reads, CI/CD, Documentation) migrated from hardcoded JS/TS shell commands to LLM-driven tool-use, completing full polyglot audit coverage across all 9 phases.
+- Structural sign-off of v1.2 Polyglot Audit Engine: TypeScript zero errors, all 9 phase runners delegate to runPhaseWithTools, Phase 0 covers Python and Go ecosystems, sandbox allows polyglot tools
+
+---
+
 ## v1.1 UI Redesign (Shipped: 2026-03-22)
 
 **Phases completed:** 4 phases, 9 plans, 16 tasks

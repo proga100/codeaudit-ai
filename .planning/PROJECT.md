@@ -40,17 +40,15 @@ Anyone can run a thorough, structured codebase health audit on any local codebas
 - ✓ History with folder grouping, selection system, bulk delete — v1.1
 - ✓ Comparison with delta banner, side-by-side cards, finding sections — v1.1
 - ✓ API Keys settings with masked list, edit/delete, inline add — v1.1
+- ✓ Polyglot audit engine — LLM-driven command generation for Python, Go, Rust, Java, and any language — v1.2
+- ✓ Structured RepoContext with language, package manager, test framework, CI system detection — v1.2
+- ✓ Sandboxed execCommand tool for safe LLM-driven codebase analysis — v1.2
 
 ### Active
 
-- [ ] Polyglot audit engine — replace hardcoded JS/TS commands with LLM-driven command generation per detected stack
 - [ ] Multi-repo cross-product analysis (run individual audits + cross-repo review)
 - [ ] npm global install / Homebrew distribution
 - [ ] Model accuracy/quality metrics display
-
-## Current Milestone: v1.2 Polyglot Audit Engine
-
-**Goal:** Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven command generation. The LLM reads the audit guide section + Phase 0 repo context and decides what commands to run per stack — making the audit accurate for Python, Go, Rust, Java, and any other language.
 
 **Target features:**
 - Enhanced Phase 0: structured RepoContext with primary language, package manager, test framework, CI system
