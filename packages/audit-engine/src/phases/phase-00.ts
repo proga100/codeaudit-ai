@@ -11,6 +11,7 @@ import type { AuditRunContext } from "../orchestrator";
 import type { PhaseRunner } from "../phase-registry";
 
 export const phase00Runner: PhaseRunner = async (ctx, phaseNumber) => {
+  console.log(`[phase-00] Starting polyglot bootstrap for ${ctx.repoPath}`);
   const { auditId, repoPath, auditOutputDir, llmProvider, decryptedApiKey, selectedModel } = ctx;
 
   // Run bootstrap detection commands — polyglot edition
@@ -26,35 +27,31 @@ export const phase00Runner: PhaseRunner = async (ctx, phaseNumber) => {
     // JS/TS ecosystem (P0-01)
     ["find", [repoPath, "-maxdepth", "2", "-name", "package.json", "-not", "-path", "*/node_modules/*"], "[ecosystem:js-package-json]"],
     ["find", [repoPath, "-maxdepth", "2", "-name", "tsconfig.json", "-not", "-path", "*/node_modules/*"], "[ecosystem:ts-tsconfig]"],
-    // Python ecosystem (P0-01)
-    ["find", [repoPath, "-maxdepth", "2", "-name", "requirements.txt", "-o", "-name", "pyproject.toml", "-o", "-name", "setup.py", "-o", "-name", "Pipfile", "-o", "-name", "setup.cfg"], "[ecosystem:python]"],
+    // Python ecosystem (P0-01) — use bash to group -o conditions properly
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "requirements.txt" -o -name "pyproject.toml" -o -name "setup.py" -o -name "Pipfile" -o -name "setup.cfg" \\) 2>/dev/null`], "[ecosystem:python]"],
     // Go ecosystem (P0-01)
     ["find", [repoPath, "-maxdepth", "2", "-name", "go.mod"], "[ecosystem:go]"],
     // Rust ecosystem (P0-01)
     ["find", [repoPath, "-maxdepth", "2", "-name", "Cargo.toml"], "[ecosystem:rust]"],
     // Java/Kotlin ecosystem (P0-01)
-    ["find", [repoPath, "-maxdepth", "2", "-name", "pom.xml", "-o", "-name", "build.gradle", "-o", "-name", "build.gradle.kts"], "[ecosystem:java-kotlin]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "pom.xml" -o -name "build.gradle" -o -name "build.gradle.kts" \\) 2>/dev/null`], "[ecosystem:java-kotlin]"],
     // Ruby ecosystem (P0-01)
     ["find", [repoPath, "-maxdepth", "2", "-name", "Gemfile"], "[ecosystem:ruby]"],
     // PHP ecosystem (P0-01)
     ["find", [repoPath, "-maxdepth", "2", "-name", "composer.json"], "[ecosystem:php]"],
     // .NET ecosystem (P0-01)
-    ["find", [repoPath, "-maxdepth", "2", "-name", "*.csproj", "-o", "-name", "*.sln", "-o", "-name", "*.fsproj"], "[ecosystem:dotnet]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "*.csproj" -o -name "*.sln" -o -name "*.fsproj" \\) 2>/dev/null`], "[ecosystem:dotnet]"],
     // Swift ecosystem (P0-01)
-    ["find", [repoPath, "-maxdepth", "2", "-name", "Package.swift", "-o", "-name", "*.xcodeproj"], "[ecosystem:swift]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "Package.swift" -o -name "*.xcodeproj" \\) 2>/dev/null`], "[ecosystem:swift]"],
 
     // Framework config detection (P0-01)
-    ["find", [repoPath, "-maxdepth", "2", "-name", "next.config.*", "-o", "-name", "nuxt.config.*", "-o",
-      "-name", "vite.config.*", "-o", "-name", "webpack.config.*", "-o",
-      "-name", "angular.json", "-o", "-name", "svelte.config.*",
-      "-not", "-path", "*/node_modules/*"], "[frameworks:js]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "next.config.*" -o -name "nuxt.config.*" -o -name "vite.config.*" -o -name "webpack.config.*" -o -name "angular.json" -o -name "svelte.config.*" \\) -not -path "*/node_modules/*" 2>/dev/null`], "[frameworks:js]"],
     // Python frameworks
-    ["find", [repoPath, "-maxdepth", "3", "-name", "manage.py", "-o", "-name", "wsgi.py", "-o",
-      "-name", "asgi.py"], "[frameworks:python]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 3 \\( -name "manage.py" -o -name "wsgi.py" -o -name "asgi.py" \\) 2>/dev/null`], "[frameworks:python]"],
 
     // Docker detection
     ["find", [repoPath, "-maxdepth", "2", "-name", "Dockerfile"], "[docker:dockerfile]"],
-    ["find", [repoPath, "-maxdepth", "2", "-name", "docker-compose.yml", "-o", "-name", "docker-compose.yaml"], "[docker:compose]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 2 \\( -name "docker-compose.yml" -o -name "docker-compose.yaml" \\) 2>/dev/null`], "[docker:compose]"],
 
     // CI detection (P0-03)
     ["find", [repoPath, "-maxdepth", "2", "-name", ".github", "-type", "d"], "[ci:github-actions-dir]"],
@@ -64,8 +61,8 @@ export const phase00Runner: PhaseRunner = async (ctx, phaseNumber) => {
     ["find", [repoPath, "-maxdepth", "1", "-name", ".travis.yml"], "[ci:travis]"],
     ["find", [repoPath, "-maxdepth", "2", "-name", "azure-pipelines.yml"], "[ci:azure-pipelines]"],
     ["find", [repoPath, "-maxdepth", "2", "-name", "bitbucket-pipelines.yml"], "[ci:bitbucket]"],
-    // GitHub Actions workflow files (if .github exists)
-    ["find", [repoPath + "/.github/workflows", "-name", "*.yml", "-o", "-name", "*.yaml"], "[ci:github-workflows]"],
+    // GitHub Actions workflow files (safe — uses -path under repoPath so no error if .github/ missing)
+    ["bash", ["-c", `find "${repoPath}" -path "*/.github/workflows/*.yml" -o -path "*/.github/workflows/*.yaml" 2>/dev/null`], "[ci:github-workflows]"],
 
     // LOC per language (P0-04)
     ["bash", ["-c", `find "${repoPath}" -type f \\( -name "*.ts" -o -name "*.tsx" \\) -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -not -path "*/build/*" | xargs wc -l 2>/dev/null | tail -1`], "[loc:TypeScript]"],
@@ -81,7 +78,7 @@ export const phase00Runner: PhaseRunner = async (ctx, phaseNumber) => {
     ["bash", ["-c", `find "${repoPath}" -type f -name "*.swift" -not -path "*/.git/*" -not -path "*/.build/*" | xargs wc -l 2>/dev/null | tail -1`], "[loc:Swift]"],
 
     // Monorepo detection (P0-05)
-    ["find", [repoPath, "-maxdepth", "1", "-name", "pnpm-workspace.yaml", "-o", "-name", "lerna.json", "-o", "-name", "nx.json", "-o", "-name", "turbo.json"], "[monorepo:js-tools]"],
+    ["bash", ["-c", `find "${repoPath}" -maxdepth 1 \\( -name "pnpm-workspace.yaml" -o -name "lerna.json" -o -name "nx.json" -o -name "turbo.json" \\) 2>/dev/null`], "[monorepo:js-tools]"],
     // Cargo workspaces — check root Cargo.toml for [workspace] section
     ["bash", ["-c", `grep -l "\\[workspace\\]" "${repoPath}/Cargo.toml" 2>/dev/null || echo ""`], "[monorepo:cargo-workspace]"],
     // Go workspaces — check go.work file
