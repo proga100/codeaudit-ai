@@ -34,7 +34,7 @@
 
 - [ ] **Phase 9: Phase 0 Enhancement** - Enrich Phase 0 output into a structured RepoContext covering language, package manager, test framework, CI, and monorepo tool detection
 - [x] **Phase 10: Tool-Use Infrastructure** - Build the execCommand tool and refactor the shared phase runner contract to accept guide section + RepoContext instead of hardcoded commands (completed 2026-03-23)
-- [ ] **Phase 11: Phase Runner Adaptation** - Migrate all 9 phase runners (phases 1-9) to the new tool-use contract so each runner is language-agnostic
+- [x] **Phase 11: Phase Runner Adaptation** - Migrate all 9 phase runners (phases 1-9) to the new tool-use contract so each runner is language-agnostic (completed 2026-03-23)
 - [ ] **Phase 12: Validation** - Confirm no regression on TypeScript repos and verify meaningful findings on Python and Go repos
 
 ## Phase Details
@@ -82,8 +82,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Migrate phases 1-5 to runPhaseWithTools (Orientation, Dependency Health, Test Coverage, Code Complexity, Git History)
-- [ ] 11-02-PLAN.md — Migrate phases 6-9 to runPhaseWithTools (Security, Deep Reads, CI/CD, Documentation)
+- [x] 11-01-PLAN.md — Migrate phases 1-5 to runPhaseWithTools (Orientation, Dependency Health, Test Coverage, Code Complexity, Git History)
+- [x] 11-02-PLAN.md — Migrate phases 6-9 to runPhaseWithTools (Security, Deep Reads, CI/CD, Documentation)
 
 ### Phase 12: Validation
 **Goal**: The refactored audit engine produces equivalent results to v1.1 on TypeScript repos and meaningful, language-specific findings on Python and Go repos
@@ -112,7 +112,7 @@ Plans:
 | 8. Data Views | v1.1 | 3/3 | Complete | 2026-03-23 |
 | 9. Phase 0 Enhancement | v1.2 | 2/2 | Complete | 2026-03-23 |
 | 10. Tool-Use Infrastructure | v1.2 | 1/1 | Complete    | 2026-03-23 |
-| 11. Phase Runner Adaptation | v1.2 | 0/2 | Not started | - |
+| 11. Phase Runner Adaptation | v1.2 | 2/2 | Complete   | 2026-03-23 |
 | 12. Validation | v1.2 | 0/TBD | Not started | - |
 
 ---

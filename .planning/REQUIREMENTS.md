@@ -21,15 +21,15 @@ Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven comm
 - [x] **PRF-01**: Each phase runner (1-9) sends the relevant audit guide section as the LLM prompt instead of hardcoded commands
 - [x] **PRF-02**: Each phase runner includes the Phase 0 RepoContext in the LLM prompt so the LLM knows the stack
 - [x] **PRF-03**: Phase runners use Vercel AI SDK tool-use to let the LLM execute shell commands (execCommand tool) rather than pre-running them
-- [ ] **PRF-04**: Phase 1 (Orientation) works for any language — file discovery, structure analysis, test file counting adapted by LLM
-- [ ] **PRF-05**: Phase 2 (Dependency Health) works for any language — LLM runs the right audit tool (npm audit, pip-audit, cargo audit, go vuln, etc.)
-- [ ] **PRF-06**: Phase 3 (Test Coverage) works for any language — LLM finds tests using language-appropriate patterns
-- [ ] **PRF-07**: Phase 4 (Code Complexity) works for any language — LLM counts functions/classes using language-appropriate patterns
-- [ ] **PRF-08**: Phase 5 (Git History) file churn analysis covers detected language file extensions, not just *.ts
-- [ ] **PRF-09**: Phase 6 (Security) searches for language-appropriate secret patterns, injection vectors, and env access
-- [ ] **PRF-10**: Phase 7 (Deep Reads) discovers payment/auth/error handling code in any language
-- [ ] **PRF-11**: Phase 8 (CI/CD) checks for all major CI systems, not just GitHub Actions
-- [ ] **PRF-12**: Phase 9 (Documentation) counts doc coverage using language-native doc styles (docstrings, GoDoc, RustDoc, JavaDoc, JSDoc)
+- [x] **PRF-04**: Phase 1 (Orientation) works for any language — file discovery, structure analysis, test file counting adapted by LLM
+- [x] **PRF-05**: Phase 2 (Dependency Health) works for any language — LLM runs the right audit tool (npm audit, pip-audit, cargo audit, go vuln, etc.)
+- [x] **PRF-06**: Phase 3 (Test Coverage) works for any language — LLM finds tests using language-appropriate patterns
+- [x] **PRF-07**: Phase 4 (Code Complexity) works for any language — LLM counts functions/classes using language-appropriate patterns
+- [x] **PRF-08**: Phase 5 (Git History) file churn analysis covers detected language file extensions, not just *.ts
+- [x] **PRF-09**: Phase 6 (Security) searches for language-appropriate secret patterns, injection vectors, and env access
+- [x] **PRF-10**: Phase 7 (Deep Reads) discovers payment/auth/error handling code in any language
+- [x] **PRF-11**: Phase 8 (CI/CD) checks for all major CI systems, not just GitHub Actions
+- [x] **PRF-12**: Phase 9 (Documentation) counts doc coverage using language-native doc styles (docstrings, GoDoc, RustDoc, JavaDoc, JSDoc)
 - [x] **PRF-13**: All refactored phases still output the same AuditFindings JSON schema — downstream UI/reports unchanged
 - [x] **PRF-14**: The execCommand tool is sandboxed: read-only, no write/delete/network commands, timeout enforced
 
@@ -71,15 +71,15 @@ Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven comm
 | PRF-03 | Phase 10 | Complete |
 | PRF-13 | Phase 10 | Complete |
 | PRF-14 | Phase 10 | Complete |
-| PRF-04 | Phase 11 | Pending |
-| PRF-05 | Phase 11 | Pending |
-| PRF-06 | Phase 11 | Pending |
-| PRF-07 | Phase 11 | Pending |
-| PRF-08 | Phase 11 | Pending |
-| PRF-09 | Phase 11 | Pending |
-| PRF-10 | Phase 11 | Pending |
-| PRF-11 | Phase 11 | Pending |
-| PRF-12 | Phase 11 | Pending |
+| PRF-04 | Phase 11 | Complete |
+| PRF-05 | Phase 11 | Complete |
+| PRF-06 | Phase 11 | Complete |
+| PRF-07 | Phase 11 | Complete |
+| PRF-08 | Phase 11 | Complete |
+| PRF-09 | Phase 11 | Complete |
+| PRF-10 | Phase 11 | Complete |
+| PRF-11 | Phase 11 | Complete |
+| PRF-12 | Phase 11 | Complete |
 | VAL-01 | Phase 12 | Pending |
 | VAL-02 | Phase 12 | Pending |
 | VAL-03 | Phase 12 | Pending |

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Polyglot Audit Engine
-status: Ready to plan
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-03-23T03:04:43.312Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-03-23T03:10:55.066Z"
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 3
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-23 after v1.2 milestone start)
 
 **Core value:** Anyone can run a thorough codebase audit on any local folder without CLI setup — just open the app, pick a folder, and run.
-**Current focus:** Phase 10 — tool-use-infrastructure
+**Current focus:** Phase 11 — phase-runner-adaptation
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
+Phase: 11 (phase-runner-adaptation) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -44,6 +44,8 @@ Plan: Not started
 | Phase 09-phase-0-enhancement P01 | 3 | 2 tasks | 5 files |
 | Phase 09-phase-0-enhancement P02 | 8 | 1 tasks | 1 files |
 | Phase 10-tool-use-infrastructure P01 | 2 | 2 tasks | 4 files |
+| Phase 11-phase-runner-adaptation P01 | 5 | 2 tasks | 5 files |
+| Phase 11-phase-runner-adaptation P02 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -64,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 10-01]: Vercel AI SDK v6 tool() uses inputSchema (not parameters) — discovered from type definitions, fixed at task time
 - [Phase 10-01]: Sandboxed exec-command tool uses allowlist + blocklist + bash -c inspection — LLM gets '(blocked: reason)' string on rejection, not exception
 - [Phase 10-01]: stepCountIs(15) cap on tool-use rounds balances thorough auditing with bounded cost
+- [Phase 11-01]: Each phase runner reduced to import + single delegation call — all orchestration lives in runPhaseWithTools
+- [Phase 11-01]: Export names preserved (phase01Runner through phase05Runner) so phase-registry/index.ts requires no changes
 
 ### Pending Todos
 
@@ -75,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T03:04:09.262Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-03-23T03:10:55.064Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
