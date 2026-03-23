@@ -9,8 +9,14 @@ const ANTHROPIC_MODELS = [
   { id: "claude-haiku-3-5", name: "Claude Haiku 3.5" },
 ];
 
-// OpenAI model filter pattern
-const OPENAI_PATTERN = /^gpt-4/;
+// OpenAI models that support structured output (json_schema response format).
+// Legacy models (gpt-4-0613, gpt-4-0314, gpt-4-turbo-2024-04-09) do NOT support it.
+const OPENAI_SUPPORTED_MODELS = new Set([
+  "gpt-4o", "gpt-4o-2024-08-06", "gpt-4o-2024-11-20",
+  "gpt-4o-mini", "gpt-4o-mini-2024-07-18",
+  "o1", "o1-2024-12-17", "o1-mini", "o1-mini-2024-09-12",
+  "o3", "o3-mini", "o4-mini",
+]);
 
 export async function GET(request: NextRequest) {
   const keyId = request.nextUrl.searchParams.get("keyId");
@@ -51,9 +57,8 @@ async function fetchModelsForProvider(
       if (res.ok) {
         const data = await res.json() as { data: Array<{ id: string }> };
         return data.data
-          .filter(m => OPENAI_PATTERN.test(m.id))
-          .map(m => ({ id: m.id, name: m.id }))
-          .slice(0, 10);
+          .filter(m => OPENAI_SUPPORTED_MODELS.has(m.id))
+          .map(m => ({ id: m.id, name: m.id }));
       }
     }
 
