@@ -67,14 +67,42 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
       prompt: prompt + jsonInstruction,
       tools: { execCommand: execCommandTool },
       stopWhen: stepCountIs(8),
-      maxOutputTokens: 4096,
+      maxOutputTokens: 16384,
     });
 
     // Parse JSON from the LLM's final text response
     const text = result.text.trim();
     // Extract JSON — handle cases where LLM wraps in ```json ... ```
-    const jsonStr = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    const parsed = PhaseOutputSchema.safeParse(JSON.parse(jsonStr));
+    let jsonStr = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+
+    // Try parsing, with repair for truncated JSON
+    let jsonObj: unknown;
+    try {
+      jsonObj = JSON.parse(jsonStr);
+    } catch {
+      // Attempt repair: close open strings/arrays/objects
+      let repaired = jsonStr;
+      // Close unclosed string
+      const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
+      if (quoteCount % 2 !== 0) repaired += '"';
+      // Close unclosed brackets
+      const opens = (repaired.match(/[{[]/g) || []).length;
+      const closes = (repaired.match(/[}\]]/g) || []).length;
+      for (let i = 0; i < opens - closes; i++) {
+        // Guess: if last unclosed was array use ], else }
+        repaired += repaired.lastIndexOf("[") > repaired.lastIndexOf("{") ? "]" : "}";
+      }
+      // Remove trailing comma before closing bracket
+      repaired = repaired.replace(/,\s*([}\]])/g, "$1");
+      try {
+        jsonObj = JSON.parse(repaired);
+        console.log(`[audit-engine] Phase ${phaseNumber}: repaired truncated JSON`);
+      } catch (e2) {
+        throw e2; // let outer catch handle
+      }
+    }
+
+    const parsed = PhaseOutputSchema.safeParse(jsonObj);
     if (parsed.success) {
       phaseOutput = parsed.data;
     } else {
