@@ -1,4 +1,6 @@
 export { runAudit } from "./orchestrator";
+export { RepoContextSchema } from "./repo-context";
+export type { RepoContext } from "./repo-context";
 export type { AuditEngineConfig, AuditRunContext } from "./orchestrator";
 export { registerPhaseRunner, getPhaseRunner } from "./phase-registry";
 export type { PhaseRunner } from "./phase-registry";
