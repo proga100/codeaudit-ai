@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateText, Output, stepCountIs } from "ai";
-import { PhaseOutputSchema } from "./finding-extractor";
+import { PhaseOutputSchema, type PhaseOutput } from "./finding-extractor";
 import { buildToolUsePhasePrompt, FINDING_FORMAT_TEMPLATE } from "./prompt-builder";
 import { createExecCommandTool } from "./tools/exec-command-tool";
 import { getGuideChunk } from "./guide-chunks";
@@ -50,24 +50,31 @@ export async function runPhaseWithTools(
   //    - output: Output.object({ schema: PhaseOutputSchema }) — structured output matching existing schema (PRF-13)
   //    - stopWhen: stepCountIs(15) — cap at 15 tool call rounds to prevent infinite loops
   //    - maxOutputTokens: 16384 — enough for findings JSON
-  const result = await generateText({
-    model,
-    prompt,
-    tools: { execCommand: execCommandTool },
-    output: Output.object({ schema: PhaseOutputSchema }),
-    stopWhen: stepCountIs(8),
-    maxOutputTokens: 4096,
-  });
+  type PhaseResult = { findings: PhaseOutput["findings"]; phaseScore: number; summary: string };
+  const emptyResult: PhaseResult = { findings: [], phaseScore: 0, summary: "Phase produced no output." };
+  let phaseOutput: PhaseResult;
+  let totalTokens = 0;
 
-  // 5. Extract structured output
-  //    In AI SDK v6 with output, the result has .output property containing the parsed object
-  //    If the LLM didn't produce output (e.g., hit step limit), use empty findings
-  const phaseOutput = result.output ?? { findings: [], overallScore: 0, summary: "Phase produced no output — LLM may have exhausted tool call steps." };
+  try {
+    const result = await generateText({
+      model,
+      prompt,
+      tools: { execCommand: execCommandTool },
+      output: Output.object({ schema: PhaseOutputSchema }),
+      stopWhen: stepCountIs(8),
+      maxOutputTokens: 4096,
+    });
 
-  // 6. Extract token usage (AI SDK v6 uses inputTokens/outputTokens)
-  const inputTokens = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;
-  const outputTokens = (result.usage as any).outputTokens ?? (result.usage as any).completionTokens ?? 0;
-  const totalTokens = inputTokens + outputTokens;
+    phaseOutput = result.output ?? emptyResult;
+    const inputTokens = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;
+    const outputTokens = (result.usage as any).outputTokens ?? (result.usage as any).completionTokens ?? 0;
+    totalTokens = inputTokens + outputTokens;
+  } catch (err: unknown) {
+    // AI_NoOutputGeneratedError, AI_RetryError, etc. — don't crash the phase
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.warn(`[audit-engine] Phase ${phaseNumber} (tool-use): LLM error — ${errMsg.slice(0, 200)}`);
+    phaseOutput = { ...emptyResult, summary: `Phase failed: ${errMsg.slice(0, 300)}` };
+  }
 
   console.log(
     `[audit-engine] Phase ${phaseNumber} (tool-use): ${phaseOutput.findings.length} findings, ${totalTokens} tokens`
