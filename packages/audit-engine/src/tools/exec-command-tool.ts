@@ -141,8 +141,8 @@ export function createExecCommandTool(repoPath: string, timeoutMs = DEFAULT_TIME
       // 5. Execute the command within the repository directory
       const output = await execCommand(command, args, repoPath, effectiveTimeout);
 
-      // 6. Truncate output to prevent context window explosion during multi-step tool-use
-      const MAX_OUTPUT_CHARS = 8000; // ~2K tokens — keeps total context manageable across 8 steps
+      // 6. Truncate only truly massive output (e.g. cat on a 10MB file)
+      const MAX_OUTPUT_CHARS = 100_000; // ~25K tokens — generous limit, let the LLM work
       if (output.length > MAX_OUTPUT_CHARS) {
         return output.slice(0, MAX_OUTPUT_CHARS) + `\n\n... (truncated — ${output.length} chars total, showing first ${MAX_OUTPUT_CHARS})`;
       }

@@ -66,8 +66,8 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
       model,
       prompt: prompt + jsonInstruction,
       tools: { execCommand: execCommandTool },
-      stopWhen: stepCountIs(8),
-      maxOutputTokens: 16384,
+      stopWhen: stepCountIs(20),
+      maxOutputTokens: 65536,
     });
 
     // Parse JSON from the LLM's final text response
