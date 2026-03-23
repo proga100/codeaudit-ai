@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 CodeAudit MVP** — Phases 1-4 (shipped 2026-03-22)
 - ✅ **v1.1 UI Redesign** — Phases 5-8 (shipped 2026-03-23)
-- 🚧 **v1.2 Polyglot Audit Engine** — Phases 9-12 (in progress)
+- ✅ **v1.2 Polyglot Audit Engine** — Phases 9-12 (shipped 2026-03-23)
 
 ## Phases
 
@@ -28,14 +28,14 @@
 
 </details>
 
-### 🚧 v1.2 Polyglot Audit Engine (In Progress)
+### ✅ v1.2 Polyglot Audit Engine (Shipped 2026-03-23)
 
 **Milestone Goal:** Replace hardcoded JS/TS shell commands with LLM-driven command generation so the audit engine produces accurate, meaningful findings for any language — Python, Go, Rust, Java, and beyond.
 
 - [ ] **Phase 9: Phase 0 Enhancement** - Enrich Phase 0 output into a structured RepoContext covering language, package manager, test framework, CI, and monorepo tool detection
 - [x] **Phase 10: Tool-Use Infrastructure** - Build the execCommand tool and refactor the shared phase runner contract to accept guide section + RepoContext instead of hardcoded commands (completed 2026-03-23)
 - [x] **Phase 11: Phase Runner Adaptation** - Migrate all 9 phase runners (phases 1-9) to the new tool-use contract so each runner is language-agnostic (completed 2026-03-23)
-- [ ] **Phase 12: Validation** - Confirm no regression on TypeScript repos and verify meaningful findings on Python and Go repos
+- [x] **Phase 12: Validation** - Confirm no regression on TypeScript repos and verify meaningful findings on Python and Go repos (completed 2026-03-23)
 
 ## Phase Details
 
@@ -96,7 +96,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Structural validation of polyglot refactoring (TS build, phase runner delegation, Python/Go detection)
+- [x] 12-01-PLAN.md — Structural validation of polyglot refactoring (TS build, phase runner delegation, Python/Go detection)
 
 ## Progress
 
@@ -113,7 +113,7 @@ Plans:
 | 9. Phase 0 Enhancement | v1.2 | 2/2 | Complete | 2026-03-23 |
 | 10. Tool-Use Infrastructure | v1.2 | 1/1 | Complete    | 2026-03-23 |
 | 11. Phase Runner Adaptation | v1.2 | 2/2 | Complete    | 2026-03-23 |
-| 12. Validation | v1.2 | 0/TBD | Not started | - |
+| 12. Validation | v1.2 | 1/1 | Complete | 2026-03-23 |
 
 ---
 *Full v1.0 details archived in `.planning/milestones/v1.0-ROADMAP.md`*

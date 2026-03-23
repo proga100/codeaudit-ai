@@ -35,9 +35,9 @@ Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven comm
 
 ### Validation (VAL)
 
-- [ ] **VAL-01**: Audit of a TypeScript/Next.js repo produces equivalent results to v1.1 (no regression)
-- [ ] **VAL-02**: Audit of a Python repo produces meaningful findings (dependencies, tests, security, complexity detected)
-- [ ] **VAL-03**: Audit of a Go repo produces meaningful findings (dependencies, tests, security, complexity detected)
+- [x] **VAL-01**: Audit of a TypeScript/Next.js repo produces equivalent results to v1.1 (no regression)
+- [x] **VAL-02**: Audit of a Python repo produces meaningful findings (dependencies, tests, security, complexity detected)
+- [x] **VAL-03**: Audit of a Go repo produces meaningful findings (dependencies, tests, security, complexity detected)
 
 ## v2 Requirements
 
@@ -80,9 +80,9 @@ Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven comm
 | PRF-10 | Phase 11 | Complete |
 | PRF-11 | Phase 11 | Complete |
 | PRF-12 | Phase 11 | Complete |
-| VAL-01 | Phase 12 | Pending |
-| VAL-02 | Phase 12 | Pending |
-| VAL-03 | Phase 12 | Pending |
+| VAL-01 | Phase 12 | Complete |
+| VAL-02 | Phase 12 | Complete |
+| VAL-03 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 23 total (note: file header previously said 20 — actual count from listed requirements is 23)
