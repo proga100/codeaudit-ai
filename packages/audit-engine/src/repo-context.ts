@@ -21,8 +21,8 @@ export const RepoContextSchema = z.object({
   // P0-05: Monorepo detection (polyglot)
   isMonorepo: z.boolean(),
   monorepoTool: z.string(),                // e.g. "turborepo", "cargo workspaces", "go modules", "gradle", "maven", "lerna", "nx", "none"
-  // P0-04: LOC by language (not just a single number)
-  locByLanguage: z.record(z.string(), z.number()), // e.g. { "TypeScript": 5000, "Python": 3000 }
+  // P0-04: LOC by language — array of {language, lines} pairs (OpenAI rejects z.record in structured output)
+  locByLanguage: z.array(z.object({ language: z.string(), lines: z.number() })), // e.g. [{ language: "TypeScript", lines: 5000 }]
   totalLinesOfCode: z.number(),
   // Preserved from v1
   contributorsLast12Months: z.array(z.object({ name: z.string(), commits: z.number() })),

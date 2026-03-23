@@ -61,7 +61,8 @@ export async function runPhaseWithTools(
 
   // 5. Extract structured output
   //    In AI SDK v6 with output, the result has .output property containing the parsed object
-  const phaseOutput = result.output;
+  //    If the LLM didn't produce output (e.g., hit step limit), use empty findings
+  const phaseOutput = result.output ?? { findings: [], overallScore: 0, summary: "Phase produced no output — LLM may have exhausted tool call steps." };
 
   // 6. Extract token usage (AI SDK v6 uses inputTokens/outputTokens)
   const inputTokens = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;

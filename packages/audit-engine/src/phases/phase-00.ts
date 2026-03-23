@@ -159,7 +159,7 @@ Instructions for each field:
 
 **monorepoTool**: e.g. "turborepo", "nx", "lerna", "pnpm workspaces", "cargo workspaces", "go workspaces", "gradle", "maven", "none".
 
-**locByLanguage**: Parse each [loc:LANGUAGE] labeled output for the total line count. Use the last number before "total" in the wc -l output, or the single number if only one file counted. Keys should be language names e.g. { "TypeScript": 5000, "Python": 3000 }. Omit languages with 0 lines.
+**locByLanguage**: Parse each [loc:LANGUAGE] labeled output for the total line count. Use the last number before "total" in the wc -l output, or the single number if only one file counted. Return as array of objects e.g. [{ "language": "TypeScript", "lines": 5000 }, { "language": "Python", "lines": 3000 }]. Omit languages with 0 lines.
 
 **totalLinesOfCode**: Sum of all locByLanguage values.
 
@@ -193,8 +193,8 @@ Instructions for each field:
     .run();
 
   // Write repo_context.md to audit output dir (backward compat — EXEC-07: never write to repoPath)
-  const locLines = Object.entries(repoContext.locByLanguage)
-    .map(([lang, loc]) => `- ${lang}: ${loc.toLocaleString()} lines`)
+  const locLines = repoContext.locByLanguage
+    .map((entry) => `- ${entry.language}: ${entry.lines.toLocaleString()} lines`)
     .join("\n");
 
   const contextMd = `# Repo Context (auto-detected)

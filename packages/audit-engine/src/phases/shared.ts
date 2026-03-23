@@ -53,10 +53,10 @@ function formatRepoContextForPrompt(ctx: RepoContext): string {
     `Monorepo: ${ctx.isMonorepo ? `yes (${ctx.monorepoTool})` : "no"}`,
     `Lines of Code: ${ctx.totalLinesOfCode.toLocaleString()}`,
   ];
-  if (Object.keys(ctx.locByLanguage).length > 0) {
+  if (ctx.locByLanguage.length > 0) {
     lines.push("LOC by Language:");
-    for (const [lang, count] of Object.entries(ctx.locByLanguage)) {
-      lines.push(`  ${lang}: ${count.toLocaleString()}`);
+    for (const entry of ctx.locByLanguage) {
+      lines.push(`  ${entry.language}: ${entry.lines.toLocaleString()}`);
     }
   }
   if (ctx.contributorsLast12Months.length > 0) {
