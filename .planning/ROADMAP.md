@@ -49,10 +49,11 @@
   3. LOC counts include .py, .go, .rs, .java, .kt, .rb, .php, .cs, .cpp, .c, and .swift files — not just .ts/.js
   4. Monorepo detection works for Cargo workspaces, Go modules, Gradle multi-project, and Maven multi-module — not only JS tooling
   5. RepoContext is persisted to the audit record and readable by all subsequent phase runners without re-running Phase 0
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: Implement RepoContext schema and Phase 0 detection logic
+- [x] 09-01-PLAN.md — Define RepoContext schema, add DB column, update shared helpers for typed access
+- [ ] 09-02-PLAN.md — Rewrite Phase 0 detection commands and LLM prompt for polyglot support
 
 ### Phase 10: Tool-Use Infrastructure
 **Goal**: A sandboxed execCommand tool exists and all phase runners share a new contract: receive audit guide section + RepoContext, call execCommand as needed, return AuditFindings JSON
@@ -109,7 +110,7 @@ Plans:
 | 6. Shell & Onboarding | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 7. Audit Flows | v1.1 | 2/2 | Complete | 2026-03-22 |
 | 8. Data Views | v1.1 | 3/3 | Complete | 2026-03-23 |
-| 9. Phase 0 Enhancement | v1.2 | 0/TBD | Not started | - |
+| 9. Phase 0 Enhancement | v1.2 | 0/2 | Not started | - |
 | 10. Tool-Use Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 11. Phase Runner Adaptation | v1.2 | 0/TBD | Not started | - |
 | 12. Validation | v1.2 | 0/TBD | Not started | - |
