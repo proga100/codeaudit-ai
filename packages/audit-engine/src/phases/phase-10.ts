@@ -42,8 +42,26 @@ Produce:
 2. summary: 2-3 paragraph executive summary of overall codebase health
 3. phaseScore: overall health score 0-10 (10 = excellent, 0 = critical failures)`;
 
-  const model = getModel(ctx, phaseNumber);
-  const { findings, summary, score, usage } = await runPhaseLlm(model as Parameters<typeof runPhaseLlm>[0], prompt, phaseNumber);
+  // Try LLM synthesis, but don't let it block report generation
+  let summary = `Audit completed with ${allFindings.length} findings across ${allPhases.filter(p => p.status === "completed").length} phases.`;
+  let score = 50; // default
+  let llmTokens = 0;
+  let topFindings = allFindings.slice(0, 10);
+
+  try {
+    const model = getModel(ctx, phaseNumber);
+    const result = await runPhaseLlm(model as Parameters<typeof runPhaseLlm>[0], prompt, phaseNumber);
+    if (result.findings.length > 0) topFindings = result.findings;
+    if (result.summary) summary = result.summary;
+    score = result.score || score;
+    llmTokens = result.usage.totalTokens;
+  } catch (err) {
+    console.warn(`[audit-engine] Phase 10: LLM synthesis failed — using aggregated findings directly. Error: ${String(err).slice(0, 150)}`);
+    // Calculate score from severity distribution
+    const critical = allFindings.filter(f => f.severity === "critical").length;
+    const high = allFindings.filter(f => f.severity === "high").length;
+    score = Math.max(0, Math.min(100, 100 - (critical * 15) - (high * 8)));
+  }
 
   // Build final report markdown
   const outputMd = `# Final Report — Codebase Health Audit
@@ -54,11 +72,11 @@ Generated: ${new Date().toISOString()}
 
 ${summary}
 
-## Overall Health Score: ${Math.round(score * 10)}/100 (${scoreToGrade(Math.round(score * 10))})
+## Overall Health Score: ${Math.round(score)}/100 (${scoreToGrade(Math.round(score))})
 
 ## Top Findings
 
-${JSON.stringify(findings, null, 2)}
+${JSON.stringify(topFindings, null, 2)}
 
 ## All Findings (${allFindings.length} total across all phases)
 
@@ -80,8 +98,8 @@ ${JSON.stringify(allFindings, null, 2)}
 
   const auditFindings: AuditFindings = {
     summary: {
-      score: Math.round(score * 10),
-      grade: scoreToGrade(Math.round(score * 10)),
+      score: Math.round(score),
+      grade: scoreToGrade(Math.round(score)),
       findings_count: severityCounts,
       categories: [...new Set(allFindings.map((f) => f.category))],
     },
@@ -93,5 +111,5 @@ ${JSON.stringify(allFindings, null, 2)}
   // Update audits.findings with aggregated AuditFindings object
   db.update(audits).set({ findings: auditFindings }).where(eq(audits.id, auditId)).run();
 
-  await markPhaseCompleted(auditId, phaseNumber, outputMd, findings, usage.totalTokens);
+  await markPhaseCompleted(auditId, phaseNumber, outputMd, topFindings, llmTokens);
 };
