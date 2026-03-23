@@ -40,9 +40,15 @@ type AuditData = {
   depth: string;
   status: string;
   startedAt: string | null;
+  tokenCount: number;
+  actualCostMicrodollars: number;
+  phasesTotal: number;
+  phasesCompleted: number;
+  phases: PhaseData[];
 };
 
 type PhaseData = {
+  phaseNumber: number;
   status: string;
   tokensUsed: number;
   findingsCount: number;
@@ -139,11 +145,17 @@ function PhaseStatusIcon({ status }: { status: string }) {
 
 export function AuditProgress({ audit }: { audit: AuditData }) {
   const [status, setStatus] = useState(audit.status);
-  const [phasesTotal, setPhasesTotal] = useState(PHASE_NAMES.length);
-  const [phasesCompleted, setPhasesCompleted] = useState(0);
-  const [totalTokens, setTotalTokens] = useState(0);
-  const [totalCostMicro, setTotalCostMicro] = useState(0);
-  const [phases, setPhases] = useState<Map<number, PhaseData>>(new Map());
+  const [phasesTotal, setPhasesTotal] = useState(audit.phasesTotal || PHASE_NAMES.length);
+  const [phasesCompleted, setPhasesCompleted] = useState(audit.phasesCompleted || 0);
+  const [totalTokens, setTotalTokens] = useState(audit.tokenCount || 0);
+  const [totalCostMicro, setTotalCostMicro] = useState(audit.actualCostMicrodollars || 0);
+  const [phases, setPhases] = useState<Map<number, PhaseData>>(() => {
+    const m = new Map<number, PhaseData>();
+    for (const p of audit.phases ?? []) {
+      m.set(p.phaseNumber, p);
+    }
+    return m;
+  });
   const [expanded, setExpanded] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [cancelling, setCancelling] = useState(false);
@@ -166,6 +178,7 @@ export function AuditProgress({ audit }: { audit: AuditData }) {
       if (data.type === "phase") {
         setPhases((prev) =>
           new Map(prev).set(data.phaseNumber, {
+            phaseNumber: data.phaseNumber,
             status: data.status,
             tokensUsed: data.tokensUsed,
             findingsCount: data.findingsCount,
