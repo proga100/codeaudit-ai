@@ -10,9 +10,9 @@ export const AuditFindingSchema = z.object({
   severity: z.enum(["critical", "high", "medium", "low", "info"]),
   title: z.string(),
   description: z.string(),
-  filePaths: z.array(z.string()),
-  lineNumbers: z.array(z.number()),
-  recommendation: z.string(),
+  filePaths: z.array(z.string()).default([]),
+  lineNumbers: z.array(z.number()).default([]),
+  recommendation: z.string().default(""),
 });
 
 export const PhaseOutputSchema = z.object({

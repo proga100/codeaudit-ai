@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateText, stepCountIs } from "ai";
-import { PhaseOutputSchema, type PhaseOutput } from "./finding-extractor";
+import { PhaseOutputSchema, AuditFindingSchema, type PhaseOutput } from "./finding-extractor";
 import { buildToolUsePhasePrompt, FINDING_FORMAT_TEMPLATE } from "./prompt-builder";
 import { createExecCommandTool } from "./tools/exec-command-tool";
 import { getGuideChunk } from "./guide-chunks";
@@ -106,8 +106,25 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
     if (parsed.success) {
       phaseOutput = parsed.data;
     } else {
-      console.warn(`[audit-engine] Phase ${phaseNumber}: JSON parsed but failed schema validation`);
-      phaseOutput = { ...emptyResult, summary: "Phase output failed schema validation: " + parsed.error.message.slice(0, 200) };
+      // Lenient fallback: try to extract findings array from the JSON even if top-level shape differs
+      const obj = jsonObj as Record<string, unknown>;
+      const rawFindings = Array.isArray(obj.findings) ? obj.findings : [];
+      const validFindings = rawFindings
+        .map((f: unknown) => AuditFindingSchema.safeParse(f))
+        .filter((r) => r.success)
+        .map((r) => (r as { data: PhaseOutput["findings"][number] }).data);
+
+      if (validFindings.length > 0) {
+        console.log(`[audit-engine] Phase ${phaseNumber}: schema validation partial — rescued ${validFindings.length} findings`);
+        phaseOutput = {
+          findings: validFindings,
+          phaseScore: typeof obj.phaseScore === "number" ? obj.phaseScore : 0,
+          summary: typeof obj.summary === "string" ? obj.summary : `Phase ${phaseNumber} completed with ${validFindings.length} findings.`,
+        };
+      } else {
+        console.warn(`[audit-engine] Phase ${phaseNumber}: JSON parsed but 0 findings passed validation`);
+        phaseOutput = { ...emptyResult, summary: "Phase output failed schema validation: " + parsed.error.message.slice(0, 300) };
+      }
     }
 
     const inputTokens = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;
