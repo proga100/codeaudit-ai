@@ -15,20 +15,31 @@ export async function GET(
 
   const stream = new ReadableStream({
     async start(controller) {
+      let closed = false;
+
+      const tryClose = () => {
+        if (closed) return;
+        closed = true;
+        if (interval) clearInterval(interval);
+        try { controller.close(); } catch { /* already closed */ }
+      };
+
       const send = (data: object) => {
+        if (closed) return;
         eventId++;
         try {
           controller.enqueue(
             encoder.encode(`id: ${eventId}\ndata: ${JSON.stringify(data)}\n\n`),
           );
         } catch {
-          // client disconnected — ignore
+          tryClose();
         }
       };
 
       const emitState = () => {
+        if (closed) return;
         const audit = db.select().from(audits).where(eq(audits.id, id)).get();
-        if (!audit) { controller.close(); return; }
+        if (!audit) { tryClose(); return; }
 
         const phases = db.select().from(auditPhases).where(eq(auditPhases.auditId, id)).all();
         const phasesToRun = getPhasesForAuditType(audit.auditType, audit.depth);
@@ -64,8 +75,7 @@ export async function GET(
 
         // Close on terminal state
         if (["completed", "cancelled", "failed"].includes(audit.status)) {
-          if (interval) clearInterval(interval);
-          controller.close();
+          tryClose();
         }
       };
 
@@ -83,10 +93,7 @@ export async function GET(
       }
 
       // Safety net: close abandoned streams after 5 minutes
-      setTimeout(() => {
-        if (interval) clearInterval(interval);
-        try { controller.close(); } catch { /* already closed */ }
-      }, 5 * 60 * 1000);
+      setTimeout(() => tryClose(), 5 * 60 * 1000);
     },
   });
 
