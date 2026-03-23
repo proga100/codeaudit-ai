@@ -58,17 +58,37 @@ Replace hardcoded JS/TS shell commands in all phase runners with LLM-driven comm
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| P0-01 | Phase 9 | Pending |
+| P0-02 | Phase 9 | Pending |
+| P0-03 | Phase 9 | Pending |
+| P0-04 | Phase 9 | Pending |
+| P0-05 | Phase 9 | Pending |
+| P0-06 | Phase 9 | Pending |
+| PRF-01 | Phase 10 | Pending |
+| PRF-02 | Phase 10 | Pending |
+| PRF-03 | Phase 10 | Pending |
+| PRF-13 | Phase 10 | Pending |
+| PRF-14 | Phase 10 | Pending |
+| PRF-04 | Phase 11 | Pending |
+| PRF-05 | Phase 11 | Pending |
+| PRF-06 | Phase 11 | Pending |
+| PRF-07 | Phase 11 | Pending |
+| PRF-08 | Phase 11 | Pending |
+| PRF-09 | Phase 11 | Pending |
+| PRF-10 | Phase 11 | Pending |
+| PRF-11 | Phase 11 | Pending |
+| PRF-12 | Phase 11 | Pending |
+| VAL-01 | Phase 12 | Pending |
+| VAL-02 | Phase 12 | Pending |
+| VAL-03 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 ⚠️
+- v1.2 requirements: 23 total (note: file header previously said 20 — actual count from listed requirements is 23)
+- Mapped to phases: 23
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after initial definition*
+*Last updated: 2026-03-23 after roadmap creation*
