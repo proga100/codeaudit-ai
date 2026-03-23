@@ -79,11 +79,11 @@ Plans:
   3. Phase 3 (Test Coverage) finds test files and measures coverage using language-appropriate test runner commands
   4. Phase 5 (Git History) churn analysis uses the detected language file extensions, not just *.ts/*.js
   5. Phase 6 (Security), Phase 7 (Deep Reads), Phase 8 (CI/CD), and Phase 9 (Documentation) all use language-appropriate patterns, CI config paths, and doc styles (docstrings, GoDoc, RustDoc, JavaDoc, JSDoc)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 11-01: Migrate phases 1-5 (Orientation, Dependency Health, Test Coverage, Code Complexity, Git History)
-- [ ] 11-02: Migrate phases 6-9 (Security, Deep Reads, CI/CD, Documentation)
+- [ ] 11-01-PLAN.md — Migrate phases 1-5 to runPhaseWithTools (Orientation, Dependency Health, Test Coverage, Code Complexity, Git History)
+- [ ] 11-02-PLAN.md — Migrate phases 6-9 to runPhaseWithTools (Security, Deep Reads, CI/CD, Documentation)
 
 ### Phase 12: Validation
 **Goal**: The refactored audit engine produces equivalent results to v1.1 on TypeScript repos and meaningful, language-specific findings on Python and Go repos
@@ -112,7 +112,7 @@ Plans:
 | 8. Data Views | v1.1 | 3/3 | Complete | 2026-03-23 |
 | 9. Phase 0 Enhancement | v1.2 | 2/2 | Complete | 2026-03-23 |
 | 10. Tool-Use Infrastructure | v1.2 | 1/1 | Complete    | 2026-03-23 |
-| 11. Phase Runner Adaptation | v1.2 | 0/TBD | Not started | - |
+| 11. Phase Runner Adaptation | v1.2 | 0/2 | Not started | - |
 | 12. Validation | v1.2 | 0/TBD | Not started | - |
 
 ---
