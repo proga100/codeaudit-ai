@@ -228,6 +228,7 @@ ${repoContext.summary}
 
   // Phase 0 produces no AuditFindings — findings array is empty
   // Output is the markdown for backward compat; structured data is in audits.repoContext
-  const tokensUsed = (usage?.totalTokens ?? 0);
-  await markPhaseCompleted(auditId, phaseNumber, contextMd, [], tokensUsed);
+  const inputTokens = (usage as any)?.inputTokens ?? (usage as any)?.promptTokens ?? 0;
+  const outputTokens = (usage as any)?.outputTokens ?? (usage as any)?.completionTokens ?? 0;
+  await markPhaseCompleted(auditId, phaseNumber, contextMd, [], inputTokens, outputTokens);
 };

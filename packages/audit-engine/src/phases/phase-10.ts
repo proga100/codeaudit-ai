@@ -111,5 +111,5 @@ ${JSON.stringify(allFindings, null, 2)}
   // Update audits.findings with aggregated AuditFindings object
   db.update(audits).set({ findings: auditFindings }).where(eq(audits.id, auditId)).run();
 
-  await markPhaseCompleted(auditId, phaseNumber, outputMd, topFindings, llmTokens);
+  await markPhaseCompleted(auditId, phaseNumber, outputMd, topFindings, result.usage.promptTokens, result.usage.completionTokens);
 };

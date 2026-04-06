@@ -162,5 +162,5 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
   await fs.writeFile(phaseFile, outputMd, "utf-8");
 
   // 10. Persist phase results to DB
-  await markPhaseCompleted(ctx.auditId, phaseNumber, outputMd, findings, totalTokens);
+  await markPhaseCompleted(ctx.auditId, phaseNumber, outputMd, findings, inputTokensTotal, outputTokensTotal);
 }
