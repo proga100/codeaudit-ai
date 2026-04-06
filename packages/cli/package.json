@@ -1,17 +1,38 @@
 {
-  "name": "@codeaudit-ai/cli",
-  "version": "0.1.0",
+  "name": "codeaudit-ai",
+  "version": "0.5.0",
   "type": "module",
-  "bin": { "codeaudit": "./src/index.ts" },
+  "description": "Run structured codebase health audits from your browser — powered by LLMs",
+  "bin": {
+    "codeaudit-ai": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "../../apps/web/**",
+    "../../packages/**",
+    "!**/node_modules",
+    "!**/.next",
+    "!**/dist"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "ts-node --esm index.ts"
+    "build": "tsup",
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "open": "^11.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": ["codeaudit", "audit", "code-quality", "llm", "security"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/codeaudit-ai"
   }
 }
