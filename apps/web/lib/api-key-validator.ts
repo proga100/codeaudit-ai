@@ -10,7 +10,7 @@
  * - Gemini: GET /v1beta/models (lightweight list endpoint)
  */
 
-export type Provider = "anthropic" | "openai" | "gemini";
+export type Provider = "anthropic" | "openai" | "gemini" | "openai-compatible";
 
 export type ValidationResult =
   | { status: "valid"; message: string }
@@ -250,6 +250,9 @@ export async function validateApiKey(
       return validateOpenAIKey(apiKey.trim());
     case "gemini":
       return validateGeminiKey(apiKey.trim());
+    case "openai-compatible":
+      // Skip validation for custom endpoints — we can't know the auth scheme
+      return { status: "valid", message: "OpenAI-compatible API key saved (not validated)." };
     default:
       return {
         status: "invalid_key",

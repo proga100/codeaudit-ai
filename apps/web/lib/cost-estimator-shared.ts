@@ -8,13 +8,14 @@ export type FolderStats = {
 
 export type AuditType = "full" | "security" | "team-collaboration" | "code-quality";
 export type AuditDepth = "quick" | "deep";
-export type Provider = "anthropic" | "openai" | "gemini";
+export type Provider = "anthropic" | "openai" | "gemini" | "openai-compatible";
 
 // Pricing in microdollars per 1k tokens
 const PRICING: Record<Provider, { input: number; output: number }> = {
-  anthropic: { input: 3000, output: 15000 },   // Claude Sonnet
-  openai:    { input: 2500, output: 10000 },    // GPT-4o
-  gemini:    { input: 1250, output: 5000 },     // Gemini 2.0 Flash
+  anthropic:            { input: 3000, output: 15000 },   // Claude Sonnet
+  openai:               { input: 2500, output: 10000 },   // GPT-4o
+  gemini:               { input: 1250, output: 5000 },    // Gemini 2.0 Flash
+  "openai-compatible":  { input: 2500, output: 10000 },   // Default to OpenAI-like pricing
 };
 
 // Phase count by audit type

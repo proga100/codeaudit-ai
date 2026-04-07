@@ -10,7 +10,7 @@ export type StartAuditInput = {
   depth: "quick" | "deep";
   apiKeyId: string;
   selectedModel: string | null;
-  llmProvider: "anthropic" | "openai" | "gemini";
+  llmProvider: "anthropic" | "openai" | "gemini" | "openai-compatible";
 };
 
 export async function startAudit(input: StartAuditInput): Promise<void> {

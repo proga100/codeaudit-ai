@@ -12,7 +12,7 @@ import { getDb, apiKeys, encryptApiKey, decryptApiKey, maskApiKey } from "@codea
 import { validateApiKey } from "@/lib/api-key-validator";
 import { eq } from "drizzle-orm";
 
-export type Provider = "anthropic" | "openai" | "gemini";
+export type Provider = "anthropic" | "openai" | "gemini" | "openai-compatible";
 
 export type ApiKeyRecord = {
   id: string;
@@ -35,27 +35,39 @@ export async function addApiKey(
   provider: Provider,
   rawKey: string,
   label: string,
+  baseUrl?: string,
 ): Promise<ActionResult<ApiKeyRecord>> {
   try {
-    if (!rawKey || rawKey.trim().length === 0) {
+    // For openai-compatible provider, API key is optional
+    if (provider !== "openai-compatible" && (!rawKey || rawKey.trim().length === 0)) {
       return { success: false, error: "API key is required" };
     }
 
-    const validation = await validateApiKey(provider, rawKey);
-    if (validation.status === "invalid_key") {
-      return { success: false, error: validation.message };
-    }
-    if (validation.status === "network_error") {
-      return { success: false, error: validation.message };
+    // Validate key only for non-openai-compatible providers
+    if (provider !== "openai-compatible") {
+      const validation = await validateApiKey(provider, rawKey);
+      if (validation.status === "invalid_key") {
+        return { success: false, error: validation.message };
+      }
+      if (validation.status === "network_error") {
+        return { success: false, error: validation.message };
+      }
     }
 
-    const { encrypted, iv } = encryptApiKey(rawKey.trim());
-    const masked = maskApiKey(rawKey.trim());
+    const { encrypted, iv } = encryptApiKey(rawKey?.trim() || "none"); // Store "none" for openai-compatible providers without API key
+    const masked = maskApiKey(rawKey?.trim() || "none");
     const db = getDb();
 
     const rows = await db
       .insert(apiKeys)
-      .values({ provider, label: label || "Default", encryptedKey: encrypted, iv, maskedKey: masked })
+      .values({
+        provider,
+        label: label || "Default",
+        encryptedKey: encrypted,
+        iv,
+        maskedKey: masked,
+        baseUrl: provider === "openai-compatible" ? baseUrl : null
+      })
       .returning({
         id: apiKeys.id,
         provider: apiKeys.provider,

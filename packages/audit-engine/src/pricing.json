@@ -4,5 +4,5 @@
   "anthropic": { "input": 3000, "output": 15000 },
   "openai": { "input": 2500, "output": 10000 },
   "gemini": { "input": 1250, "output": 5000 },
-  "ollama": { "input": 0, "output": 0 }
+  "openai-compatible": { "input": 0, "output": 0 }
 }

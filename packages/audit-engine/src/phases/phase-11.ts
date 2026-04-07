@@ -37,5 +37,5 @@ export const phase11Runner: PhaseRunner = async (ctx, phaseNumber) => {
 
   const outputMd = `# Phase 11 — HTML Reports Generated\n\nFiles: report-management.html, report-technical.html\nScore: ${scoreValue}/100 (${grade}), ${findings.length} findings`;
 
-  await markPhaseCompleted(auditId, phaseNumber, outputMd, [], 0);
+  await markPhaseCompleted(auditId, phaseNumber, outputMd, [], 0, 0);
 };

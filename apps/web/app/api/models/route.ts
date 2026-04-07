@@ -27,14 +27,15 @@ export async function GET(request: NextRequest) {
   if (!key) return NextResponse.json({ error: "Key not found" }, { status: 404 });
 
   const rawKey = decryptApiKey(key.encryptedKey, key.iv);
-  const models = await fetchModelsForProvider(key.provider, rawKey);
+  const models = await fetchModelsForProvider(key.provider, rawKey, key.baseUrl ?? undefined);
 
   return NextResponse.json({ models, provider: key.provider });
 }
 
 async function fetchModelsForProvider(
-  provider: "anthropic" | "openai" | "gemini",
+  provider: "anthropic" | "openai" | "gemini" | "openai-compatible",
   rawKey: string,
+  baseUrl?: string,
 ): Promise<Array<{ id: string; name: string }>> {
   try {
     if (provider === "anthropic") {
@@ -72,6 +73,21 @@ async function fetchModelsForProvider(
           .filter(m => m.name.includes("gemini"))
           .map(m => ({ id: m.name.replace("models/", ""), name: m.displayName }));
       }
+    }
+
+    if (provider === "openai-compatible") {
+      if (!baseUrl) return [];
+      const res = await fetch(`${baseUrl}/models`, {
+        headers: rawKey !== "none"
+          ? { Authorization: `Bearer ${rawKey}` }
+          : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.data.map((m: any) => ({ id: m.id, name: m.id }));
+      }
+      // Fallback: return empty list — UI shows manual model name input
+      return [];
     }
   } catch {
     // Fall through to empty list

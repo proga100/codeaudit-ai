@@ -2,7 +2,7 @@
 // Override: if user selected a specific model, use it for ALL phases.
 
 export type PhaseComplexity = "simple" | "medium" | "complex";
-export type LlmProvider = "anthropic" | "openai" | "gemini";
+export type LlmProvider = "anthropic" | "openai" | "gemini" | "openai-compatible";
 
 // Phase complexity tiers (from RESEARCH.md Pattern 7)
 export const PHASE_COMPLEXITY: Record<number, PhaseComplexity> = {
@@ -20,7 +20,7 @@ export const PHASE_COMPLEXITY: Record<number, PhaseComplexity> = {
   11: "complex", // HTML report generation
 };
 
-const AUTO_MODELS: Record<LlmProvider, Record<PhaseComplexity, string>> = {
+const AUTO_MODELS: Record<Exclude<LlmProvider, "openai-compatible">, Record<PhaseComplexity, string>> = {
   anthropic: {
     simple: "claude-haiku-3-5",
     medium: "claude-sonnet-4-5",
@@ -45,6 +45,12 @@ export function resolveModel(
 ): string {
   // User override: use their selected model for every phase
   if (userSelectedModel) return userSelectedModel;
+
+  // OpenAI-compatible provider requires explicit model selection
+  if (provider === "openai-compatible") {
+    throw new Error("OpenAI-compatible provider requires a specific model selection");
+  }
+
   const complexity = PHASE_COMPLEXITY[phaseNumber] ?? "medium";
-  return AUTO_MODELS[provider][complexity];
+  return AUTO_MODELS[provider as Exclude<LlmProvider, "openai-compatible">][complexity];
 }

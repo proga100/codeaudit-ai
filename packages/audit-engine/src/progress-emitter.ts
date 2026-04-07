@@ -4,7 +4,7 @@ import type { AuditFinding } from "@codeaudit-ai/db";
 import pricing from "./pricing.json";
 
 type PricingEntry = { input: number; output: number };
-const PRICING = pricing as Record<string, PricingEntry | undefined>;
+const PRICING = pricing as unknown as Record<string, PricingEntry | undefined>;
 const DEFAULT_PRICING: PricingEntry = { input: 3000, output: 15000 };
 
 /**

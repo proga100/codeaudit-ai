@@ -46,6 +46,8 @@ Produce:
   let summary = `Audit completed with ${allFindings.length} findings across ${allPhases.filter(p => p.status === "completed").length} phases.`;
   let score = 50; // default
   let llmTokens = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
   let topFindings = allFindings.slice(0, 10);
 
   try {
@@ -55,6 +57,8 @@ Produce:
     if (result.summary) summary = result.summary;
     score = result.score || score;
     llmTokens = result.usage.totalTokens;
+    promptTokens = result.usage.promptTokens;
+    completionTokens = result.usage.completionTokens;
   } catch (err) {
     console.warn(`[audit-engine] Phase 10: LLM synthesis failed — using aggregated findings directly. Error: ${String(err).slice(0, 150)}`);
     // Calculate score from severity distribution
@@ -111,5 +115,5 @@ ${JSON.stringify(allFindings, null, 2)}
   // Update audits.findings with aggregated AuditFindings object
   db.update(audits).set({ findings: auditFindings }).where(eq(audits.id, auditId)).run();
 
-  await markPhaseCompleted(auditId, phaseNumber, outputMd, topFindings, result.usage.promptTokens, result.usage.completionTokens);
+  await markPhaseCompleted(auditId, phaseNumber, outputMd, topFindings, promptTokens, completionTokens);
 };

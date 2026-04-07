@@ -23,13 +23,19 @@ export type AuditEngineConfig = {
   auditOutputDir: string;
   auditType: "full" | "security" | "team-collaboration" | "code-quality";
   depth: "quick" | "deep";
-  llmProvider: "anthropic" | "openai" | "gemini";
+  llmProvider: "anthropic" | "openai" | "gemini" | "openai-compatible";
   apiKeyId: string;
   selectedModel: string | null;
 };
 
 export type AuditRunContext = AuditEngineConfig & {
   decryptedApiKey: string;
+  apiKeyRow: {
+    provider: "anthropic" | "openai" | "gemini" | "openai-compatible";
+    encryptedKey: string;
+    iv: string;
+    baseUrl: string | null;
+  };
 };
 
 export async function runAudit(config: AuditEngineConfig): Promise<void> {
@@ -40,7 +46,7 @@ export async function runAudit(config: AuditEngineConfig): Promise<void> {
   if (!keyRow) throw new Error(`API key ${config.apiKeyId} not found`);
   const decryptedApiKey = decryptApiKey(keyRow.encryptedKey, keyRow.iv);
 
-  const ctx: AuditRunContext = { ...config, decryptedApiKey };
+  const ctx: AuditRunContext = { ...config, decryptedApiKey, apiKeyRow: keyRow };
 
   // Mark audit as running
   db.update(audits).set({ status: "running", startedAt: new Date() })

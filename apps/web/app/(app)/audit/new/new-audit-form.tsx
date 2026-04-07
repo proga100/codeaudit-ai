@@ -21,7 +21,7 @@ import {
 
 type SerializedApiKey = {
   id: string;
-  provider: "anthropic" | "openai" | "gemini";
+  provider: "anthropic" | "openai" | "gemini" | "openai-compatible";
   label: string;
   maskedKey: string;
   createdAt: string;
@@ -131,6 +131,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
   openai: "OpenAI",
   gemini: "Gemini",
+  "openai-compatible": "OpenAI Compatible",
 };
 
 // ─── NewAuditForm ──────────────────────────────────────────────────────────
@@ -166,6 +167,9 @@ export function NewAuditForm({
   // Derived: selected provider
   const selectedKey = apiKeys.find((k) => k.id === selectedKeyId);
   const selectedProvider: Provider = selectedKey?.provider ?? "anthropic";
+
+  // Disable AUTO mode for openai-compatible provider
+  const disableAutoMode = selectedProvider === "openai-compatible";
 
   // ─── Folder validation ────────────────────────────────────────────────
 
@@ -250,7 +254,8 @@ export function NewAuditForm({
   const canStart =
     folder.trim() !== "" &&
     folderValidation?.valid === true &&
-    selectedKeyId !== "";
+    selectedKeyId !== "" &&
+    (!disableAutoMode || selectedModel !== null);
 
   // ─── Start audit ──────────────────────────────────────────────────────
 
@@ -495,7 +500,7 @@ export function NewAuditForm({
             <select
               value={selectedModel ?? ""}
               onChange={(e) => setSelectedModel(e.target.value || null)}
-              disabled={loadingModels}
+              disabled={loadingModels || disableAutoMode}
               className="w-full py-2.5 px-3.5 rounded-[10px] bg-elevated border border-border text-text text-[13px] appearance-none cursor-pointer outline-none focus:border-accent transition-colors duration-150 disabled:opacity-60"
             >
               {loadingModels ? (
@@ -504,7 +509,11 @@ export function NewAuditForm({
                 </option>
               ) : (
                 <>
-                  <option value="">Auto (recommended)</option>
+                  {disableAutoMode ? (
+                    <option value="">Select a model (AUTO disabled)</option>
+                  ) : (
+                    <option value="">Auto (recommended)</option>
+                  )}
                   {models.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}

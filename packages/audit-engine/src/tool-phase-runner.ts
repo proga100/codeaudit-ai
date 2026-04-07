@@ -54,6 +54,8 @@ export async function runPhaseWithTools(
   const emptyResult: PhaseResult = { findings: [], phaseScore: 0, summary: "Phase produced no output." };
   let phaseOutput: PhaseResult;
   let totalTokens = 0;
+  let inputTokensTotal = 0;
+  let outputTokensTotal = 0;
 
   try {
     // Don't use Output.object — Gemini rejects combining tools + structured output.
@@ -127,9 +129,9 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
       }
     }
 
-    const inputTokens = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;
-    const outputTokens = (result.usage as any).outputTokens ?? (result.usage as any).completionTokens ?? 0;
-    totalTokens = inputTokens + outputTokens;
+    inputTokensTotal = (result.usage as any).inputTokens ?? (result.usage as any).promptTokens ?? 0;
+    outputTokensTotal = (result.usage as any).outputTokens ?? (result.usage as any).completionTokens ?? 0;
+    totalTokens = inputTokensTotal + outputTokensTotal;
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.warn(`[audit-engine] Phase ${phaseNumber} (tool-use): LLM error — ${errMsg.slice(0, 200)}`);

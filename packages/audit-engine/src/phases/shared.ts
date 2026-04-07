@@ -89,6 +89,7 @@ export function getModel(ctx: AuditRunContext, phaseNumber: number): any {
     provider: ctx.llmProvider,
     apiKey: ctx.decryptedApiKey,
     model: resolveModel(ctx.llmProvider, phaseNumber, ctx.selectedModel),
+    baseUrl: ctx.llmProvider === "openai-compatible" ? (ctx.apiKeyRow.baseUrl ?? undefined) : undefined,
   });
 }
 

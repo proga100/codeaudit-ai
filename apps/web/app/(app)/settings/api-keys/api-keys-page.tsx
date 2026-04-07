@@ -16,14 +16,16 @@ const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
   openai: "OpenAI",
   gemini: "Google Gemini",
+  "openai-compatible": "OpenAI Compatible",
 };
 
-const PROVIDERS: Provider[] = ["anthropic", "openai", "gemini"];
+const PROVIDERS: Provider[] = ["anthropic", "openai", "gemini", "openai-compatible"];
 
 const PROVIDER_PLACEHOLDERS: Record<Provider, string> = {
   anthropic: "sk-ant-api03-...",
   openai: "sk-proj-...",
   gemini: "AIza...",
+  "openai-compatible": "Leave blank for local servers",
 };
 
 // ─── ApiKeysPage (client component) ───────────────────────────────────────────
@@ -39,6 +41,7 @@ export function ApiKeysPage({ keys }: ApiKeysPageProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [provider, setProvider] = useState<Provider>("anthropic");
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [label, setLabel] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -52,13 +55,14 @@ export function ApiKeysPage({ keys }: ApiKeysPageProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleAdd = async () => {
-    if (!apiKey || submitting) return;
+    if ((!apiKey && provider !== "openai-compatible") || submitting) return;
     setSubmitting(true);
     setAddError(null);
     try {
-      const result = await addApiKey(provider, apiKey, label);
+      const result = await addApiKey(provider, apiKey, label, provider === "openai-compatible" ? baseUrl : undefined);
       if (result.success) {
         setApiKey("");
+        setBaseUrl("");
         setLabel("");
         setProvider("anthropic");
         setShowAdd(false);
@@ -143,6 +147,23 @@ export function ApiKeysPage({ keys }: ApiKeysPageProps) {
               ))}
             </div>
 
+            {/* Base URL input (only for openai-compatible) */}
+            {provider === "openai-compatible" && (
+              <div className="mt-2">
+                <Input
+                  type="text"
+                  mono
+                  placeholder="http://localhost:11434/v1"
+                  value={baseUrl}
+                  onChange={(e) => setBaseUrl(e.target.value)}
+                  className="mb-2"
+                />
+                <p className="text-[12px] text-text-muted mb-3">
+                  Required for local servers (Ollama, LM Studio, vLLM)
+                </p>
+              </div>
+            )}
+
             {/* API Key input */}
             <Input
               type="password"
@@ -158,6 +179,27 @@ export function ApiKeysPage({ keys }: ApiKeysPageProps) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
             />
+
+            {/* Info box for openai-compatible */}
+            {provider === "openai-compatible" && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm">
+                <p className="font-medium mb-2">Recommended models for code audits:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>32B+ parameters (e.g., Qwen3 32B, Llama 3.3 70B, Qwen3-235B-A22B)</li>
+                  <li>128K+ context window</li>
+                  <li>Strong structured output / JSON mode support</li>
+                </ul>
+                <p className="mt-2 font-medium">Local hardware requirements:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>GPU: 20GB+ VRAM for 32B models, 40GB+ for 70B</li>
+                  <li>CPU-only: works but expect 5-10 min per audit phase</li>
+                  <li>RAM: 32GB+ recommended for 32B models</li>
+                </ul>
+                <p className="mt-2 text-xs">
+                  Smaller models (7B-14B) may produce low-quality or malformed audit output.
+                </p>
+              </div>
+            )}
 
             {/* Error */}
             {addError && (

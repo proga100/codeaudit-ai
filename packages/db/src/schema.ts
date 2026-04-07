@@ -35,7 +35,7 @@ export type AuditFindings = {
 // ============================================================
 export const apiKeys = sqliteTable("api_keys", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  provider: text("provider", { enum: ["anthropic", "openai", "gemini"] }).notNull(),
+  provider: text("provider", { enum: ["anthropic", "openai", "gemini", "openai-compatible"] }).notNull(),
   label: text("label").notNull().default("Default"),
   // AES-256-GCM encrypted key — stored as hex, never returned to client after submission
   encryptedKey: text("encrypted_key").notNull(),
@@ -43,6 +43,8 @@ export const apiKeys = sqliteTable("api_keys", {
   iv: text("iv").notNull(),
   // Masked version of the key for display (e.g. "••••3f7a") — derived from plaintext at creation
   maskedKey: text("masked_key").notNull().default("••••"),
+  // Base URL for openai-compatible providers (e.g. Ollama, LM Studio)
+  baseUrl: text("base_url"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 }, (key) => ({
@@ -76,7 +78,7 @@ export const audits = sqliteTable("audits", {
   }).notNull().default("queued"),
   currentPhase: integer("current_phase"), // 0-11, null when not running
   llmProvider: text("llm_provider", {
-    enum: ["anthropic", "openai", "gemini"],
+    enum: ["anthropic", "openai", "gemini", "openai-compatible"],
   }).notNull(),
   selectedModel: text("selected_model"),
   apiKeyId: text("api_key_id").references(() => apiKeys.id, { onDelete: "set null" }),
