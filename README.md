@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/user/codeaudit-ai/actions"><img src="https://img.shields.io/github/actions/workflow/status/user/codeaudit-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI" alt="CI Status" /></a>
+  <a href="https://github.com/anvarnarz/codeaudit-ai/actions"><img src="https://img.shields.io/github/actions/workflow/status/anvarnarz/codeaudit-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI" alt="CI Status" /></a>
   <img src="https://img.shields.io/badge/version-0.6.0-blue?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
@@ -90,7 +90,7 @@ CodeAudit AI is a **local-first** web application that wraps a comprehensive 12-
 
 ```bash
 # Clone the repo
-git clone https://github.com/user/codeaudit-ai.git
+git clone https://github.com/anvarnarz/codeaudit-ai.git
 cd codeaudit-ai
 
 # Install dependencies
