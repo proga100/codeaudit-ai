@@ -473,6 +473,7 @@ See [TODOS.md](TODOS.md) for detailed task list.
 
 <p align="center">
   <sub>Built with</sub><br />
+  <a href="https://claude.ai"><img src="https://cdn.simpleicons.org/anthropic/D97757" width="20" height="20" alt="Claude" /></a>&nbsp;&nbsp;
   <a href="https://nextjs.org"><img src="https://cdn.simpleicons.org/nextdotjs/000000" width="20" height="20" alt="Next.js" /></a>&nbsp;&nbsp;
   <a href="https://www.typescriptlang.org"><img src="https://cdn.simpleicons.org/typescript/3178C6" width="20" height="20" alt="TypeScript" /></a>&nbsp;&nbsp;
   <a href="https://tailwindcss.com"><img src="https://cdn.simpleicons.org/tailwindcss/06B6D4" width="20" height="20" alt="Tailwind CSS" /></a>&nbsp;&nbsp;
