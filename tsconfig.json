@@ -21,5 +21,5 @@
     { "path": "./packages/audit-engine" },
     { "path": "./packages/llm-adapter" }
   ],
-  "exclude": ["node_modules", "**/node_modules", "**/.next", "**/dist", "apps/web"]
+  "exclude": ["node_modules", "**/node_modules", "**/.next", "**/dist", "apps/web", "**/*.test.ts", "**/*.spec.ts"]
 }

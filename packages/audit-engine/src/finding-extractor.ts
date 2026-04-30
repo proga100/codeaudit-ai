@@ -57,7 +57,7 @@ export async function runPhaseLlm(
     usage = result.usage as typeof usage;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Phase ${phaseNumber} LLM call failed: ${msg.slice(0, 300)}`);
+    throw new Error(`Phase ${phaseNumber} LLM call failed: ${msg.slice(0, 300)}`, { cause: err });
   }
 
   const promptTokens = usage.inputTokens ?? usage.promptTokens ?? 0;

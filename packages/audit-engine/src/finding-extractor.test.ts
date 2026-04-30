@@ -107,7 +107,7 @@ describe("runPhaseLlm error handling", () => {
 
   it("wraps LLM API errors with phase context", async () => {
     const { generateObject } = await import("ai");
-    const { runPhaseLlm } = await import("./finding-extractor.js");
+    const { runPhaseLlm } = await import("./finding-extractor");
     vi.mocked(generateObject).mockRejectedValueOnce(new Error("Network timeout"));
 
     await expect(runPhaseLlm({} as any, "prompt", 6)).rejects.toThrow(
@@ -117,7 +117,7 @@ describe("runPhaseLlm error handling", () => {
 
   it("truncates very long error messages to 300 chars", async () => {
     const { generateObject } = await import("ai");
-    const { runPhaseLlm } = await import("./finding-extractor.js");
+    const { runPhaseLlm } = await import("./finding-extractor");
     const longError = "x".repeat(500);
     vi.mocked(generateObject).mockRejectedValueOnce(new Error(longError));
 
@@ -128,6 +128,20 @@ describe("runPhaseLlm error handling", () => {
       const msg = (err as Error).message;
       expect(msg).toMatch(/^Phase 6 LLM call failed: x{300}$/);
       expect(msg.length).toBe("Phase 6 LLM call failed: ".length + 300);
+    }
+  });
+
+  it("preserves the original error as `cause`", async () => {
+    const { generateObject } = await import("ai");
+    const { runPhaseLlm } = await import("./finding-extractor");
+    const original = new Error("boom");
+    vi.mocked(generateObject).mockRejectedValueOnce(original);
+
+    try {
+      await runPhaseLlm({} as any, "prompt", 6);
+      expect.fail("Should have thrown");
+    } catch (err) {
+      expect((err as Error).cause).toBe(original);
     }
   });
 });
