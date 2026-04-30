@@ -38,7 +38,7 @@ export function getRepoContext(auditId: string): string {
 /**
  * Format a typed RepoContext into a readable string for LLM prompts.
  */
-function formatRepoContextForPrompt(ctx: RepoContext): string {
+export function formatRepoContextForPrompt(ctx: RepoContext): string {
   const lines = [
     `Repo: ${ctx.repoName}`,
     `Remote: ${ctx.remoteUrl || "no remote"}`,
@@ -63,6 +63,13 @@ function formatRepoContextForPrompt(ctx: RepoContext): string {
     lines.push("Contributors (12 months):");
     for (const c of ctx.contributorsLast12Months) {
       lines.push(`  ${c.name}: ${c.commits} commits`);
+    }
+  }
+  if (ctx.conventionDocs && ctx.conventionDocs.length > 0) {
+    lines.push("\nProject Style Conventions (override generic best-practices):");
+    for (const doc of ctx.conventionDocs) {
+      lines.push(`  --- ${doc.path} ---`);
+      lines.push(doc.excerpt.split("\n").map((l) => `    ${l}`).join("\n"));
     }
   }
   lines.push(`\nSummary: ${ctx.summary}`);

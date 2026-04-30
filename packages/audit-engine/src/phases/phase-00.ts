@@ -10,6 +10,23 @@ import { RepoContextSchema } from "../repo-context";
 import type { AuditRunContext } from "../orchestrator";
 import type { PhaseRunner } from "../phase-registry";
 
+const CONVENTION_FILES = ["CLAUDE.md", "AGENTS.md", ".cursorrules", "CONTRIBUTING.md"];
+const MAX_EXCERPT_CHARS = 2048;
+
+async function readConventionDocs(repoPath: string): Promise<{ path: string; excerpt: string }[]> {
+  const docs: { path: string; excerpt: string }[] = [];
+  for (const filename of CONVENTION_FILES) {
+    const fullPath = path.join(repoPath, filename);
+    try {
+      const content = await fs.readFile(fullPath, "utf-8");
+      docs.push({ path: filename, excerpt: content.slice(0, MAX_EXCERPT_CHARS) });
+    } catch {
+      // File doesn't exist — skip silently
+    }
+  }
+  return docs;
+}
+
 export const phase00Runner: PhaseRunner = async (ctx, phaseNumber) => {
   console.log(`[phase-00] Starting polyglot bootstrap for ${ctx.repoPath}`);
   const { auditId, repoPath, auditOutputDir, llmProvider, decryptedApiKey, selectedModel } = ctx;
@@ -183,6 +200,10 @@ Instructions for each field:
     prompt,
     maxOutputTokens: 8192,
   });
+
+  // Read project-style convention docs (Task 4) — first 2KB of each
+  const conventionDocs = await readConventionDocs(repoPath);
+  repoContext.conventionDocs = conventionDocs;
 
   // Persist structured RepoContext to audits.repoContext column (P0-06)
   const db = getDb();

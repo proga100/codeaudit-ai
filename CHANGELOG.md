@@ -6,6 +6,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.6.2] — 2026-04-30 — Audit Quality Fixes
+
+### Fixed
+- **Phase 6 (Security)**: false-positive CRITICAL on gitignored `.env` files. The audit engine now requires `git log --all --full-history` and `git ls-files --error-unmatch` evidence before classifying a secret-bearing file as committed. Gitignored secrets are no longer flagged as CRITICAL leaks.
+- **Phase 1 (Orientation)**: generic "TypeScript config missing" finding on JSX-only projects. Stack-aware gating now skips type-system checks when the language is not in the detected primary languages.
+- **Phase 9 (Documentation)**: false-positive "code lacks inline comments" on projects with explicit no-comment style policies (e.g., CLAUDE.md saying "default to writing no comments").
+- **CRITICAL severity over-classification**. Severity definitions in `FINDING_FORMAT_TEMPLATE` now require remote exploitability or production blast radius — local-only docker-compose defaults and theoretical SQL injection downgrade to HIGH/LOW.
+
+### Added
+- **`RepoContext.conventionDocs`**: Phase 0 reads CLAUDE.md, AGENTS.md, .cursorrules, and CONTRIBUTING.md (first 2KB each) and surfaces them in every phase prompt under "Project Style Conventions". Lets findings honor project-specific style overrides.
+- **Severity criteria** in `FINDING_FORMAT_TEMPLATE`: explicit definitions for critical/high/medium/low/info with concrete examples and a "Do NOT use critical for" exclusion list.
+- **Stack-aware gating preamble** in every phase prompt: "Do not flag X if X is not detected" rule for TypeScript config, Python type hints, Dockerfile, JSDoc, and similar best-practices.
+
+---
+
 ## [0.6.1] — 2026-04-08 — Deterministic Scoring Methodology
 
 ### Changed

@@ -64,4 +64,22 @@ describe("FINDING_FORMAT_TEMPLATE", () => {
     expect(FINDING_FORMAT_TEMPLATE).toContain("filePaths");
     expect(FINDING_FORMAT_TEMPLATE).toContain("recommendation");
   });
+
+  it("defines what CRITICAL means with concrete criteria", () => {
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toContain("critical");
+    expect(FINDING_FORMAT_TEMPLATE).toMatch(/critical[\s\S]{0,400}(exploit|remote|production|live|blast radius)/i);
+  });
+
+  it("rules out CRITICAL for local-only or theoretical issues", () => {
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/local[- ]only|theoretical|not[- ]exploitable/);
+  });
+
+  it("requires evidence-based descriptions (no speculation)", () => {
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/evidence|verify|confirm/);
+  });
+
+  it("instructs the LLM to gate findings on detected stack", () => {
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/repo context|detected stack|primarily/);
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/do not flag.*not detected|skip.*not.*detected/);
+  });
 });
