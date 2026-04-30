@@ -70,9 +70,9 @@ CodeAudit AI is a **local-first** web application that wraps a comprehensive 12-
 
 | Provider | Models | Get API Key |
 |----------|--------|-------------|
-| **Anthropic** | Claude Opus 4.6 / Sonnet 4.6 / Haiku 4.5 | [console.anthropic.com](https://console.anthropic.com/) |
-| **OpenAI** | GPT-4o / GPT-4o-mini | [platform.openai.com](https://platform.openai.com/api-keys) |
-| **Google Gemini** | Gemini 2.5 Pro / Flash | [aistudio.google.com](https://aistudio.google.com/apikey) |
+| **Anthropic** | Claude Opus 4.7 / Sonnet 4.6 / Haiku 4.5 | [console.anthropic.com](https://console.anthropic.com/) |
+| **OpenAI** | GPT-5.5 / GPT-5.5 Pro / GPT-5.4-mini / GPT-5.4-nano | [platform.openai.com](https://platform.openai.com/api-keys) |
+| **Google Gemini** | Gemini 3.1 Pro / Gemini 3 Flash / Gemini 3.1 Flash-Lite | [aistudio.google.com](https://aistudio.google.com/apikey) |
 | **OpenAI-Compatible** | Any model via custom endpoint | Ollama, LM Studio, vLLM, llama.cpp, etc. |
 
 > **AUTO mode** minimizes cost by using cheaper models for simple phases and stronger models for security & architecture analysis. (Not available for OpenAI-compatible — requires explicit model selection.)
