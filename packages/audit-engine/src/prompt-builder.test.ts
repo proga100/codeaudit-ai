@@ -77,4 +77,9 @@ describe("FINDING_FORMAT_TEMPLATE", () => {
   it("requires evidence-based descriptions (no speculation)", () => {
     expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/evidence|verify|confirm/);
   });
+
+  it("instructs the LLM to gate findings on detected stack", () => {
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/repo context|detected stack|primarily/);
+    expect(FINDING_FORMAT_TEMPLATE.toLowerCase()).toMatch(/do not flag.*not detected|skip.*not.*detected/);
+  });
 });

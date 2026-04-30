@@ -10,8 +10,14 @@ Output: structured repo context object. Do not read any source files in this pha
 
   1: `Phase 1 — Orientation: Understand the project structure.
 Check: top-level directory layout, entry points (main, index, app), package.json scripts,
-dependency count (prod vs dev), TypeScript configuration, build output paths.
-Goal: Establish a mental model of what this codebase is and how it's organized.`,
+dependency count (prod vs dev), build output paths.
+Goal: Establish a mental model of what this codebase is and how it's organized.
+
+Stack-gated checks:
+- TypeScript configuration: only inspect if TypeScript is in the detected primary languages.
+  A JSX-only or plain JavaScript project does not need a tsconfig.json — do not flag this.
+- Type-system findings: only flag if the language has an opt-in type system actually in use.
+- Build configuration: only check the toolchain matching the detected package manager.`,
 
   2: `Phase 2 — Dependency Health: Audit all dependencies.
 Check: outdated packages (npm outdated / pnpm outdated), known vulnerabilities (npm audit),
@@ -66,7 +72,15 @@ Flag: secrets in CI config, missing staging environment, no rollback procedure.`
 
   9: `Phase 9 — Documentation: Assess documentation health.
 Sub-phases: 9a project-level README, 9b API docs, 9c code comments, 9d env setup docs, 9e data model docs.
-Flag: missing onboarding docs, undocumented APIs, no env variable reference.`,
+Flag: missing onboarding docs, undocumented APIs, no env variable reference.
+
+Respect project conventions:
+- Before flagging "code lacks inline comments", check the Repo Context for convention docs
+  (CLAUDE.md, AGENTS.md, .cursorrules, CONTRIBUTING.md). If any of these state a no-comment
+  or minimal-comment policy, do NOT flag missing inline comments — that is the project's
+  deliberate style, not a defect.
+- README and env-var documentation gaps are still valid findings regardless of comment style.
+- API documentation gaps are still valid findings regardless of comment style.`,
 
   10: `Phase 10 — Final Report Synthesis: Produce the comprehensive findings summary.
 Aggregate all findings from phases 1-9. Compute overall health score (0-100).

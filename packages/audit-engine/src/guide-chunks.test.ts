@@ -25,4 +25,19 @@ describe("getGuideChunk", () => {
       expect(getGuideChunk(999)).toContain("Phase 999");
     });
   });
+
+  describe("Phase 1 (Orientation)", () => {
+    const chunk = getGuideChunk(1);
+    it("gates TypeScript-specific findings on actual TypeScript usage", () => {
+      expect(chunk.toLowerCase()).toMatch(/typescript.*only if|only.*typescript|skip.*typescript/i);
+    });
+  });
+
+  describe("Phase 9 (Documentation)", () => {
+    const chunk = getGuideChunk(9);
+    it("respects project comment-style conventions", () => {
+      expect(chunk.toLowerCase()).toMatch(/comment.*polic|style guide|convention/);
+      expect(chunk.toLowerCase()).toMatch(/no[- ]comment|minimal.*comment/);
+    });
+  });
 });

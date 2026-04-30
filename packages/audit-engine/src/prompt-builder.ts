@@ -100,4 +100,17 @@ Use these strict criteria. When in doubt, downgrade.
 - Theoretical issues with no user-controllable input path (e.g., SQL built from hardcoded keys)
 - Missing best-practices that are not actually exploitable
 
-**Verify before flagging:** Every CRITICAL finding must include the exact command and output that proves the issue is real, not just suspected.`;
+**Verify before flagging:** Every CRITICAL finding must include the exact command and output that proves the issue is real, not just suspected.
+
+**Stack-aware gating — read Repo Context before flagging stack-specific issues:**
+
+The Repo Context block above lists the detected primary languages, frameworks, and conventions.
+Use it as a gate:
+- Do not flag "TypeScript config missing" if TypeScript is not in the detected primary languages.
+- Do not flag "Python type hints missing" if Python is not detected.
+- Do not flag "no Dockerfile" if the project has no infrastructure-as-code in scope.
+- Do not flag "missing JSDoc comments" if the project's convention docs (CLAUDE.md, AGENTS.md,
+  .cursorrules, CONTRIBUTING.md) state a no-comment or minimal-comment policy.
+
+When unsure whether a generic best-practice applies, downgrade to LOW or INFO and note the
+uncertainty in the description.`;
