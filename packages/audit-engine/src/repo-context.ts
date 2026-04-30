@@ -26,6 +26,13 @@ export const RepoContextSchema = z.object({
   totalLinesOfCode: z.number(),
   // Preserved from v1
   contributorsLast12Months: z.array(z.object({ name: z.string(), commits: z.number() })),
+  // Project-style conventions (CLAUDE.md, AGENTS.md, .cursorrules, CONTRIBUTING.md)
+  // surfaced to phase prompts so generic best-practice findings can be gated against
+  // the project's documented style. First ~2KB of each file, populated in Phase 0.
+  conventionDocs: z.array(z.object({
+    path: z.string(),       // e.g. "CLAUDE.md"
+    excerpt: z.string(),    // first ~2KB of file content
+  })),
   summary: z.string(),
 });
 
