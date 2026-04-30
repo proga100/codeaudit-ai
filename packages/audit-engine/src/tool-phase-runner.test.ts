@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { parsePhaseOutput } from "./tool-phase-runner";
 import { withRetry } from "./retry";
 
@@ -106,7 +106,16 @@ describe("parsePhaseOutput", () => {
   });
 });
 
+function mockSetTimeoutImmediate() {
+  return vi.spyOn(global, "setTimeout").mockImplementation((cb: Parameters<typeof setTimeout>[0]) => {
+    (cb as () => void)();
+    return 0 as unknown as ReturnType<typeof setTimeout>;
+  });
+}
+
 describe("withRetry", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it("returns result immediately on first success", async () => {
     const fn = vi.fn().mockResolvedValue("ok");
     const result = await withRetry(fn, 3, "test");
@@ -120,17 +129,9 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(new Error("HTTP 429 Too Many Requests"))
       .mockResolvedValueOnce("ok-on-retry");
 
-    // Replace setTimeout with an immediate resolver to avoid real delays
-    const setTimeoutSpy = vi
-      .spyOn(global, "setTimeout")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .mockImplementation((cb: any) => {
-        cb();
-        return 0 as unknown as ReturnType<typeof setTimeout>;
-      });
+    mockSetTimeoutImmediate();
 
     const result = await withRetry(fn, 3, "test");
-    setTimeoutSpy.mockRestore();
 
     expect(result).toBe("ok-on-retry");
     expect(fn).toHaveBeenCalledTimes(2);
@@ -142,16 +143,9 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(new Error("rate limit exceeded"))
       .mockResolvedValueOnce("recovered");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const setTimeoutSpy = vi
-      .spyOn(global, "setTimeout")
-      .mockImplementation((cb: any) => {
-        cb();
-        return 0 as unknown as ReturnType<typeof setTimeout>;
-      });
+    mockSetTimeoutImmediate();
 
     const result = await withRetry(fn, 3, "test");
-    setTimeoutSpy.mockRestore();
 
     expect(result).toBe("recovered");
     expect(fn).toHaveBeenCalledTimes(2);
@@ -165,16 +159,9 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(err)
       .mockRejectedValueOnce(err);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const setTimeoutSpy = vi
-      .spyOn(global, "setTimeout")
-      .mockImplementation((cb: any) => {
-        cb();
-        return 0 as unknown as ReturnType<typeof setTimeout>;
-      });
+    mockSetTimeoutImmediate();
 
     await expect(withRetry(fn, 3, "test")).rejects.toThrow("429 rate limit");
-    setTimeoutSpy.mockRestore();
 
     expect(fn).toHaveBeenCalledTimes(3);
   });
