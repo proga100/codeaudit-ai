@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { withRetry } from "./tool-phase-runner";
+import { withRetry } from "./retry";
 
 // OpenAI structured output requires ALL properties in 'required' array.
 // No .optional(), no .default() — every field must be plain required.
