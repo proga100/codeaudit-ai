@@ -36,8 +36,23 @@ Flag: files with very high churn, single-owner critical modules, no PR review ev
   6: `Phase 6 — Security Audit: Thorough security investigation.
 Sub-phases: 6a secrets/credentials, 6b auth/authorization, 6c input validation/injection,
 6d API security, 6e data protection/crypto, 6f infrastructure.
-Flag all Critical and High findings with attack vectors. This is the highest-stakes phase.
-Look for: hardcoded secrets, unvalidated user input in SQL/shell, missing rate limits, weak crypto.`,
+Look for: hardcoded secrets, unvalidated user input in SQL/shell, missing rate limits, weak crypto.
+
+CRITICAL — verify before flagging secrets:
+- A file containing a secret on disk is NOT the same as a secret committed to git.
+- Before flagging any .env, .env.*, credentials.json, or similar file as a CRITICAL leak, run:
+    git ls-files --error-unmatch <path>           # is the file tracked?
+    git log --all --full-history -- <path>        # is the file in any history?
+- If both commands show the file is gitignored and never tracked, the secret is local-only.
+  Do NOT flag gitignored secrets as CRITICAL — at most note them as INFO with a recommendation
+  to rotate if the disk is shared/backed-up.
+- A secret that was once committed and later deleted IS still CRITICAL — it remains in history.
+- Public-repo + committed-secret = CRITICAL. Private-repo + committed-secret = HIGH unless the
+  team's security posture treats internal exposure as critical.
+
+Output expectations:
+- Every CRITICAL finding in this phase must include the exact git command and its output as
+  evidence in the description field. No evidence = downgrade.`,
 
   7: `Phase 7 — Deep Reads: Read high-risk modules in full.
 Sub-phases: 7a payment/billing code, 7b user data/privacy, 7c error handling, 7d third-party integrations.
