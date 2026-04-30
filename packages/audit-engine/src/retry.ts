@@ -1,4 +1,5 @@
-/** Retries `fn` up to `maxAttempts` times on HTTP 429 / rate-limit errors only. */
+/** Retries `fn` up to `maxAttempts` times on rate-limit errors (HTTP 429,
+ *  "Too Many Requests", or gRPC RESOURCE_EXHAUSTED / Gemini). */
 export async function withRetry<T>(
   fn: () => Promise<T>,
   maxAttempts: number,
