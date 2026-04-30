@@ -11,6 +11,33 @@ import { getModel } from "./phases/shared";
 import { markPhaseCompleted } from "./progress-emitter";
 import type { AuditRunContext } from "./orchestrator";
 
+/** Retries `fn` up to `maxAttempts` times on HTTP 429 / rate-limit errors only. */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts: number,
+  label: string,
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const isRateLimit =
+        msg.includes("429") ||
+        msg.toLowerCase().includes("rate limit") ||
+        msg.toLowerCase().includes("too many requests");
+      if (!isRateLimit || attempt === maxAttempts) throw err;
+      const delayMs = Math.pow(2, attempt - 1) * 2000; // 2s, 4s, 8s
+      console.log(
+        `[audit-engine] ${label}: rate limited (attempt ${attempt}/${maxAttempts}), retrying in ${delayMs}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  // TypeScript needs this — loop always returns or throws
+  throw new Error("withRetry: unreachable");
+}
+
 /**
  * Shared phase runner helper that uses generateText with tool-use.
  *
@@ -64,13 +91,18 @@ export async function runPhaseWithTools(
 { "findings": [{ "id": "uuid", "phase": ${phaseNumber}, "category": "string", "severity": "critical|high|medium|low|info", "title": "string", "description": "string", "filePaths": ["string"], "lineNumbers": [number], "recommendation": "string" }], "phaseScore": 0-100, "summary": "string" }
 Return ONLY the JSON object — no markdown, no code fences, no explanation before or after.`;
 
-    const result = await generateText({
-      model,
-      prompt: prompt + jsonInstruction,
-      tools: { execCommand: execCommandTool },
-      stopWhen: stepCountIs(20),
-      maxOutputTokens: 65536,
-    });
+    const result = await withRetry(
+      () =>
+        generateText({
+          model,
+          prompt: prompt + jsonInstruction,
+          tools: { execCommand: execCommandTool },
+          stopWhen: stepCountIs(20),
+          maxOutputTokens: 65536,
+        }),
+      3,
+      `Phase ${phaseNumber} generateText`,
+    );
 
     // Parse JSON from the LLM's final text response
     const text = result.text.trim();

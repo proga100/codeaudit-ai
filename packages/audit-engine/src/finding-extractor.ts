@@ -1,5 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
+import { withRetry } from "./tool-phase-runner";
 
 // OpenAI structured output requires ALL properties in 'required' array.
 // No .optional(), no .default() — every field must be plain required.
@@ -34,12 +35,19 @@ export async function runPhaseLlm(
   usage: { promptTokens: number; completionTokens: number; totalTokens: number };
 }> {
   console.log(`[audit-engine] Phase ${phaseNumber}: calling LLM...`);
-  const { object, usage } = await generateObject({
-    model,
-    schema: PhaseOutputSchema,
-    prompt: prompt + "\n\nIMPORTANT: For each finding, always provide all fields including id (use a unique identifier), filePaths (array, empty if not applicable), lineNumbers (array, empty if not applicable), and recommendation.",
-    maxOutputTokens: 4096,
-  });
+  const { object, usage } = await withRetry(
+    () =>
+      generateObject({
+        model,
+        schema: PhaseOutputSchema,
+        prompt:
+          prompt +
+          "\n\nIMPORTANT: For each finding, always provide all fields including id (use a unique identifier), filePaths (array, empty if not applicable), lineNumbers (array, empty if not applicable), and recommendation.",
+        maxOutputTokens: 4096,
+      }),
+    3,
+    `Phase ${phaseNumber} generateObject`,
+  );
 
   const promptTokens = (usage as any).inputTokens ?? (usage as any).promptTokens ?? 0;
   const completionTokens = (usage as any).outputTokens ?? (usage as any).completionTokens ?? 0;
