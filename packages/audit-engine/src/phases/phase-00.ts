@@ -11,7 +11,7 @@ import type { AuditRunContext } from "../orchestrator";
 import type { PhaseRunner } from "../phase-registry";
 
 const CONVENTION_FILES = ["CLAUDE.md", "AGENTS.md", ".cursorrules", "CONTRIBUTING.md"];
-const MAX_EXCERPT_BYTES = 2048;
+const MAX_EXCERPT_CHARS = 2048;
 
 async function readConventionDocs(repoPath: string): Promise<{ path: string; excerpt: string }[]> {
   const docs: { path: string; excerpt: string }[] = [];
@@ -19,7 +19,7 @@ async function readConventionDocs(repoPath: string): Promise<{ path: string; exc
     const fullPath = path.join(repoPath, filename);
     try {
       const content = await fs.readFile(fullPath, "utf-8");
-      docs.push({ path: filename, excerpt: content.slice(0, MAX_EXCERPT_BYTES) });
+      docs.push({ path: filename, excerpt: content.slice(0, MAX_EXCERPT_CHARS) });
     } catch {
       // File doesn't exist — skip silently
     }
