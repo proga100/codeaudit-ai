@@ -12,6 +12,23 @@ import "./phases/index";
 
 const execFileAsync = promisify(execFile);
 
+const PHASE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes per phase
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const race = Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`${label} timed out after ${ms / 60_000} minutes`)),
+        ms,
+      );
+    }),
+  ]);
+  // Clean up timer whether promise resolves or rejects
+  return race.finally(() => clearTimeout(timer!));
+}
+
 // Inlined from apps/web/lib/folder-safety.ts to avoid cross-package dependency (D-10)
 async function unlockFolderLocal(folderPath: string): Promise<void> {
   await execFileAsync("chmod", ["-R", "u+w", folderPath]);
@@ -87,7 +104,7 @@ export async function runAudit(config: AuditEngineConfig): Promise<void> {
       console.log(`[audit-engine] ▶ Starting phase ${phaseNum}...`);
       await markPhaseRunning(config.auditId, phaseNum);
       try {
-        await runner(ctx, phaseNum);
+        await withTimeout(runner(ctx, phaseNum), PHASE_TIMEOUT_MS, `Phase ${phaseNum}`);
         console.log(`[audit-engine] ✓ Phase ${phaseNum} completed`);
       } catch (err) {
         console.error(`[audit-engine] ✗ Phase ${phaseNum} failed:`, err);
