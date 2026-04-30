@@ -497,7 +497,7 @@ You may not have write access to the target directory. Check: `ls -la /path/to/y
 
 ### LLM phase fails immediately with "429"
 
-You've hit your LLM provider's rate limit. The app retries automatically (3 attempts with exponential backoff — 2s, 4s, 8s). If it still fails, wait a few minutes and resume the audit — completed phases are checkpointed and will be skipped.
+You've hit your LLM provider's rate limit. The app retries automatically (up to 3 attempts with exponential backoff — 2s and 4s waits between them). If it still fails, wait a few minutes and resume the audit — completed phases are checkpointed and will be skipped.
 
 ### PDF export fails or is blank
 

@@ -22,7 +22,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed (pre-release hardening)
 - **Stream handler**: SSE stream now catches DB errors and emits an error event to the client instead of silently closing.
 - **Phase timeout**: Each audit phase now has a 30-minute hard timeout — hangs no longer block the orchestrator indefinitely.
-- **Rate limit retry**: LLM calls retry up to 3× with exponential backoff (2s, 4s, 8s) on rate-limit responses (HTTP 429, "Too Many Requests", or Gemini RESOURCE_EXHAUSTED).
+- **Rate limit retry**: LLM calls retry up to 3 attempts with exponential backoff (2s and 4s waits between attempts) on rate-limit responses (HTTP 429, "Too Many Requests", or Gemini RESOURCE_EXHAUSTED).
 - **Finding-extractor**: `runPhaseLlm` now wraps `generateObject` errors with phase context and preserves the original error via `Error.cause` for clearer diagnostics.
 - **Version sync**: CLI package and VERSION file now correctly reflect v0.6.1.
 
