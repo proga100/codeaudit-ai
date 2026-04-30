@@ -79,6 +79,17 @@ CodeAudit AI is a **local-first** web application that wraps a comprehensive 12-
 
 ---
 
+## Platform Support
+
+| Platform | Status |
+|----------|--------|
+| macOS (Intel & Apple Silicon) | ✅ Supported |
+| Linux (x86_64, arm64) | ✅ Supported |
+| Windows (native) | ❌ Not supported — Phase 0 detection uses bash. Use WSL2 instead. |
+| Windows WSL2 | ✅ Works |
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -462,6 +473,44 @@ Your API keys are encrypted at rest using **AES-256-GCM** with a unique IV per k
 | **1.0.0** | Planned | Public release — quality metrics, perf, docs, license |
 
 See [TODOS.md](TODOS.md) for detailed task list.
+
+---
+
+## Troubleshooting
+
+### "ENCRYPTION_KEY not set" on first launch
+
+Run `pnpm dev` once — it auto-generates the key at `~/.codeaudit-ai/.env`. If you see this error in production, the `.env` file was not created on startup. Check write permissions on `~/.codeaudit-ai/`.
+
+### Audit stuck at "Running" with no progress
+
+The audit may have crashed after locking the folder. To recover:
+
+1. Stop the server.
+2. Unlock the folder manually: `chmod -R u+w /path/to/your/repo`
+3. Restore git push: `git -C /path/to/your/repo remote set-url --push origin <original-url>`
+4. Restart the server and start a new audit.
+
+### "Folder lock failed" error
+
+You may not have write access to the target directory. Check: `ls -la /path/to/your/repo`.
+
+### LLM phase fails immediately with "429"
+
+You've hit your LLM provider's rate limit. The app retries automatically (3 attempts with exponential backoff — 2s, 4s, 8s). If it still fails, wait a few minutes and resume the audit — completed phases are checkpointed and will be skipped.
+
+### PDF export fails or is blank
+
+Puppeteer requires a Chromium install. Run:
+```bash
+npx puppeteer browsers install chrome
+```
+
+### Port 3000 already in use
+
+```bash
+PORT=3001 pnpm dev
+```
 
 ---
 
