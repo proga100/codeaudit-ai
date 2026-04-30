@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuditFindingSchema, PhaseOutputSchema } from "./finding-extractor";
 
 describe("AuditFindingSchema", () => {
@@ -86,5 +86,48 @@ describe("PhaseOutputSchema", () => {
     const output = { findings: [], summary: "test", phaseScore: "A" };
     const result = PhaseOutputSchema.safeParse(output);
     expect(result.success).toBe(false);
+  });
+});
+
+// --- runPhaseLlm error handling tests ---
+
+vi.mock("ai", () => ({
+  generateObject: vi.fn(),
+}));
+
+// Mock withRetry to invoke fn directly (no retry, no delay) — tests focus on error wrapping behavior
+vi.mock("./retry", () => ({
+  withRetry: vi.fn(async (fn: () => Promise<unknown>) => fn()),
+}));
+
+describe("runPhaseLlm error handling", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("wraps LLM API errors with phase context", async () => {
+    const { generateObject } = await import("ai");
+    const { runPhaseLlm } = await import("./finding-extractor.js");
+    vi.mocked(generateObject).mockRejectedValueOnce(new Error("Network timeout"));
+
+    await expect(runPhaseLlm({} as any, "prompt", 6)).rejects.toThrow(
+      "Phase 6 LLM call failed: Network timeout",
+    );
+  });
+
+  it("truncates very long error messages to 300 chars", async () => {
+    const { generateObject } = await import("ai");
+    const { runPhaseLlm } = await import("./finding-extractor.js");
+    const longError = "x".repeat(500);
+    vi.mocked(generateObject).mockRejectedValueOnce(new Error(longError));
+
+    try {
+      await runPhaseLlm({} as any, "prompt", 6);
+      expect.fail("Should have thrown");
+    } catch (err) {
+      const msg = (err as Error).message;
+      expect(msg).toMatch(/^Phase 6 LLM call failed: x{300}$/);
+      expect(msg.length).toBe("Phase 6 LLM call failed: ".length + 300);
+    }
   });
 });

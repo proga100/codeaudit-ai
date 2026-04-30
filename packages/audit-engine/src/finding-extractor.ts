@@ -35,24 +35,37 @@ export async function runPhaseLlm(
   usage: { promptTokens: number; completionTokens: number; totalTokens: number };
 }> {
   console.log(`[audit-engine] Phase ${phaseNumber}: calling LLM...`);
-  const { object, usage } = await withRetry(
-    () =>
-      generateObject({
-        model,
-        schema: PhaseOutputSchema,
-        prompt:
-          prompt +
-          "\n\nIMPORTANT: For each finding, always provide all fields including id (use a unique identifier), filePaths (array, empty if not applicable), lineNumbers (array, empty if not applicable), and recommendation.",
-        maxOutputTokens: 4096,
-      }),
-    3,
-    `Phase ${phaseNumber} generateObject`,
+
+  let object: PhaseOutput;
+  let usage: { inputTokens?: number; outputTokens?: number; promptTokens?: number; completionTokens?: number };
+
+  try {
+    const result = await withRetry(
+      () =>
+        generateObject({
+          model,
+          schema: PhaseOutputSchema,
+          prompt:
+            prompt +
+            "\n\nIMPORTANT: For each finding, always provide all fields including id (use a unique identifier), filePaths (array, empty if not applicable), lineNumbers (array, empty if not applicable), and recommendation.",
+          maxOutputTokens: 4096,
+        }),
+      3,
+      `Phase ${phaseNumber} generateObject`,
+    );
+    object = result.object;
+    usage = result.usage as typeof usage;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Phase ${phaseNumber} LLM call failed: ${msg.slice(0, 300)}`);
+  }
+
+  const promptTokens = usage.inputTokens ?? usage.promptTokens ?? 0;
+  const completionTokens = usage.outputTokens ?? usage.completionTokens ?? 0;
+
+  console.log(
+    `[audit-engine] Phase ${phaseNumber}: LLM returned ${object.findings.length} findings, ${promptTokens + completionTokens} tokens`,
   );
-
-  const promptTokens = (usage as any).inputTokens ?? (usage as any).promptTokens ?? 0;
-  const completionTokens = (usage as any).outputTokens ?? (usage as any).completionTokens ?? 0;
-
-  console.log(`[audit-engine] Phase ${phaseNumber}: LLM returned ${object.findings.length} findings, ${promptTokens + completionTokens} tokens`);
 
   return {
     findings: object.findings.map((f) => ({ ...f, phase: phaseNumber })),
