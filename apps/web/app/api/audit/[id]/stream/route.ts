@@ -80,7 +80,8 @@ export async function GET(
           }
         } catch (err) {
           console.error("[stream] emitState error:", err);
-          send({ type: "error", message: "Stream error — reconnect to resume" });
+          const code = err instanceof Error ? err.message.slice(0, 80) : "unknown";
+          send({ type: "error", message: "Stream error — reconnect to resume", code });
           tryClose();
         }
       };
@@ -91,15 +92,8 @@ export async function GET(
       // Emit immediately on connect (replay completed state for reconnecting clients — PROG-04)
       emitState();
 
-      // Only start polling if stream is still open (not already closed by emitState for terminal audits)
-      let shouldPoll = false;
-      try {
-        const statusCheck = db.select().from(audits).where(eq(audits.id, id)).get();
-        shouldPoll = !["completed", "cancelled", "failed"].includes(statusCheck?.status ?? "");
-      } catch {
-        shouldPoll = false;
-      }
-      if (shouldPoll) {
+      // Only start polling if emitState didn't already close the stream (terminal audit or DB error)
+      if (!closed) {
         interval = setInterval(emitState, 500);
       }
 
