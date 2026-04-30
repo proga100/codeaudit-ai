@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { parsePhaseOutput } from "./tool-phase-runner";
+import { withRetry } from "./retry";
 
 const validFinding = {
   id: "f1",
@@ -102,5 +103,72 @@ describe("parsePhaseOutput", () => {
     });
     const result = parsePhaseOutput(output, 3);
     expect(result.findings[0]!.phase).toBe(3); // overridden, not 999
+  });
+});
+
+function mockSetTimeoutImmediate() {
+  return vi.spyOn(global, "setTimeout").mockImplementation((cb: Parameters<typeof setTimeout>[0]) => {
+    (cb as () => void)();
+    return 0 as unknown as ReturnType<typeof setTimeout>;
+  });
+}
+
+describe("withRetry", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("returns result immediately on first success", async () => {
+    const fn = vi.fn().mockResolvedValue("ok");
+    const result = await withRetry(fn, 3, "test");
+    expect(result).toBe("ok");
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries on 429 error and returns result on second attempt", async () => {
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("HTTP 429 Too Many Requests"))
+      .mockResolvedValueOnce("ok-on-retry");
+
+    mockSetTimeoutImmediate();
+
+    const result = await withRetry(fn, 3, "test");
+
+    expect(result).toBe("ok-on-retry");
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries on 'rate limit' message", async () => {
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("rate limit exceeded"))
+      .mockResolvedValueOnce("recovered");
+
+    mockSetTimeoutImmediate();
+
+    const result = await withRetry(fn, 3, "test");
+
+    expect(result).toBe("recovered");
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws after max attempts on persistent rate limit", async () => {
+    const err = new Error("429 rate limit");
+    const fn = vi
+      .fn()
+      .mockRejectedValueOnce(err)
+      .mockRejectedValueOnce(err)
+      .mockRejectedValueOnce(err);
+
+    mockSetTimeoutImmediate();
+
+    await expect(withRetry(fn, 3, "test")).rejects.toThrow("429 rate limit");
+
+    expect(fn).toHaveBeenCalledTimes(3);
+  });
+
+  it("does NOT retry on non-rate-limit errors", async () => {
+    const fn = vi.fn().mockRejectedValue(new Error("invalid API key"));
+    await expect(withRetry(fn, 3, "test")).rejects.toThrow("invalid API key");
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "codeaudit-ai",
-  "version": "0.5.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "Run structured codebase health audits from your browser — powered by LLMs",
   "bin": {

@@ -10,6 +10,7 @@ import { getRepoContext } from "./phases/shared";
 import { getModel } from "./phases/shared";
 import { markPhaseCompleted } from "./progress-emitter";
 import type { AuditRunContext } from "./orchestrator";
+import { withRetry } from "./retry";
 
 /**
  * Shared phase runner helper that uses generateText with tool-use.
@@ -64,13 +65,18 @@ export async function runPhaseWithTools(
 { "findings": [{ "id": "uuid", "phase": ${phaseNumber}, "category": "string", "severity": "critical|high|medium|low|info", "title": "string", "description": "string", "filePaths": ["string"], "lineNumbers": [number], "recommendation": "string" }], "phaseScore": 0-100, "summary": "string" }
 Return ONLY the JSON object — no markdown, no code fences, no explanation before or after.`;
 
-    const result = await generateText({
-      model,
-      prompt: prompt + jsonInstruction,
-      tools: { execCommand: execCommandTool },
-      stopWhen: stepCountIs(20),
-      maxOutputTokens: 65536,
-    });
+    const result = await withRetry(
+      () =>
+        generateText({
+          model,
+          prompt: prompt + jsonInstruction,
+          tools: { execCommand: execCommandTool },
+          stopWhen: stepCountIs(20),
+          maxOutputTokens: 65536,
+        }),
+      3,
+      `Phase ${phaseNumber} generateText`,
+    );
 
     // Parse JSON from the LLM's final text response
     const text = result.text.trim();

@@ -19,6 +19,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - **Score scale bug**: LLM returned 0–10 score used directly as 0–100, producing absurdly low scores (e.g., 5/100 for a codebase that should score ~49)
 
+### Fixed (pre-release hardening)
+- **Stream handler**: SSE stream now catches DB errors and emits an error event to the client instead of silently closing.
+- **Phase timeout**: Each audit phase now has a 30-minute hard timeout — hangs no longer block the orchestrator indefinitely.
+- **Rate limit retry**: LLM calls retry up to 3 attempts with exponential backoff (2s and 4s waits between attempts) on rate-limit responses (HTTP 429, "Too Many Requests", or Gemini RESOURCE_EXHAUSTED).
+- **Finding-extractor**: `runPhaseLlm` now wraps `generateObject` errors with phase context and preserves the original error via `Error.cause` for clearer diagnostics.
+- **Version sync**: CLI package and VERSION file now correctly reflect v0.6.1.
+
+### Added (pre-release hardening)
+- Platform support table in README (macOS/Linux supported, Windows native not supported — use WSL2).
+- Troubleshooting section in README covering 6 common failure scenarios.
+- Unit tests for `withRetry` rate-limit retry behavior (5 cases).
+- Integration tests for the orchestrator's cancel flag, checkpoint resume, non-fatal phase failure, and folder unlock guarantee (5 cases).
+- Unit tests for `runPhaseLlm` error wrapping and Error.cause preservation (3 cases).
+
 ---
 
 ## [0.6.0] — 2026-04-07 — OpenAI-Compatible Provider Support

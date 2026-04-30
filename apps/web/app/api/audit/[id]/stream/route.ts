@@ -38,43 +38,50 @@ export async function GET(
 
       const emitState = () => {
         if (closed) return;
-        const audit = db.select().from(audits).where(eq(audits.id, id)).get();
-        if (!audit) { tryClose(); return; }
+        try {
+          const audit = db.select().from(audits).where(eq(audits.id, id)).get();
+          if (!audit) { tryClose(); return; }
 
-        const phases = db.select().from(auditPhases).where(eq(auditPhases.auditId, id)).all();
-        const phasesToRun = getPhasesForAuditType(audit.auditType, audit.depth);
-        const phasesCompleted = phases.filter((p) => ["completed", "skipped"].includes(p.status)).length;
+          const phases = db.select().from(auditPhases).where(eq(auditPhases.auditId, id)).all();
+          const phasesToRun = getPhasesForAuditType(audit.auditType, audit.depth);
+          const phasesCompleted = phases.filter((p) => ["completed", "skipped"].includes(p.status)).length;
 
-        // Emit each phase's current state (replay completed phases on reconnect — PROG-04)
-        for (const phase of phases) {
-          const criticalCount = (phase.findings ?? []).filter((f) => f.severity === "critical").length;
-          const durationMs = phase.startedAt && phase.completedAt
-            ? phase.completedAt.getTime() - phase.startedAt.getTime()
-            : null;
+          // Emit each phase's current state (replay completed phases on reconnect — PROG-04)
+          for (const phase of phases) {
+            const criticalCount = (phase.findings ?? []).filter((f) => f.severity === "critical").length;
+            const durationMs = phase.startedAt && phase.completedAt
+              ? phase.completedAt.getTime() - phase.startedAt.getTime()
+              : null;
+            send({
+              type: "phase",
+              phaseNumber: phase.phaseNumber,
+              status: phase.status,
+              tokensUsed: phase.tokensUsed,
+              findingsCount: phase.findings?.length ?? 0,
+              criticalCount,
+              durationMs,
+            });
+          }
+
+          // Emit overall audit state
           send({
-            type: "phase",
-            phaseNumber: phase.phaseNumber,
-            status: phase.status,
-            tokensUsed: phase.tokensUsed,
-            findingsCount: phase.findings?.length ?? 0,
-            criticalCount,
-            durationMs,
+            type: "audit",
+            status: audit.status,
+            currentPhase: audit.currentPhase,
+            totalTokens: audit.tokenCount,
+            totalCostMicro: audit.actualCostMicrodollars,
+            phasesTotal: phasesToRun.length,
+            phasesCompleted,
           });
-        }
 
-        // Emit overall audit state
-        send({
-          type: "audit",
-          status: audit.status,
-          currentPhase: audit.currentPhase,
-          totalTokens: audit.tokenCount,
-          totalCostMicro: audit.actualCostMicrodollars,
-          phasesTotal: phasesToRun.length,
-          phasesCompleted,
-        });
-
-        // Close on terminal state
-        if (["completed", "cancelled", "failed"].includes(audit.status)) {
+          // Close on terminal state
+          if (["completed", "cancelled", "failed"].includes(audit.status)) {
+            tryClose();
+          }
+        } catch (err) {
+          console.error("[stream] emitState error:", err);
+          const code = err instanceof Error ? err.message.slice(0, 80) : "unknown";
+          send({ type: "error", message: "Stream error — reconnect to resume", code });
           tryClose();
         }
       };
@@ -85,10 +92,8 @@ export async function GET(
       // Emit immediately on connect (replay completed state for reconnecting clients — PROG-04)
       emitState();
 
-      // Only start polling if stream is still open (not already closed by emitState for terminal audits)
-      if (!["completed", "cancelled", "failed"].includes(
-        db.select().from(audits).where(eq(audits.id, id)).get()?.status ?? ""
-      )) {
+      // Only start polling if emitState didn't already close the stream (terminal audit or DB error)
+      if (!closed) {
         interval = setInterval(emitState, 500);
       }
 
