@@ -71,10 +71,8 @@ vi.mock("@codeaudit-ai/db", () => {
 
   return {
     getDb: vi.fn(() => currentDb),
-    // Tests can call refreshDb() to get a blank db between cases — but beforeEach resets via vi.clearAllMocks
-    _refreshDb: () => {
-      currentDb = makeDb();
-    },
+    // Isolation model: vi.clearAllMocks() in beforeEach resets call counts on dbInstance.select.
+    // Tests that need custom query behavior call overrideSelectGet() to patch dbInstance.select directly.
     // Table sentinels — identity-matched inside chain.get()
     audits: "audits-table",
     auditPhases: "auditPhases-table",
@@ -110,7 +108,7 @@ vi.mock("./progress-emitter", () => ({
 // ──────────────────────────────────────────────────────────────────────────────
 import { runAudit } from "./orchestrator";
 import { getPhaseRunner } from "./phase-registry";
-import { markPhaseFailed, markPhaseSkipped } from "./progress-emitter";
+import { markPhaseFailed, markPhaseRunning, markPhaseSkipped } from "./progress-emitter";
 import { getDb } from "@codeaudit-ai/db";
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -174,6 +172,8 @@ describe("runAudit — orchestrator", () => {
 
     // Phases 1, 2, 3 → runner called 3 times
     expect(mockRunner).toHaveBeenCalledTimes(3);
+    // markPhaseRunning must have been called once per phase
+    expect(markPhaseRunning).toHaveBeenCalledTimes(3);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -219,8 +219,13 @@ describe("runAudit — orchestrator", () => {
 
     await runAudit(baseConfig);
 
-    // No runner should have been called — all 3 phases were skipped
+    // No runner should have been called — all 3 phases were skipped via `continue` (line 94, orchestrator.ts)
     expect(mockRunner).not.toHaveBeenCalled();
+    // markPhaseSkipped is only called when a phase has NO runner (orchestrator.ts line 100).
+    // When a phase is already completed the orchestrator just `continue`s (line 94) — no markPhaseSkipped call.
+    expect(markPhaseSkipped).not.toHaveBeenCalled();
+    // getDb must have been called multiple times (audit status + per-phase checkpoint queries)
+    expect(vi.mocked(getDb).mock.calls.length).toBeGreaterThan(1);
   });
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -244,7 +249,8 @@ describe("runAudit — orchestrator", () => {
 
     await runAudit(baseConfig);
 
-    // markPhaseFailed called for phase 1 with the error message
+    // markPhaseFailed called exactly once — only phase 1 threw
+    expect(markPhaseFailed).toHaveBeenCalledTimes(1);
     expect(markPhaseFailed).toHaveBeenCalledWith(
       "audit-123",
       1,
