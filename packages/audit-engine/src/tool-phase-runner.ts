@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { generateText, stepCountIs } from "ai";
-import { PhaseOutputSchema, AuditFindingSchema, type PhaseOutput } from "./finding-extractor";
+import { PhaseOutputSchema, AuditFindingSchema, groupSimilarFindings, type PhaseOutput } from "./finding-extractor";
 import { buildToolUsePhasePrompt, FINDING_FORMAT_TEMPLATE } from "./prompt-builder";
 import { createExecCommandTool } from "./tools/exec-command-tool";
 import { getGuideChunk } from "./guide-chunks";
@@ -11,6 +11,12 @@ import { getModel } from "./phases/shared";
 import { markPhaseCompleted } from "./progress-emitter";
 import type { AuditRunContext } from "./orchestrator";
 import { withRetry } from "./retry";
+import { deterministicLlmParams } from "./llm-params";
+
+// Hard cap on tool-call rounds per phase. If the LLM hits this, we log a
+// warning so missing findings can be attributed to budget exhaustion vs. a
+// genuinely clean phase.
+const STEP_CAP = 20;
 
 /**
  * Shared phase runner helper that uses generateText with tool-use.
@@ -24,10 +30,19 @@ import { withRetry } from "./retry";
  *
  * @param ctx         - Audit run context (auditId, repoPath, auditOutputDir, provider, model, depth)
  * @param phaseNumber - Phase number (1-9) to execute
+ * @param options.extraInstructions - Optional text appended to the prompt. Used to feed
+ *   pre-computed deterministic results into the LLM context so it doesn't
+ *   re-discover them via tool-use (and emit duplicate findings).
+ * @param options.prependFindings - Optional findings produced deterministically before
+ *   the LLM ran. Merged with the LLM's findings before persisting.
  */
 export async function runPhaseWithTools(
   ctx: AuditRunContext,
   phaseNumber: number,
+  options?: {
+    extraInstructions?: string;
+    prependFindings?: PhaseOutput["findings"];
+  },
 ): Promise<void> {
   console.log(`[audit-engine] Phase ${phaseNumber} (tool-use): starting...`);
 
@@ -37,12 +52,15 @@ export async function runPhaseWithTools(
   const guideChunk = getGuideChunk(phaseNumber);
 
   // 2. Build tool-use prompt (no pre-embedded command output)
-  const prompt = buildToolUsePhasePrompt(
+  const basePrompt = buildToolUsePhasePrompt(
     guideChunk,
     repoContext,
     ctx.repoPath,
     FINDING_FORMAT_TEMPLATE,
   );
+  const prompt = options?.extraInstructions
+    ? `${basePrompt}\n\n${options.extraInstructions}`
+    : basePrompt;
 
   // 3. Create sandboxed execCommand tool (30s default timeout per command)
   const execCommandTool = createExecCommandTool(ctx.repoPath);
@@ -65,18 +83,27 @@ export async function runPhaseWithTools(
 { "findings": [{ "id": "uuid", "phase": ${phaseNumber}, "category": "string", "severity": "critical|high|medium|low|info", "title": "string", "description": "string", "filePaths": ["string"], "lineNumbers": [number], "recommendation": "string" }], "phaseScore": 0-100, "summary": "string" }
 Return ONLY the JSON object — no markdown, no code fences, no explanation before or after.`;
 
+    const sampling = deterministicLlmParams(ctx.llmProvider, ctx.auditId, phaseNumber);
     const result = await withRetry(
       () =>
         generateText({
           model,
           prompt: prompt + jsonInstruction,
           tools: { execCommand: execCommandTool },
-          stopWhen: stepCountIs(20),
+          stopWhen: stepCountIs(STEP_CAP),
           maxOutputTokens: 65536,
+          ...sampling,
         }),
       3,
       `Phase ${phaseNumber} generateText`,
     );
+
+    if (Array.isArray(result.steps) && result.steps.length >= STEP_CAP) {
+      console.warn(
+        `[audit-engine] Phase ${phaseNumber} (tool-use): hit step cap (${STEP_CAP}) — ` +
+          `LLM may not have completed all checks. Findings may be incomplete.`,
+      );
+    }
 
     // Parse JSON from the LLM's final text response
     const text = result.text.trim();
@@ -148,8 +175,12 @@ Return ONLY the JSON object — no markdown, no code fences, no explanation befo
     `[audit-engine] Phase ${phaseNumber} (tool-use): ${phaseOutput.findings.length} findings, ${totalTokens} tokens`
   );
 
-  // 7. Set phase number on each finding (same pattern as runPhaseLlm)
-  const findings = phaseOutput.findings.map((f) => ({ ...f, phase: phaseNumber }));
+  // 7. Set phase number on each finding (same pattern as runPhaseLlm).
+  //    Prepend deterministic findings (from pre-computed scans, e.g. Phase 4 size scan),
+  //    then collapse near-duplicates so a chatty phase can't flood the score.
+  const llmFindings = phaseOutput.findings.map((f) => ({ ...f, phase: phaseNumber }));
+  const prepended = (options?.prependFindings ?? []).map((f) => ({ ...f, phase: phaseNumber }));
+  const findings = groupSimilarFindings([...prepended, ...llmFindings]);
 
   // 8. Build markdown output file
   const phaseName = getPhaseName(phaseNumber);

@@ -6,7 +6,7 @@ import type { AuditFindings, FindingsSeverity } from "@codeaudit-ai/db";
 import { runPhaseLlm } from "../finding-extractor";
 import { markPhaseCompleted } from "../progress-emitter";
 import { getModel } from "./shared";
-import type { AuditRunContext } from "../orchestrator";
+import { deterministicLlmParams } from "../llm-params";
 import type { PhaseRunner } from "../phase-registry";
 
 /**
@@ -88,7 +88,8 @@ Produce:
 
   try {
     const model = getModel(ctx, phaseNumber);
-    const result = await runPhaseLlm(model as Parameters<typeof runPhaseLlm>[0], prompt, phaseNumber);
+    const sampling = deterministicLlmParams(ctx.llmProvider, ctx.auditId, phaseNumber);
+    const result = await runPhaseLlm(model as Parameters<typeof runPhaseLlm>[0], prompt, phaseNumber, sampling);
     if (result.findings.length > 0) topFindings = result.findings;
     if (result.summary) summary = result.summary;
     llmTokens = result.usage.totalTokens;

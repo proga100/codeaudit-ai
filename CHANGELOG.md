@@ -6,6 +6,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.6.3] — 2026-04-30 — Deterministic Audit Results
+
+### Fixed
+- **Score thrashing between runs**: audit could swing from 41/100 to 0/100 on the same commit because each run sampled different tool calls at default temperature ~1.0. All LLM calls now use `temperature: 0` (plus a stable seed derived from auditId+phaseNumber for OpenAI/Gemini).
+- **Phase 4 large-file findings non-deterministic**: the LLM might discover Python files on one run but skip them on the next depending on which `find` commands it chose. Phase 4 now runs a deterministic pure-Node file-size scan (no shell dependency) before the LLM starts. All files over the 300-line threshold are collected in code, not by the LLM.
+- **19 "Large python file" mediums = instant 0 score**: the LLM was emitting one finding per file (19 × medium = 95 pts deducted). The size scan now emits a single grouped finding covering all over-threshold files, severity based on the largest (low/medium/high). Near-duplicate findings from the LLM are also merged post-extraction.
+- **Silent step-cap exhaustion**: when the LLM hit the 20-step tool-call cap it silently skipped remaining checks. Now logs a `warn`-level message so incomplete phases are visible in audit output.
+
+### Added
+- `llm-params.ts`: `deterministicLlmParams(provider, auditId, phaseNumber)` — returns provider-appropriate `{ temperature, seed? }`. Anthropic gets temperature only (no seed API support); OpenAI/Gemini get both.
+- `phase-04-size-scan.ts`: deterministic source-file walker. Respects exclude dirs (node\_modules, .git, dist, vendor, \_\_pycache\_\_, etc), matches 25 source extensions, 60s soft timeout on large repos.
+- `groupSimilarFindings()` in `finding-extractor.ts`: post-extraction normaliser that collapses findings sharing `(category, normalized-title)` into one finding. Caps the score damage any single category-pattern can inflict.
+- `runPhaseWithTools` now accepts `options.extraInstructions` and `options.prependFindings` so deterministic pre-scans can inject results into the LLM context and contribute findings without fighting with the agent.
+
+---
+
 ## [0.6.2] — 2026-04-30 — Audit Quality Fixes
 
 ### Fixed

@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { execCommand } from "../commands";
 import { markPhaseCompleted } from "../progress-emitter";
 import { RepoContextSchema } from "../repo-context";
+import { deterministicLlmParams } from "../llm-params";
 import type { AuditRunContext } from "../orchestrator";
 import type { PhaseRunner } from "../phase-registry";
 
@@ -192,6 +193,7 @@ Instructions for each field:
 
 **summary**: 2-3 sentence summary of what this repo appears to be, based on detected languages, frameworks, and structure.`;
 
+  const sampling = deterministicLlmParams(ctx.llmProvider, ctx.auditId, phaseNumber);
   const { object: repoContext, usage } = await generateObject({
     // Cast needed: providers return V1, ai@6 types expect V2/V3
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,6 +201,7 @@ Instructions for each field:
     schema: RepoContextSchema,
     prompt,
     maxOutputTokens: 8192,
+    ...sampling,
   });
 
   // Read project-style convention docs (Task 4) — first 2KB of each
