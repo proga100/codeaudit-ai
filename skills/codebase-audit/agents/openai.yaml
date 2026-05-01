@@ -1,0 +1,8 @@
+interface:
+  display_name: "Codebase Audit"
+  short_description: "Token-efficient own-code repo audits"
+  brand_color: "#16A34A"
+  default_prompt: "Use $codebase-audit to run a quick own-code-first audit of this repository and write a Markdown report."
+
+policy:
+  allow_implicit_invocation: true
